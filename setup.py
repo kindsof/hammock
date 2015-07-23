@@ -4,7 +4,8 @@ import setuptools
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    path = os.path.join(os.path.dirname(__file__), fname)
+    return open(path).read() if os.path.exists(path) else ""
 
 
 setuptools.setup(
