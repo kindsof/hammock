@@ -7,8 +7,8 @@ import waiting
 import functools
 import hammock
 import hammock.client as client
+import hammock.testing.server as server
 import tests.resources as resources
-import tests.server as server
 
 
 api = falcon.API()
