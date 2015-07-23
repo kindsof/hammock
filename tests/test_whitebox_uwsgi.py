@@ -6,9 +6,9 @@ import StringIO as string_io
 import waiting
 import functools
 import hammock
-import hammock.tests.resources as resources
 import hammock.client as client
-import hammock.tests.server as server
+import tests.resources as resources
+import tests.server as server
 
 
 api = falcon.API()

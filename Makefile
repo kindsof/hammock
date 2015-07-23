@@ -4,10 +4,14 @@ clean:
 	find -name *.pyc -delete
 
 pylint:
-	../strato-pylint/pylint.sh ./
+	pylint -r n --rcfile=.pylintrc hammock tests
 
 pep8:
-	pep8 --max-line-length=145 ./
+	pep8 --max-line-length=145 hammock tests
 
 unittest:
-	python -m unittest discover hammock -p "test_*.py" 
+	python -m unittest discover tests -p "test_*.py"
+
+install: requirement.txt setup.py hammock/*
+	pip install -r requirement.txt
+	python setup.py install

@@ -5,7 +5,7 @@ import falcon
 import falcon.testing as testing
 import hammock.resource as resource
 import hammock.redirect as redirect
-import hammock.tests.server as server
+import tests.server as server
 
 # Find the best implementation available on this platform
 try:

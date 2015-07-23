@@ -4,8 +4,8 @@ import falcon
 import logging
 import falcon.testing as testing
 import hammock
-import hammock.tests.resources as resources
 import hammock.decorator as decorator
+import tests.resources as resources
 
 
 def default_404(req, res):  # pylint: disable=unused-argument
