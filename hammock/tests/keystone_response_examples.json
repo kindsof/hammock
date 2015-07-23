@@ -1,0 +1,296 @@
+{
+  "get_root_url_keystone": {
+    "versions": {
+      "values": [
+        {
+          "id": "v3.4",
+          "links": [
+            {
+              "href": "http://localhost:35357/v3/",
+              "rel": "self"
+            }
+          ],
+          "media-types": [
+            {
+              "base": "application/json",
+              "type": "application/vnd.openstack.identity-v3+json"
+            }
+          ],
+          "status": "stable",
+          "updated": "2015-03-30T00:00:00Z"
+        },
+        {
+          "id": "v2.0",
+          "links": [
+            {
+              "href": "http://localhost:35357/v2.0/",
+              "rel": "self"
+            },
+            {
+              "href": "http://docs.openstack.org/",
+              "rel": "describedby",
+              "type": "text/html"
+            }
+          ],
+          "media-types": [
+            {
+              "base": "application/json",
+              "type": "application/vnd.openstack.identity-v2.0+json"
+            }
+          ],
+          "status": "stable",
+          "updated": "2014-04-17T00:00:00Z"
+        }
+      ]
+    }
+  },
+  "post_v3_auth_tokens_response": {
+    "token": {
+      "methods": [
+        "password"
+      ],
+      "roles": [
+        {
+          "id": "admin",
+          "name": "admin"
+        },
+        {
+          "id": "system_admin",
+          "name": "system_admin"
+        }
+      ],
+      "expires_at": "2015-06-22T07:23:06.084265Z",
+      "project": {
+        "domain": {
+          "id": "default",
+          "name": "cloud_admin"
+        },
+        "id": "dbea5f0f7f6843099fe3f959acc69a8e",
+        "name": "default"
+      },
+      "catalog": [
+        {
+          "endpoints": [
+            {
+              "url": "http://openstack-nova-api.service.strato:8773/services/Cloud",
+              "interface": "public",
+              "region": "null",
+              "region_id": "null",
+              "id": "151ed028a89d42cca4c468d2e365f98e"
+            },
+            {
+              "url": "http://openstack-nova-api.service.strato:8773/services/Cloud",
+              "interface": "admin",
+              "region": "null",
+              "region_id": "null",
+              "id": "2b071258afca4936b18ad2d2b8158ba7"
+            },
+            {
+              "url": "http://openstack-nova-api.service.strato:8773/services/Admin",
+              "interface": "internal",
+              "region": "null",
+              "region_id": "null",
+              "id": "7abf2d4987f54eb2912d2587f0e70e73"
+            }
+          ],
+          "type": "ec2",
+          "id": "fbf1e7539564418eb381c71ad649bedd",
+          "name": "nova_ec2"
+        },
+        {
+          "endpoints": [
+            {
+              "url": "http://openstack-keystone.service.strato:5000/v3",
+              "interface": "internal",
+              "region": "null",
+              "region_id": "null",
+              "id": "367223f10e0b4e46b7f9a3e94fc12b9e"
+            },
+            {
+              "url": "http://openstack-keystone.service.strato:5000/v3",
+              "interface": "admin",
+              "region": "null",
+              "region_id": "null",
+              "id": "9d9c64a8dedd40739697ecbc5a87aac4"
+            },
+            {
+              "url": "http://openstack-keystone.service.strato:5000/v3",
+              "interface": "public",
+              "region": "null",
+              "region_id": "null",
+              "id": "f86e9e7113674bdf8c52911cd9688eff"
+            }
+          ],
+          "type": "identity",
+          "id": "a0af96c8a8f04f3c89bcbed261b53873",
+          "name": "keyestone"
+        },
+        {
+          "endpoints": [
+            {
+              "url": "http://neutron-server.service.strato:9696",
+              "interface": "internal",
+              "region": "null",
+              "region_id": "null",
+              "id": "491478b4bb9747169ccc6448f7fad41d"
+            },
+            {
+              "url": "http://neutron-server.service.strato:9696",
+              "interface": "public",
+              "region": "null",
+              "region_id": "null",
+              "id": "74d523a6b7994eab991f21f8f98e017f"
+            },
+            {
+              "url": "http://neutron-server.service.strato:9696",
+              "interface": "admin",
+              "region": "null",
+              "region_id": "null",
+              "id": "a242c2f2e7454fa78602041475792172"
+            }
+          ],
+          "type": "network",
+          "id": "7f5bc74c9b4e4135bb2788922d0a5060",
+          "name": "neutron"
+        },
+        {
+          "endpoints": [
+            {
+              "url": "http://openstack-cinder-api.service.strato:8776/v1/dbea5f0f7f6843099fe3f959acc69a8e",
+              "interface": "admin",
+              "region": "null",
+              "region_id": "null",
+              "id": "83096685c73e4e4885987c9c8578e61e"
+            },
+            {
+              "url": "http://openstack-cinder-api.service.strato:8776/v1/dbea5f0f7f6843099fe3f959acc69a8e",
+              "interface": "internal",
+              "region": "null",
+              "region_id": "null",
+              "id": "9b839eba288e438993f43e3ef9e7690b"
+            },
+            {
+              "url": "http://openstack-cinder-api.service.strato:8776/v1/dbea5f0f7f6843099fe3f959acc69a8e",
+              "interface": "public",
+              "region": "null",
+              "region_id": "null",
+              "id": "bdcccf5ad2f04a3db588fae5a3cc946b"
+            }
+          ],
+          "type": "volume",
+          "id": "f0e55365ca134298b95d80c770ed962a",
+          "name": "cinder"
+        },
+        {
+          "endpoints": [
+            {
+              "url": "http://openstack-nova-api.service.strato:8774/v2/dbea5f0f7f6843099fe3f959acc69a8e",
+              "interface": "internal",
+              "region": "null",
+              "region_id": "null",
+              "id": "8c4c33032847423097d12fad7c9ceeca"
+            },
+            {
+              "url": "http://openstack-nova-api.service.strato:8774/v2/dbea5f0f7f6843099fe3f959acc69a8e",
+              "interface": "admin",
+              "region": "null",
+              "region_id": "null",
+              "id": "9b589e11e2ca4b76aa94e2cb837bb359"
+            },
+            {
+              "url": "http://openstack-nova-api.service.strato:8774/v2/dbea5f0f7f6843099fe3f959acc69a8e",
+              "interface": "public",
+              "region": "null",
+              "region_id": "null",
+              "id": "bc707bf3e02148009aeaae2203f2addc"
+            }
+          ],
+          "type": "compute",
+          "id": "10f3173e97d44f9ba5113f955b5ce836",
+          "name": "nova"
+        }
+      ],
+      "extras": {},
+      "user": {
+        "domain": {
+          "id": "default",
+          "name": "cloud_admin"
+        },
+        "id": "admin",
+        "name": "admin"
+      },
+      "audit_ids": [
+        "5rNCBa55QySzX2HZcyasIA"
+      ],
+      "issued_at": "2015-06-22T06:23:06.084290Z"
+    }
+  },
+  "get_v3_role_assignments_response": {
+    "role_assignments": [
+      {
+        "links": {
+          "assignment": "http://identity:35357/v3/domains/--domain-id--/users/--user-id--/roles/--role-id--"
+        },
+        "role": {
+          "id": "--role-id--"
+        },
+        "scope": {
+          "domain": {
+            "id": "--domain-id--"
+          }
+        },
+        "user": {
+          "id": "--user-id--"
+        }
+      },
+      {
+        "group": {
+          "id": "--group-id--"
+        },
+        "links": {
+          "assignment": "http://identity:35357/v3/projects/--project-id--/groups/--group-id--/roles/--role-id--"
+        },
+        "role": {
+          "id": "--role-id--"
+        },
+        "scope": {
+          "project": {
+            "id": "--project-id--"
+          }
+        }
+      }
+    ],
+    "links": {
+      "self": "http://identity:35357/v3/role_assignments",
+      "previous": "null",
+      "next": "null"
+    }
+  },
+  "get_v3_services_response": {
+    "links": {
+      "next": null,
+      "previous": null,
+      "self": "http://identity:5000/v3/services"
+    },
+    "services": [
+      {
+        "description": "Keystone Identity Service",
+        "id": "--service-id--",
+        "links": {
+          "self": "http://identity:5000/v3/services/--service-id--"
+        },
+        "name": "keystone",
+        "type": "identity"
+      },
+      {
+        "id": "--service-id--",
+        "links": {
+          "self": "http://identity:5000/v3/services/--service-id--"
+        },
+        "type": "volume"
+      }
+    ]
+  }
+
+
+}
