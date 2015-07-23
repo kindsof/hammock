@@ -1,4 +1,4 @@
-all: pep8 pylint unittest packages
+all: pep8 pylint unittest packages rename
 
 clean:
 	find -name *.pyc -delete
@@ -17,10 +17,15 @@ install: requirement.txt setup.py hammock/*
 	pip install -r requirement.txt
 	python setup.py install
 
-packages: setup.py hammock/*
+packages: rpm rename
+
+rpm: setup.py hammock/*
 	python setup.py bdist --formats=rpm
 	rm -rf build
 	rm dist/*.src.rpm dist/*.tar.gz
+
+rename:
+	mv $(wildcard  dist/*.rpm) $(basename $(wildcard dist/*.rpm))-$(shell git rev-parse --short=7 HEAD).rpm
 
 submit:
 	sudo -E solvent submitproduct rpm dist
