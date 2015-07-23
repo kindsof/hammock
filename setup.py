@@ -1,3 +1,4 @@
+#! /bin/python
 import os
 import setuptools
 
@@ -15,6 +16,6 @@ setuptools.setup(
     license = "BSD",
     keywords = "REST",
     url = "http://packages.python.org/hammock",
-    packages=['hammock'],
+    packages=['hammock', 'hammock.testing'],
     long_description=read('README.md'),
 )
