@@ -1,5 +1,7 @@
-# strato.common.rest
-developer freindly resource approach for falcon.
+# hammock
+A good place to REST.
+Hammock provides a freindly approach to develope resources for a REST server.
+currently supports falcon.
 
 ## General.
 
