@@ -21,6 +21,7 @@ packages: rpm rename
 
 rpm: setup.py hammock/*
 	python setup.py bdist --formats=rpm
+	python setup.py bdist_egg
 	rm -rf build
 	rm dist/*.src.rpm dist/*.tar.gz
 
@@ -32,3 +33,6 @@ submit:
 
 approve:
 	sudo -E solvent approve --product rpm
+
+prepareForCleanBuild:
+	pip install -r requirement.txt
