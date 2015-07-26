@@ -36,3 +36,4 @@ approve:
 
 prepareForCleanBuild:
 	pip install -r requirement.txt
+	pip install uwsgi
