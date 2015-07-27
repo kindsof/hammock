@@ -5,11 +5,11 @@ import falcon
 
 class Files(resource.Resource):
 
-    @resource.post(result_content_type=resource.TYPE_OCTET_STREAM)
+    @resource.post(response_content_type=resource.TYPE_OCTET_STREAM)
     def echo(self, _file):
         return string_io.StringIO(_file.read())
 
-    @resource.get(result_content_type=resource.TYPE_OCTET_STREAM)
+    @resource.get(response_content_type=resource.TYPE_OCTET_STREAM)
     def generate(self, size_mb):
         return string_io.StringIO(bytearray(int(size_mb) << 20))
 

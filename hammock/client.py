@@ -30,7 +30,7 @@ class {{ class_name }}(object):
     def close(self):
         self._client.close()
 
-    def fetch(self, method, url, json=None, stream=None, success_code=200, result_type='{{ type_json }}', kwargs=None):
+    def fetch(self, method, url, json=None, stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None):
         url = url_join(self._url, url)
         json.update(kwargs or {})
         _kwargs = {
@@ -50,10 +50,10 @@ class {{ class_name }}(object):
         logging.debug("Sending %s request: %s %s", method, url, json)
         response = getattr(self._client, method.lower())(url, **_kwargs)  # pylint: disable=star-args
         result = None
-        if result_type == '{{ type_json }}':
+        if response_type == '{{ type_json }}':
             result = self.jsonify(response)
             logging.debug("Got response status %s, body: %s", response.status_code, result)
-        elif result_type == '{{ type_octet_stream }}':
+        elif response_type == '{{ type_octet_stream }}':
             result = response.raw
         if response.status_code != success_code:
             logging.warn(
@@ -140,7 +140,7 @@ dict(\
 {% if kw_file in args  %}\
         stream={{ kw_file }},
 {% endif %}\
-        result_type='{{ result_type }}',
+        response_type='{{ response_type }}',
         success_code={{ success_code }},
     )
 """)
@@ -253,7 +253,7 @@ def _tabify(text):
     ])
 
 
-def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, result_type, keywords):
+def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, response_type, keywords):
     params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - {decorator.KW_HEADERS, decorator.KW_FILE, decorator.KW_LIST}
     url_kw = set(url_kw) - {decorator.KW_HEADERS, decorator.KW_FILE, decorator.KW_LIST}
     defaults = {k: v if type(v) is not str else "'%s'" % v for k, v in defaults.items()}
@@ -272,7 +272,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         params_kw=params_kw,
         defaults=defaults,
         success_code=success_code,
-        result_type=result_type,
+        response_type=response_type,
         kw_file=decorator.KW_FILE,
         kw_list=decorator.KW_LIST,
         keywords=keywords,
@@ -300,7 +300,7 @@ def client_methods_propeties(resource_object):
                 url_kw=[arg for arg in spec.args if "{{{}}}".format(arg) in method.path],
                 defaults=method_defaults,
                 success_code=method.success_code,
-                result_type=method.result_content_type,
+                response_type=method.response_content_type,
                 keywords=spec.keywords,
             ))
     return kwargs

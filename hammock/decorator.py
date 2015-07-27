@@ -4,6 +4,7 @@ import functools
 import simplejson as json
 import logging
 import uuid
+import hammock.headers as headers
 
 
 KW_HEADERS = "_headers"
@@ -14,45 +15,44 @@ TYPE_JSON = "application/json"
 TYPE_OCTET_STREAM = "application/octet-stream"
 
 
-def route(path, method, client_methods=None, success_code=falcon.HTTP_200, result_content_type=TYPE_JSON):
+def route(path, method, client_methods=None, success_code=200, response_content_type=TYPE_JSON):
     def _decorator(func):
         spec = inspect.getargspec(func)
         func.is_route = True
         func.path = path
         func.method = method
         func.client_methods = client_methods
-        func.success_code = int(
-            success_code.split(" ")[0] if not isinstance(success_code, int) else success_code)
-        func.result_content_type = result_content_type
+        func.success_code = int(success_code.split(" ")[0]) \
+            if not isinstance(success_code, int) else success_code
+        func.response_content_type = response_content_type
 
         @functools.wraps(func)
         def _wrapper(self, request, response, **url_kwargs):
             request_uuid = uuid.uuid4()
-            request_params, header_handler = _extract_request_params(request)
-            kwargs = _arrange_params_by_spec(spec, url_kwargs, request_params, header_handler)
             logging.debug(
-                "[request %s] %s %s, kwargs=%s (%s ommitted)",
-                request_uuid, request.method, request.url, kwargs, KW_HEADERS)
+                "[request %s] %s %s",
+                request_uuid, request.method, request.url)
+            try:
+                request_params = _extract_params(request)
+                request_headers = headers.Headers(request.headers, request.get_header)
+                kwargs = _convert_to_kwargs(spec, url_kwargs, request_params, request_headers)
+            except Exception as e:
+                logging.warn("[Error parsing request kwargs %s] %s", request_uuid, e)
+                raise
+            else:
+                logging.debug("[kwargs %s] %s", kwargs)
             try:
                 result = func(self, **kwargs)  # pylint: disable=star-args
-                headers = {}
-                if isinstance(result, dict) and KW_HEADERS in result:
-                    headers = result[KW_HEADERS]
-                    del result[KW_HEADERS]
+                if result is not None:
+                    _extract_response_headers(result, response)
+                    _extract_response_body(result, response, response_content_type)
             except Exception as e:
-                e = _convert_exception_of_internal_function(e)
+                logging.exception("[Internal server error %s]", request_uuid)  # this will show traceback in logs
+                e = _convert_exception(e)
                 response.status, response.body = e.status, e.to_dict()  # assingment for logging in finally block
                 raise e
             else:
-                for k, v in headers.iteritems():
-                    response.set_header(k, v)
-                if result is not None:
-                    if result_content_type == TYPE_JSON:
-                        response.body = json.dumps(result)
-                    elif result_content_type == TYPE_OCTET_STREAM:
-                        response.stream = result
-                    response.set_header(CONTENT_TYPE, result_content_type)
-                response.status = success_code
+                response.status = str(success_code)
             finally:
                 logging.debug(
                     "[response %s] status: %s, body: %s",
@@ -64,7 +64,7 @@ def route(path, method, client_methods=None, success_code=falcon.HTTP_200, resul
     return _decorator
 
 
-def _extract_request_params(request):
+def _extract_params(request):
     params = {
         k: (v if v != "None" else None)
         for k, v in request.params.iteritems()
@@ -86,10 +86,10 @@ def _extract_request_params(request):
                 )
         else:
             params[KW_FILE] = request.stream
-    return params, request.get_header
+    return params
 
 
-def _arrange_params_by_spec(spec, url_kwargs, request_params, header_handler):
+def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
     defaults = spec.defaults or []
     args = spec.args[1:len(spec.args) - len(defaults)]
     keywords = spec.args[len(spec.args) - len(defaults):]
@@ -105,7 +105,7 @@ def _arrange_params_by_spec(spec, url_kwargs, request_params, header_handler):
     url_kwargs.update(request_params or {})
     kwargs.update({arg: url_kwargs.get(arg, None) for arg in args})
     if KW_HEADERS in args:
-        kwargs[KW_HEADERS] = header_handler
+        kwargs[KW_HEADERS] = request_headers
     for kw, error_msg in (
         (KW_FILE, "expected {} as {}".format(CONTENT_TYPE, TYPE_OCTET_STREAM)),
         (KW_LIST, "expected {} {} as list".format(CONTENT_TYPE, TYPE_JSON)),
@@ -124,8 +124,7 @@ def _arrange_params_by_spec(spec, url_kwargs, request_params, header_handler):
     return kwargs
 
 
-def _convert_exception_of_internal_function(e):
-    logging.exception("Caught internal server exception")  # this will show traceback in logs
+def _convert_exception(e):
     if not issubclass(type(e), falcon.HTTPError):
         e = falcon.HTTPError(
             falcon.HTTP_500,
@@ -140,3 +139,21 @@ def iter_route_methods(resource_object):
         attr for _, attr in inspect.getmembers(resource_object)
         if getattr(attr, "is_route", False)
     )
+
+
+def _extract_response_headers(result, response):
+    if isinstance(result, dict) and KW_HEADERS in result:
+        response_headers = result[KW_HEADERS]
+        del result[KW_HEADERS]
+        for k, v in response_headers.iteritems():
+            response.set_header(k, v)
+
+
+def _extract_response_body(result, response, content_type):
+    if content_type == TYPE_JSON:
+        response.body = json.dumps(result)
+    elif content_type == TYPE_OCTET_STREAM:
+        response.stream = result
+    else:
+        raise Exception("Unsupported response content-type %s", content_type)
+    response.set_header(CONTENT_TYPE, content_type)
