@@ -1,4 +1,5 @@
 import hammock.common as common
+import hammock.types as types
 import requests
 import logging
 import urlparse
@@ -69,7 +70,7 @@ def _passthrough(request, dest):
             del prepared.headers['TRANSFER-ENCODING']
 
         inner_response = session.send(prepared, stream=True)
-        return inner_response.raw, inner_response.headers, inner_response.status_code
+        return types.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
     finally:
         session.close()
 
