@@ -10,7 +10,8 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
     def _decorator(func):
         func.is_sink = True
         func.path = path
-        if dest:
+        func.dest = dest
+        if func.dest:
             _func_is_pass(func)
 
         def _full_path_wrapper(full_path):
@@ -21,8 +22,8 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
                     _trim_prefix(request, full_path)
                 if pre_process:
                     pre_process(request)
-                if dest:
-                    output = _passthrough(request, dest)
+                if func.dest:
+                    output = _passthrough(request, func.dest)
                 else:
                     output = func(request)
                 if post_process:
