@@ -31,11 +31,11 @@ defines the say method as a rest method for `GET /helloworld`.
 Simply use this code:
 ```python
 import python
-from strato.common.rest import rest
+import hammock
 from somewhere.inn.your.project import resources
 
 api = falcon.API()
-rest.Rest(api, resources)
+hammock.Hammock(api, resources)
 ```
 
 ## rest methods.
@@ -73,11 +73,10 @@ and you add the package `your.project.resources` to the rest.Rest class, the res
 - For packages: if you want that the url componant of a package to defer from it's name, 
 you can add to the package `__init__.py` file: `PATH = "some-other-name". This will replace the package 
 name with `some-other-name` in the url.
-- For classes: override the name classmethod:
+- For classes: adding PATH class member
 ```python
-@classmethod
-def name(cls):
-  return "some-other-name"
+class SomeResource(resource.Resource):
+  PATH = "some-other-name"
 ```
 
 ## Examples:

@@ -3,43 +3,20 @@ import json
 import urlparse
 import falcon
 import falcon.testing as testing
-import hammock.resource as resource
-import hammock.redirect as redirect
+import StringIO as string_io
+import tests.resources.redirect as redirect
+import tests.resources as resources
+import hammock
 import hammock.testing.server as server
-
-# Find the best implementation available on this platform
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
-
-class RedirectExample(redirect.Redirect):
-    PATH = "/example"
-
-    def __init__(self, api, dest):
-        self.__class__.DEST = dest
-        super(RedirectExample, self).__init__(api)
-
-
-class ResourceUnderRedirect(resource.Resource):
-    @resource.get("specific")
-    def specific(self):  # pylint: disable=unused-argument
-        return "specific"
-
-    @classmethod
-    def name(cls):
-        return "example"
 
 
 class TestRedirect(testing.TestBase):
+
     def setUp(self):
         super(TestRedirect, self).setUp()
-        self._server = server.Server()
+        self._server = server.Server(port=redirect.PORT)
         self.api = falcon.API()
-        ResourceUnderRedirect(self.api, "")
-        RedirectExample(self.api, "http://%s:%d" % (
-            self._server.host, self._server.port))
+        hammock.Hammock(self.api, resources)
 
     def tearDown(self):
         super(TestRedirect, self).tearDown()
@@ -51,14 +28,14 @@ class TestRedirect(testing.TestBase):
         :return:
         """
         method = "GET"
-        redirect_path = "{}{}".format(RedirectExample.PATH, '/v3/users?key1=val1&key2=val2')
+        redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
         headers = {"host": "localhost", "content-length": "0"}
         body = None
         self._exec_request(redirect_path, method, body, headers)
 
     def test_redirect_post_request_with_json_body(self):
         method = "POST"
-        redirect_path = "{}{}".format(RedirectExample.PATH, '/v3/users')
+        redirect_path = "/redirect/v3/users"
         body = json.dumps({"desc": "sent from test", "method": "POST"})
         headers = {"content-type": "application/json",
                    "host": "127.0.0.1",
@@ -74,7 +51,7 @@ class TestRedirect(testing.TestBase):
 
     def test_redirect_post_request_with_binary_body(self):
         method = "POST"
-        redirect_path = "{}{}".format(RedirectExample.PATH, '/v3/users?key1=val1&key2=val2')
+        redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
 
         with open(__file__, 'rb') as fd:
             body = fd.read()
@@ -85,11 +62,8 @@ class TestRedirect(testing.TestBase):
 
     def test_redirect_post_request_with_large_binary_body(self):
         method = "POST"
-        redirect_path = "{}{}".format(RedirectExample.PATH, '/v3/users?key1=val1&key2=val2')
-
-        # Initialize a read buffer
-
-        body_stream = StringIO()
+        redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
+        body_stream = string_io.StringIO()
         with open(__file__, 'rb') as fd:
             for _ in range(100):
                 body_stream.write(fd.read())
@@ -110,7 +84,7 @@ class TestRedirect(testing.TestBase):
         )
         if "content-type" not in headers or headers["content-type"] == "application/json":
             response = json.loads(response)
-            self.assertEqual(response["path"], parsed.path[len(RedirectExample.PATH):])
+            self.assertEqual(response["path"], parsed.path[len("/redirect"):])
             self.assertEqual(response["query_string"], parsed.query)
             self.assertEqual(response["method"], method)
             self.assertDictContainsSubset({k: v for k, v in headers.iteritems() if k.lower() != "host"},
@@ -124,9 +98,9 @@ class TestRedirect(testing.TestBase):
             self.assertEqual(response, body)
 
     def test_redirect_with_resource_conflicts(self):
-        self.assertEqual(json.loads(self._simulate("/example/specific")), "specific")
-        self.assertEqual(json.loads(self._simulate("/example/specific/not"))["path"], "/specific/not")
-        self.assertEqual(json.loads(self._simulate("/example/"))["path"], "/")
+        self.assertEqual(json.loads(self._simulate("/redirect/specific")), "specific")
+        self.assertEqual(json.loads(self._simulate("/redirect/specific/not"))["path"], "/specific/not")
+        self.assertEqual(json.loads(self._simulate("/redirect"))["path"], "/")
 
     def _simulate(self, url, method="GET", body=None, headers=None):
         response = self.simulate_request(
@@ -135,9 +109,3 @@ class TestRedirect(testing.TestBase):
         if type(response) is not list:
             response = list(response)
         return response[0]
-
-
-if __name__ == '__main__':
-    import unittest
-
-    unittest.main()

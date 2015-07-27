@@ -1,6 +1,6 @@
 import hammock
 import hammock.resource as resource
-import hammock.decorator as decorator
+import hammock.route as route
 import jinja2
 import re
 import inspect
@@ -204,8 +204,8 @@ class ClientGenerator(object):
             resources_names=resources_names,
             resource_classes=resource_classes,
             token_entry=resource.TOKEN_ENTRY,
-            type_json=decorator.TYPE_JSON,
-            type_octet_stream=decorator.TYPE_OCTET_STREAM,
+            type_json=route.TYPE_JSON,
+            type_octet_stream=route.TYPE_OCTET_STREAM,
         )
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
@@ -254,12 +254,12 @@ def _tabify(text):
 
 
 def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, response_type, keywords):
-    params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - {decorator.KW_HEADERS, decorator.KW_FILE, decorator.KW_LIST}
-    url_kw = set(url_kw) - {decorator.KW_HEADERS, decorator.KW_FILE, decorator.KW_LIST}
+    params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - {route.KW_HEADERS, route.KW_FILE, route.KW_LIST}
+    url_kw = set(url_kw) - {route.KW_HEADERS, route.KW_FILE, route.KW_LIST}
     defaults = {k: v if type(v) is not str else "'%s'" % v for k, v in defaults.items()}
-    args = [arg for arg in args if arg != decorator.KW_HEADERS]
-    assert not ((decorator.KW_FILE in args) and (decorator.KW_LIST in args)), \
-        "Can only have {} or {} in method args".format(decorator.KW_FILE, decorator.KW_LIST)
+    args = [arg for arg in args if arg != route.KW_HEADERS]
+    assert not ((route.KW_FILE in args) and (route.KW_LIST in args)), \
+        "Can only have {} or {} in method args".format(route.KW_FILE, route.KW_LIST)
     if method_name in ("login", "logout", "refresh",):
         method_name = "_%s" % method_name
     return METHOD_TEMPLATE.render(
@@ -273,15 +273,15 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         defaults=defaults,
         success_code=success_code,
         response_type=response_type,
-        kw_file=decorator.KW_FILE,
-        kw_list=decorator.KW_LIST,
+        kw_file=route.KW_FILE,
+        kw_list=route.KW_LIST,
         keywords=keywords,
     )
 
 
 def client_methods_propeties(resource_object):
     kwargs = []
-    for method in decorator.iter_route_methods(resource_object):
+    for method in route.iter_route_methods(resource_object):
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in derivative_methods.iteritems():
             method_defaults = method_defaults or {}

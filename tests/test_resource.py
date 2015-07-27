@@ -4,7 +4,7 @@ import falcon
 import logging
 import falcon.testing as testing
 import hammock
-import hammock.decorator as decorator
+import hammock.route as route
 import tests.resources as resources
 
 
@@ -48,7 +48,7 @@ class TestResource(testing.TestBase):
             path,
             method="POST",
             body=body,
-            headers={decorator.CONTENT_TYPE: decorator.TYPE_OCTET_STREAM},
+            headers={route.CONTENT_TYPE: route.TYPE_OCTET_STREAM},
         )
         response = list(response)
         self.assertLess(1, len(response))
@@ -71,7 +71,7 @@ class TestResource(testing.TestBase):
             method="POST",
             query_string="size_mb={:d}".format(mb_to_test),
             body=body,
-            headers={decorator.CONTENT_TYPE: decorator.TYPE_OCTET_STREAM},
+            headers={route.CONTENT_TYPE: route.TYPE_OCTET_STREAM},
         )
         self.assertEqual(json.loads(response[0]), "OK")
 
@@ -89,7 +89,7 @@ class TestResource(testing.TestBase):
         self.assertEqual("sub-in-sub1", self._simulate("GET", "/sub_resource/sub"))
         self.assertEqual("sub2-in-sub1", self._simulate("GET", "/sub_resource/sub2"))
         self.assertEqual("sub-in-sub2", self._simulate("GET", "/sub_resource2/sub"))
-        self.assertEqual("sub-in-modified", self._simulate("GET", "/different_path/sub"))
+        self.assertEqual("modified-in-modified", self._simulate("GET", "/different_path/different_sub"))
         self.assertEqual("sub-in-nested-in-sub", self._simulate("GET", "/sub_resource/nested/sub"))
 
     def test_internal_server_error(self):
@@ -118,7 +118,7 @@ class TestResource(testing.TestBase):
             kwargs["query_string"] = query_string
         if body:
             kwargs["body"] = json.dumps(body)
-            headers.update({decorator.CONTENT_TYPE: decorator.TYPE_JSON})
+            headers.update({route.CONTENT_TYPE: route.TYPE_JSON})
         kwargs["headers"] = headers
         return json.loads(self.simulate_request(url, method=method, **kwargs)[0])  # pylint: disable=star-args
 

@@ -1,4 +1,5 @@
 import hammock.route as route
+import hammock.sink as _sink
 import hammock.common as common
 import collections
 import logging
@@ -17,6 +18,7 @@ class Resource(object):
     def __init__(self, api, base_path):
         self._api = api
         self._add_route_methods(base_path)
+        self._add_sink_methods(base_path)
 
     def _add_route_methods(self, base_path):
         paths = collections.defaultdict(dict)
@@ -31,12 +33,19 @@ class Resource(object):
                     path.translate(None, "{}/."),
                     ]),
                 (), methods)()
-            self._api.add_route("/%s" % common.url_join(base_path, self.name(), path), new_route)
-        logging.debug("Added %s to api", self.name())
+            full_path = "/%s" % common.url_join(base_path, self.name(), path)
+            self._api.add_route(full_path, new_route)
+            logging.debug("Added route %s", full_path)
+
+    def _add_sink_methods(self, base_path):
+        for method in _sink.iter_sink_methods(self):
+            full_path = "/" + common.url_join(base_path, self.name(), method.path)
+            self._api.add_sink(method.get(full_path), full_path)
+            logging.info("Added sink %s", full_path)
 
     @classmethod
     def name(cls):
-        return cls.__name__.lower()
+        return getattr(cls, "PATH", cls.__name__.lower())
 
 
 def get(path="", **kwargs):
@@ -53,3 +62,11 @@ def put(path="", **kwargs):
 
 def delete(path="", **kwargs):
     return route.route(path, "DELETE", **kwargs)
+
+
+def passthrough(dest, path="", **kwargs):
+    return _sink.sink(path, dest=dest, trim_prefix=True, **kwargs)
+
+
+def sink(path="", **kwargs):
+    return _sink.sink(path=path, **kwargs)
