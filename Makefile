@@ -19,7 +19,7 @@ install: requirement.txt setup.py hammock/*
 
 packages: rpm rename
 
-rpm: setup.py hammock/*
+rpm: clean setup.py hammock/*
 	python setup.py bdist --formats=rpm
 	python setup.py bdist_egg
 	rm -rf build
