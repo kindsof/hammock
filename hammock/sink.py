@@ -3,11 +3,7 @@ import requests
 import logging
 import urlparse
 import functools
-import collections
 import inspect
-
-
-Response = collections.namedtuple("Response", ["stream", "headers", "status"])
 
 
 def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=False):
@@ -29,14 +25,14 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
                     output = _passthrough(request, dest)
                 else:
                     output = func(request)
+                if post_process:
+                    output = post_process(output)
                 body_or_stream, response._headers, response.status = output
                 response.status = str(response.status)
                 if hasattr(body_or_stream, "read"):
                     response.stream = body_or_stream
                 else:
                     response.body = body_or_stream
-                if post_process:
-                    post_process(response)
             return _wrapper
         func.get = _full_path_wrapper
         return func
