@@ -30,24 +30,25 @@ class {{ class_name }}(object):
     def close(self):
         self._client.close()
 
-    def fetch(self, method, url, json=None, stream=None, success_code=200, result_type='{{ type_json }}'):
+    def fetch(self, method, url, json=None, stream=None, success_code=200, result_type='{{ type_json }}', kwargs=None):
         url = url_join(self._url, url)
-        kwargs = {
+        json.update(kwargs or {})
+        _kwargs = {
             "timeout": self._timeout,
             "stream": True,
         }
         if method in {"POST", "PUT"}:
             if stream:
-                kwargs["data"] = stream
+                _kwargs["data"] = stream
                 if json:
-                    kwargs["params"] = json
+                    _kwargs["params"] = json
             else:
                 if json:
-                    kwargs["json"] = json
+                    _kwargs["json"] = json
         else:
-            kwargs["params"] = json
+            _kwargs["params"] = json
         logging.debug("Sending %s request: %s %s", method, url, json)
-        response = getattr(self._client, method.lower())(url, **kwargs)  # pylint: disable=star-args
+        response = getattr(self._client, method.lower())(url, **_kwargs)  # pylint: disable=star-args
         result = None
         if result_type == '{{ type_json }}':
             result = self.jsonify(response)
@@ -90,10 +91,12 @@ class {{ class_name }}(object):
 METHOD_TEMPLATE = jinja2.Template("""
 def {{ method_name }}({{ args|join(', ') }}\
 {% if kwargs %}\
-, \
 {% for k, v in kwargs.iteritems() %}\
-{{ k }}={{ v }}, \
+, {{ k }}={{ v }}\
 {% endfor %}\
+{% endif %}\
+{% if keywords %}\
+, **{{ keywords }}\
 {% endif %}\
 ):
     return self._client.fetch(
@@ -130,6 +133,9 @@ dict(\
 ),
 {% else %}\
 {{ kw_list }},
+{% endif %}\
+{% if keywords %}\
+        kwargs={{ keywords }},
 {% endif %}\
 {% if kw_file in args  %}\
         stream={{ kw_file }},
@@ -247,7 +253,7 @@ def _tabify(text):
     ])
 
 
-def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, result_type):
+def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, result_type, keywords):
     params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - {decorator.KW_HEADERS, decorator.KW_FILE, decorator.KW_LIST}
     url_kw = set(url_kw) - {decorator.KW_HEADERS, decorator.KW_FILE, decorator.KW_LIST}
     defaults = {k: v if type(v) is not str else "'%s'" % v for k, v in defaults.items()}
@@ -269,6 +275,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         result_type=result_type,
         kw_file=decorator.KW_FILE,
         kw_list=decorator.KW_LIST,
+        keywords=keywords,
     )
 
 
@@ -294,5 +301,6 @@ def client_methods_propeties(resource_object):
                 defaults=method_defaults,
                 success_code=method.success_code,
                 result_type=method.result_content_type,
+                keywords=spec.keywords,
             ))
     return kwargs
