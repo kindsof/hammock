@@ -10,16 +10,17 @@ def passthrough(request, response, dest, pre_process, post_process, trim_prefix,
     request_uuid = uuid.uuid4()
     logging.info("[Passthrough received %s] requested: %s", request_uuid, request.url)
     try:
+        context = {}
         if trim_prefix:
             _trim_prefix(request, trim_prefix)
         if pre_process:
-            pre_process(request, **params)
+            pre_process(request, context, **params)
         if dest:
             output = _passthrough(request, dest, request_uuid)
         else:
             output = func(request, **params)
         if post_process:
-            output = post_process(output, **params)
+            output = post_process(output, context, **params)
         body_or_stream, response._headers, response.status = output
         response.status = str(response.status)
         if hasattr(body_or_stream, "read"):
