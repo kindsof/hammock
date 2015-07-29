@@ -7,7 +7,7 @@ DEST = "http://localhost:{:d}".format(PORT)
 
 class Redirect(resource.Resource):
 
-    @resource.passthrough(dest=DEST)
+    @resource.passthrough(dest=DEST, trim_prefix="redirect")
     def passthrough(self):
         pass
 

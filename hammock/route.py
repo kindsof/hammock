@@ -5,6 +5,7 @@ import simplejson as json
 import logging
 import uuid
 import hammock.headers as headers
+import hammock.passthrough as passthrough_module
 
 
 KW_HEADERS = "_headers"
@@ -58,6 +59,33 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                     "[response %s] status: %s, body: %s",
                     request_uuid, response.status, response.body,
                 )
+
+        func.responder = _wrapper
+        return func
+    return _decorator
+
+
+def passthrough(path, method, dest, pre_process=None, post_process=None, trim_prefix=False):
+    def _decorator(func):
+        func.is_route = True
+        func.path = path
+        func.method = method
+        func.client_methods = {}
+        func.success_code = None
+        func.response_content_type = None
+
+        @functools.wraps(func)
+        def _wrapper(_, request, response, **params):
+            passthrough_module.passthrough(
+                request,
+                response,
+                dest,
+                pre_process,
+                post_process,
+                trim_prefix,
+                func,
+                **params
+            )
 
         func.responder = _wrapper
         return func

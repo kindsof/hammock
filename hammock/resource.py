@@ -4,6 +4,7 @@ import hammock.common as common
 import collections
 import logging
 import functools
+import re
 
 
 TOKEN_ENTRY = "X-Auth-Token"
@@ -11,6 +12,7 @@ CONTENT_TYPE = route.CONTENT_TYPE
 TYPE_JSON = route.TYPE_JSON
 TYPE_OCTET_STREAM = route.TYPE_OCTET_STREAM
 KW_HEADERS = route.KW_HEADERS
+EXPRESSION_PATTERN = r'{([a-zA-Z][a-zA-Z_]*)}'
 
 
 class Resource(object):
@@ -38,9 +40,13 @@ class Resource(object):
             logging.debug("Added route %s", full_path)
 
     def _add_sink_methods(self, base_path):
+        sinks = {}
         for method in _sink.iter_sink_methods(self):
             full_path = "/" + common.url_join(base_path, self.name(), method.path)
-            self._api.add_sink(method.get(full_path), full_path)
+            pattern = re.compile(re.sub(EXPRESSION_PATTERN, r'(?P<\1>[^/]+)', full_path))
+            sinks[pattern] = method.method
+        for pattern in sorted(sinks, cmp=lambda p1, p2: len(p1.pattern) - len(p2.pattern)):
+            self._api.add_sink(sinks[pattern], pattern)
             logging.info("Added sink %s", full_path)
 
     @classmethod
@@ -64,8 +70,24 @@ def delete(path="", **kwargs):
     return route.route(path, "DELETE", **kwargs)
 
 
+def get_passthrough(dest, path="", **kwargs):
+    return route.passthrough(path, "GET", dest=dest, **kwargs)
+
+
+def post_passthrough(dest, path="", **kwargs):
+    return route.passthrough(path, "POST", dest=dest, **kwargs)
+
+
+def put_passthrough(dest, path="", **kwargs):
+    return route.passthrough(path, "PUT", dest=dest, **kwargs)
+
+
+def delete_passthrough(dest, path="", **kwargs):
+    return route.passthrough(path, "DELETE", dest=dest, **kwargs)
+
+
 def passthrough(dest, path="", **kwargs):
-    return _sink.sink(path, dest=dest, trim_prefix=True, **kwargs)
+    return _sink.sink(path, dest=dest, **kwargs)
 
 
 def sink(path="", **kwargs):
