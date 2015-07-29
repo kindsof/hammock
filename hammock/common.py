@@ -1,8 +1,19 @@
+import falcon
 import inspect
 
 
 def url_join(*parts):
     return '/'.join(arg.strip('/') for arg in parts if arg)
+
+
+def convert_exception(e):
+    if not issubclass(type(e), falcon.HTTPError):
+        e = falcon.HTTPError(
+            falcon.HTTP_500,
+            "Internal Server Error",
+            "Got exception in internal function: %s" % e,
+        )
+    return e
 
 
 def func_is_pass(func):

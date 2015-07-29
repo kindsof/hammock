@@ -4,6 +4,7 @@ import functools
 import simplejson as json
 import logging
 import uuid
+import hammock.common as common
 import hammock.headers as headers
 import hammock.passthrough as passthrough_module
 
@@ -49,7 +50,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                     _extract_response_body(result, response, response_content_type)
             except Exception as e:
                 logging.exception("[Internal server error %s]", request_uuid)  # this will show traceback in logs
-                e = _convert_exception(e)
+                e = common.convert_exception(e)
                 response.status, response.body = e.status, e.to_dict()  # assingment for logging in finally block
                 raise e
             else:
@@ -150,16 +151,6 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
             "Missing parameters: %s" % ", ".join(missing),
             "Bad request")
     return kwargs
-
-
-def _convert_exception(e):
-    if not issubclass(type(e), falcon.HTTPError):
-        e = falcon.HTTPError(
-            falcon.HTTP_500,
-            "Internal Server Error",
-            "Got exception in internal function: %s" % e,
-        )
-    return e
 
 
 def _extract_response_headers(result, response):

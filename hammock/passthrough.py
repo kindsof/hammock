@@ -1,33 +1,46 @@
 import logging
 import requests
 import urlparse
+import uuid
 import hammock.common as common
 import hammock.types as types
 
 
 def passthrough(request, response, dest, pre_process, post_process, trim_prefix, func, **params):
-    logging.info("Redirecting %s", request.url)
-    if trim_prefix:
-        _trim_prefix(request, trim_prefix)
-    if pre_process:
-        pre_process(request, **params)
-    if dest:
-        output = _passthrough(request, dest)
-    else:
-        output = func(request, **params)
-    if post_process:
-        output = post_process(output, **params)
-    body_or_stream, response._headers, response.status = output
-    response.status = str(response.status)
-    if hasattr(body_or_stream, "read"):
-        response.stream = body_or_stream
-    else:
-        response.body = body_or_stream
+    request_uuid = uuid.uuid4()
+    logging.info("[Passthrough received %s] requested: %s", request_uuid, request.url)
+    try:
+        if trim_prefix:
+            _trim_prefix(request, trim_prefix)
+        if pre_process:
+            pre_process(request, **params)
+        if dest:
+            output = _passthrough(request, dest, request_uuid)
+        else:
+            output = func(request, **params)
+        if post_process:
+            output = post_process(output, **params)
+        body_or_stream, response._headers, response.status = output
+        response.status = str(response.status)
+        if hasattr(body_or_stream, "read"):
+            response.stream = body_or_stream
+        else:
+            response.body = body_or_stream
+    except Exception as e:
+        logging.exception("[Passthrough error %s]", request_uuid)  # this will show traceback in logs
+        e = common.convert_exception(e)
+        response.status, response.body = e.status, e.to_dict()  # assingment for logging in finally block
+        raise e
+    finally:
+        logging.debug(
+            "[Passthrough response %s] status: %s, body: %s",
+            request_uuid, response.status, response.body,
+        )
 
 
-def _passthrough(request, dest):
+def _passthrough(request, dest, request_uuid):
     redirection_url = common.url_join(dest, request.path)
-    logging.info("Passthrough to %s", redirection_url)
+    logging.info("[Passthrough %s] redirecting to %s", request_uuid, redirection_url)
     inner_request = requests.Request(
         request.method,
         url=redirection_url,
