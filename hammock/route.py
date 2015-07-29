@@ -35,7 +35,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 request_uuid, request.method, request.url)
             try:
                 request_params = _extract_params(request)
-                request_headers = headers.Headers(request.headers, request.get_header)
+                request_headers = headers.Headers(request.headers)
                 kwargs = _convert_to_kwargs(spec, url_kwargs, request_params, request_headers)
             except Exception as e:
                 logging.warn("[Error parsing request kwargs %s] %s", request_uuid, e)
