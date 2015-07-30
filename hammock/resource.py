@@ -58,6 +58,10 @@ def get(path="", **kwargs):
     return route.route(path, "GET", **kwargs)
 
 
+def head(path="", **kwargs):
+    return route.route(path, "HEAD", **kwargs)
+
+
 def post(path="", **kwargs):
     return route.route(path, "POST", **kwargs)
 
