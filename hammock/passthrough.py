@@ -45,7 +45,7 @@ def _passthrough(request, dest, request_uuid):
     inner_request = requests.Request(
         request.method,
         url=redirection_url,
-        data=request.stream if request.method in ("POST", "PUT", "PATCH") else None,
+        data=request.stream if request.method in ("POST", "PUT", "PATCH", "DELETE") else None,
         headers={
             k: v if k.lower() != "host" else urlparse.urlparse(dest).netloc
             for k, v in request.headers.iteritems()
