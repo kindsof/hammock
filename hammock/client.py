@@ -192,12 +192,12 @@ class ClientGenerator(object):
             _tabify(_resource_class_code(_resource))
             for _resource in self._resources.get("", [])
         ]
-        resources_names = [(r.name().translate(None, "{}./"), r.name()) for r in self._resources.get("", [])]
+        resources_names = [(r.name().translate(None, "{}./-"), r.name()) for r in self._resources.get("", [])]
         for name, resource_hirarchy in self._resources.iteritems():
             if name == "":
                 continue
             resource_classes.append(_tabify(_recursion_code(name, resource_hirarchy)))
-            resources_names.append((name.translate(None, "{}./"), name))
+            resources_names.append((name.translate(None, "{}./-"), name))
 
         code = FILE_TEMPLATE.render(
             class_name=class_name,
@@ -225,7 +225,7 @@ def _resource_class_code(_resource):
     if _resource.name() == "auth":
         methods.insert(0, AUTH_METHODS_CODE)
     return RESOURCE_CLASS_TEMPLATE.render(
-        name=_resource.name().translate(None, "{}/."), resource=_resource, methods=methods)
+        name=_resource.name().translate(None, "{}/.-"), resource=_resource, methods=methods)
 
 
 def _recursion_code(name, resource_hirarchy):
@@ -233,14 +233,14 @@ def _recursion_code(name, resource_hirarchy):
         _resource_class_code(_resource)
         for _resource in resource_hirarchy.get("", [])
     ]
-    sub_resources = [(_resource.name().translate(None, "{}/."), _resource.name()) for _resource in resource_hirarchy.get("", [])]
+    sub_resources = [(_resource.name().translate(None, "{}/.-"), _resource.name()) for _resource in resource_hirarchy.get("", [])]
     for key, value in resource_hirarchy.iteritems():
         if key == "":
             continue
         sub_classes.append(_recursion_code(key, value))
-        sub_resources.append((key.translate(None, "{}/."), key))
+        sub_resources.append((key.translate(None, "{}/.-"), key))
     return RESOURCE_CLASS_TEMPLATE.render(
-        name=name.translate(None, "{}/."),
+        name=name.translate(None, "{}/.-"),
         sub_resources=sub_resources,
         sub_classes=_tabify("".join(sub_classes))
     )

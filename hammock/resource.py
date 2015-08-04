@@ -32,7 +32,7 @@ class Resource(object):
                     "Resource",
                     base_path.replace("/", "_"),
                     self.name().capitalize(),
-                    path.translate(None, "{}/."),
+                    path.translate(None, "{}/.-"),
                     ]),
                 (), methods)()
             full_path = "/%s" % common.url_join(base_path, self.name(), path)
