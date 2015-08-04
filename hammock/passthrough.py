@@ -30,7 +30,7 @@ def passthrough(request, response, dest, pre_process, post_process, trim_prefix,
     except Exception as e:
         logging.exception("[Passthrough error %s]", request_uuid)  # this will show traceback in logs
         e = common.convert_exception(e)
-        response.status, response.body = e.status, e.to_dict()  # assingment for logging in finally block
+        response.status, response.body = e.status, e.to_dict()  # assignment for logging in finally block
         raise e
     finally:
         logging.debug(
@@ -40,7 +40,7 @@ def passthrough(request, response, dest, pre_process, post_process, trim_prefix,
 
 
 def _passthrough(request, dest, request_uuid):
-    redirection_url = common.url_join(dest, request.path)
+    redirection_url = common.url_join(dest, request.relative_uri)
     logging.info("[Passthrough %s] redirecting to %s", request_uuid, redirection_url)
     inner_request = requests.Request(
         request.method,
