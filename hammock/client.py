@@ -210,11 +210,12 @@ class ClientGenerator(object):
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
     def _add_resource(self, package, module_name, parents):
-        resource_class = hammock.resource_class(package, module_name)
+        resource_classes = hammock.resource_classes(package, module_name)
         cur = self._resources
         for p in parents:
             cur = cur.setdefault(p, {})
-        cur.setdefault("", []).append(resource_class)
+        for resource_class in resource_classes:
+            cur.setdefault("", []).append(resource_class)
 
 
 def _resource_class_code(_resource):

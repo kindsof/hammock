@@ -1,5 +1,7 @@
 import hammock.resource_node as resource_node
+import hammock.resource as resource
 import pkgutil
+import inspect
 
 
 class Hammock(resource_node.ResourceNode):
@@ -10,11 +12,15 @@ class Hammock(resource_node.ResourceNode):
 
     def _add_resource(self, package, module_name, parents):
         prefix = "/".join(parents)
-        resource = resource_class(package, module_name)(self._api, prefix)
+        resources = [
+            resource_class(self._api, prefix)
+            for resource_class in resource_classes(package, module_name)
+        ]
         node = self
         for parent in parents:
             node = node.add(parent)
-        node.add(resource.name(), resource)
+        for _resource in resources:
+            node.add(_resource.name(), _resource)
 
 
 def iter_modules(package, callback, parents=None):
@@ -30,6 +36,14 @@ def iter_modules(package, callback, parents=None):
             callback(package, name, parents)
 
 
-def resource_class(package, module_name):
+def _is_resource_class(obj):
+    return inspect.isclass(obj) and issubclass(obj, resource.Resource)
+
+
+def resource_classes(package, module_name):
     module = __import__(".".join([package.__name__, module_name]), fromlist=[package.__name__])
-    return getattr(module, module_name.capitalize())
+    return [
+        getattr(module, attr)
+        for attr in dir(module)
+        if _is_resource_class(getattr(module, attr))
+    ]
