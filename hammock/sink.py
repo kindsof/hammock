@@ -13,8 +13,9 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
             common.func_is_pass(func)
 
         @functools.wraps(func)
-        def _wrapper(request, response, **params):
+        def _wrapper(self, request, response, **params):
             passthrough.passthrough(
+                self,
                 request,
                 response,
                 dest,

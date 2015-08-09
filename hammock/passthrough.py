@@ -6,7 +6,7 @@ import hammock.common as common
 import hammock.types as types
 
 
-def passthrough(request, response, dest, pre_process, post_process, trim_prefix, func, **params):
+def passthrough(self, request, response, dest, pre_process, post_process, trim_prefix, func, **params):
     request_uuid = uuid.uuid4()
     logging.info("[Passthrough received %s] requested: %s", request_uuid, request.url)
     try:
@@ -16,9 +16,9 @@ def passthrough(request, response, dest, pre_process, post_process, trim_prefix,
         if pre_process:
             pre_process(request, context, **params)
         if dest:
-            output = _passthrough(request, dest, request_uuid)
+            output = send_to(request, dest, request_uuid)
         else:
-            output = func(request, **params)
+            output = func(self, request, **params)
         if post_process:
             output = post_process(output, context, **params)
         body_or_stream, response._headers, response.status = output
@@ -39,7 +39,7 @@ def passthrough(request, response, dest, pre_process, post_process, trim_prefix,
         )
 
 
-def _passthrough(request, dest, request_uuid):
+def send_to(request, dest, request_uuid=None):
     redirection_url = common.url_join(dest, request.relative_uri)
     logging.info("[Passthrough %s] redirecting to %s", request_uuid, redirection_url)
     inner_request = requests.Request(

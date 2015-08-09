@@ -46,7 +46,7 @@ class Resource(object):
             pattern = re.compile(re.sub(EXPRESSION_PATTERN, r'(?P<\1>[^/]+)', full_path))
             sinks[pattern] = method.method
         for pattern in sorted(sinks, cmp=lambda p1, p2: len(p1.pattern) - len(p2.pattern)):
-            self._api.add_sink(sinks[pattern], pattern)
+            self._api.add_sink(functools.partial(sinks[pattern], self), pattern)
             logging.info("Added sink %s", full_path)
 
     @classmethod
