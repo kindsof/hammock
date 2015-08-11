@@ -76,8 +76,9 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
         func.response_content_type = None
 
         @functools.wraps(func)
-        def _wrapper(_, request, response, **params):
+        def _wrapper(self, request, response, **params):
             passthrough_module.passthrough(
+                self,
                 request,
                 response,
                 dest,
