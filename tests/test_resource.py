@@ -5,7 +5,9 @@ import logging
 import falcon.testing as testing
 import hammock
 import hammock.route as route
+import hammock.headers as hammock_headers
 import tests.resources as resources
+import tests.resources.keywords as keywords
 
 
 def default_404(req, res):  # pylint: disable=unused-argument
@@ -21,7 +23,7 @@ class TestResource(testing.TestBase):
         self.api.add_sink(default_404)
 
     def test_resource(self):
-        dict_url = lambda key: "/dict/action/%s" % key
+        dict_url = lambda key: "/dict/%s" % key
         self.assertDictEqual({"post": 1}, self._simulate("POST", dict_url("a"), body={"value": 1}))
         self.assertDictEqual({"post": 2}, self._simulate("POST", dict_url("b"), body={"value": 2}))
         self.assert_400("POST", dict_url("a"), body={"value": 10})
@@ -110,6 +112,52 @@ class TestResource(testing.TestBase):
             True,
             self._simulate("GET", "/headers/some_wrong_key", query_string="value=None", headers=headers)
         )
+
+    def test_keywords(self):
+        url = "/keywords"
+        expected = {"arg": 1, "default": 2, "c": 3, "d": 4}
+        expected_no_default = expected.copy()
+        expected_no_default["default"] = keywords.Keywords.DEFAULT
+
+        logging.info("Testing keywords with GET")
+        get = self._simulate(
+            "GET", url,
+            query_string="arg=1&default=2&c=3&d=4",
+        )
+        self.assertDictEqual({k: int(v) for k, v in get.iteritems()}, expected)
+
+        logging.info("Testing keywords with GET and no default")
+        get = self._simulate(
+            "GET", url,
+            query_string="arg=1&c=3&d=4",
+        )
+        self.assertDictEqual({k: int(v) for k, v in get.iteritems()}, expected_no_default)
+
+        for method in ("POST", "PUT"):
+            logging.info("Testing keywords with %s", method)
+            ret = self._simulate(
+                method, url,
+                body=expected,
+            )
+            self.assertDictEqual(ret, expected)
+            no_default = expected.copy()
+            del no_default["default"]
+            ret = self._simulate(
+                method, url,
+                body=no_default,
+            )
+            self.assertDictEqual(ret, expected_no_default)
+        logging.info("Testing keywords with GET and headers")
+        response = self._simulate(
+            "GET", "{}/headers".format(url),
+            query_string="arg=1&default=2&c=3",
+            headers={"d": str(expected["d"])},
+        )
+        self.assertEqual(int(response["arg"]), expected["arg"])
+        self.assertEqual(int(response["default"]), expected["default"])
+        self.assertEqual(int(response["c"]), expected["c"])
+        headers = hammock_headers.Headers(response["headers"])
+        self.assertEqual(int(headers["d"]), expected["d"])
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None):
         kwargs = {}

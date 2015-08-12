@@ -123,17 +123,12 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
     defaults = spec.defaults or []
     args = spec.args[1:len(spec.args) - len(defaults)]
     keywords = spec.args[len(spec.args) - len(defaults):]
-    request_params = request_params or {}
-    if spec.keywords:
-        kwargs = {spec.keywords: request_params}
-    else:
-        kwargs = {
-            keyword: request_params.get(keyword, default)
-            for keyword, default in zip(keywords, defaults)
-        }
-
-    url_kwargs.update(request_params or {})
-    kwargs.update({arg: url_kwargs.get(arg, None) for arg in args})
+    kwargs = request_params or {}
+    kwargs.update(url_kwargs or {})
+    kwargs.update({
+        keyword: kwargs.get(keyword, default)
+        for keyword, default in zip(keywords, defaults)
+    })
     if KW_HEADERS in args:
         kwargs[KW_HEADERS] = request_headers
     for kw, error_msg in (
@@ -146,7 +141,7 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
             except KeyError:
                 raise falcon.HTTPError(falcon.HTTP_415, 'Bad data', error_msg)
             args.remove(kw)
-    missing = set(args) - set(url_kwargs or {}) - set([KW_HEADERS])
+    missing = set(args) - set(kwargs)
     if missing:
         raise falcon.HTTPBadRequest(
             "Missing parameters: %s" % ", ".join(missing),
