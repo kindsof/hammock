@@ -40,6 +40,7 @@ class {{ class_name }}(object):
         if method in {"POST", "PUT"}:
             if stream:
                 _kwargs["data"] = stream
+                _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}"}
                 if json:
                     _kwargs["params"] = json
             else:

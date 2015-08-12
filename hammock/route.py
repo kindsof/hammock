@@ -114,7 +114,7 @@ def _extract_params(request):
                     'Malformed JSON',
                     'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.'
                 )
-        else:
+        elif content_type == TYPE_OCTET_STREAM:
             params[KW_FILE] = request.stream
     return params
 
