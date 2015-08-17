@@ -12,6 +12,19 @@ import logging
 import bunch
 
 
+class HttpError(Exception):
+
+    def __init__(self, code, title, description):
+        super(HttpError, self).__init__()
+        self.code = code
+        self.title = title
+        self.description = description
+
+    def __repr__(self):
+        return '<HttpError {code}>(title="{title}", description="{description}")'.format(
+            code=self.code, title=self.title, description=self.description)
+
+
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
@@ -32,7 +45,8 @@ class {{ class_name }}(object):
 
     def fetch(self, method, url, json=None, stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None):
         url = url_join(self._url, url)
-        json.update(kwargs or {})
+        if json:
+            json.update(kwargs or {})
         _kwargs = {
             "timeout": self._timeout,
             "stream": True,
@@ -61,7 +75,8 @@ class {{ class_name }}(object):
                 "Response status %d does not match expected success status %d",
                 response.status_code, success_code
             )
-            response.raise_for_status()
+            data = self.jsonify(response) or {}
+            raise HttpError(response.status_code, data.get("title", ""), data.get("description", ""))
         return result
 
     def set_token(self, token):

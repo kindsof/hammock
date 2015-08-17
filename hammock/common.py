@@ -1,5 +1,5 @@
-import falcon
 import inspect
+import falcon
 
 
 def url_join(*parts):
@@ -8,10 +8,10 @@ def url_join(*parts):
 
 def convert_exception(e):
     if not issubclass(type(e), falcon.HTTPError):
-        e = falcon.HTTPError(
+        return falcon.HTTPError(
             falcon.HTTP_500,
             "Internal Server Error",
-            "Got exception in internal function: %s" % e,
+            "Got exception in internal function: {}".format(e),
         )
     return e
 
