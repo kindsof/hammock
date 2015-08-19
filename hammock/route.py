@@ -151,10 +151,8 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
 
 def _extract_response_headers(result, response):
     if isinstance(result, dict) and KW_HEADERS in result:
-        response_headers = result[KW_HEADERS]
-        del result[KW_HEADERS]
-        for k, v in response_headers.iteritems():
-            response.set_header(k, v)
+        for k, v in result.pop(KW_HEADERS).iteritems():
+            response.set_header(k, str(v))
 
 
 def _extract_response_body(result, response, content_type):
