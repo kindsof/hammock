@@ -49,13 +49,10 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                     _extract_response_headers(result, response)
                     _extract_response_body(result, response, response_content_type)
             except Exception as e:
-                logging.exception("[Internal server error %s]", request_uuid)  # this will show traceback in logs
-                e = common.convert_exception(e)
-                response.status, response.body = e.status, e.to_dict()  # assingment for logging in finally block
-                raise e
+                common.log_exception(e, request_uuid)
+                raise
             else:
                 response.status = str(success_code)
-            finally:
                 logging.debug(
                     "[response %s] status: %s, body: %s",
                     request_uuid, response.status, response.body,

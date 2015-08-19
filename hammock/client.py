@@ -12,19 +12,6 @@ import logging
 import bunch
 
 
-class HttpError(Exception):
-
-    def __init__(self, code, title, description):
-        super(HttpError, self).__init__()
-        self.code = code
-        self.title = title
-        self.description = description
-
-    def __repr__(self):
-        return '<HttpError {code}>(title="{title}", description="{description}")'.format(
-            code=self.code, title=self.title, description=self.description)
-
-
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
@@ -75,8 +62,7 @@ class {{ class_name }}(object):
                 "Response status %d does not match expected success status %d",
                 response.status_code, success_code
             )
-            data = self.jsonify(response) or {}
-            raise HttpError(response.status_code, data.get("title", ""), data.get("description", ""))
+        response.raise_for_status()
         return result
 
     def set_token(self, token):

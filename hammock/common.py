@@ -1,19 +1,18 @@
 import inspect
 import falcon
+import logging
 
 
 def url_join(*parts):
     return '/'.join(arg.strip('/') for arg in parts if arg)
 
 
-def convert_exception(e):
-    if not issubclass(type(e), falcon.HTTPError):
-        return falcon.HTTPError(
-            falcon.HTTP_500,
-            "Internal Server Error",
-            "Got exception in internal function: {}".format(e),
-        )
-    return e
+def log_exception(exc, request_uuid):
+    if isinstance(exc, falcon.HTTPError):
+        logging.exception(
+            "[Http %s Exception %s] %s", exc.status, request_uuid, exc.title)
+    else:
+        logging.exception("[Internal server error %s]", request_uuid)
 
 
 def func_is_pass(func):

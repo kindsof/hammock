@@ -28,10 +28,8 @@ def passthrough(self, request, response, dest, pre_process, post_process, trim_p
         else:
             response.body = body_or_stream
     except Exception as e:
-        logging.exception("[Passthrough error %s]", request_uuid)  # this will show traceback in logs
-        e = common.convert_exception(e)
-        response.status, response.body = e.status, e.to_dict()  # assignment for logging in finally block
-        raise e
+        common.log_exception(e, request_uuid)
+        raise
     finally:
         logging.debug(
             "[Passthrough response %s] status: %s, body: %s",
