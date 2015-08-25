@@ -8,7 +8,7 @@ import hammock.types as types
 
 def passthrough(self, request, response, dest, pre_process, post_process, trim_prefix, func, **params):
     request_uuid = uuid.uuid4()
-    logging.info("[Passthrough received %s] requested: %s", request_uuid, request.url)
+    logging.debug("[Passthrough received %s] requested: %s", request_uuid, request.url)
     try:
         context = {}
         if trim_prefix:
