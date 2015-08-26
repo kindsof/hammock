@@ -47,7 +47,7 @@ class Resource(object):
             sinks[pattern] = method.method
         for pattern in sorted(sinks, cmp=lambda p1, p2: len(p1.pattern) - len(p2.pattern)):
             self._api.add_sink(functools.partial(sinks[pattern], self), pattern)
-            logging.info("Added sink %s", full_path)
+            logging.debug("Added sink %s", full_path)
 
     @classmethod
     def name(cls):
