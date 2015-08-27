@@ -9,8 +9,7 @@ def url_join(*parts):
 
 def log_exception(exc, request_uuid):
     if isinstance(exc, falcon.HTTPError):
-        logging.exception(
-            "[Http %s Exception %s] %s", exc.status, request_uuid, exc.title)
+        logging.warning("[Http %s Exception %s] %s", exc.status, request_uuid, exc.title)
     else:
         logging.exception("[Internal server error %s]", request_uuid)
 
