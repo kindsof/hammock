@@ -74,6 +74,10 @@ def delete(path="", **kwargs):
     return route.route(path, "DELETE", **kwargs)
 
 
+def patch(path="", **kwargs):
+    return route.route(path, "PATCH", **kwargs)
+
+
 def get_passthrough(dest, path="", **kwargs):
     return route.passthrough(path, "GET", dest=dest, **kwargs)
 
