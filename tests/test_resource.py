@@ -4,7 +4,7 @@ import falcon
 import logging
 import falcon.testing as testing
 import hammock
-import hammock.route as route
+import hammock.common as common
 import hammock.headers as hammock_headers
 import tests.resources as resources
 import tests.resources.keywords as keywords
@@ -50,7 +50,7 @@ class TestResource(testing.TestBase):
             path,
             method="POST",
             body=body,
-            headers={route.CONTENT_TYPE: route.TYPE_OCTET_STREAM},
+            headers={common.CONTENT_TYPE: common.TYPE_OCTET_STREAM},
         )
         response = list(response)
         self.assertLess(1, len(response))
@@ -73,7 +73,7 @@ class TestResource(testing.TestBase):
             method="POST",
             query_string="size_mb={:d}".format(mb_to_test),
             body=body,
-            headers={route.CONTENT_TYPE: route.TYPE_OCTET_STREAM},
+            headers={common.CONTENT_TYPE: common.TYPE_OCTET_STREAM},
         )
         self.assertEqual(json.loads(response[0]), "OK")
 
@@ -166,7 +166,7 @@ class TestResource(testing.TestBase):
             kwargs["query_string"] = query_string
         if body:
             kwargs["body"] = json.dumps(body)
-            headers.update({route.CONTENT_TYPE: route.TYPE_JSON})
+            headers.update({common.CONTENT_TYPE: common.TYPE_JSON})
         kwargs["headers"] = headers
         return json.loads(self.simulate_request(url, method=method, **kwargs)[0])  # pylint: disable=star-args
 

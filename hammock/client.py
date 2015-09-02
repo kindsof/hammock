@@ -1,6 +1,7 @@
 import hammock
 import hammock.resource as resource
 import hammock.route as route
+import hammock.common as common
 import jinja2
 import re
 import inspect
@@ -38,7 +39,7 @@ class {{ class_name }}(object):
             "timeout": self._timeout,
             "stream": True,
         }
-        if method in {"POST", "PUT"}:
+        if method not in {{ url_params_methods }}:
             if stream:
                 _kwargs["data"] = stream
                 _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}"}
@@ -206,8 +207,9 @@ class ClientGenerator(object):
             resources_names=resources_names,
             resource_classes=resource_classes,
             token_entry=resource.TOKEN_ENTRY,
-            type_json=route.TYPE_JSON,
-            type_octet_stream=route.TYPE_OCTET_STREAM,
+            type_json=common.TYPE_JSON,
+            type_octet_stream=common.TYPE_OCTET_STREAM,
+            url_params_methods=common.URL_PARAMS_METHODS,
         )
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
@@ -257,12 +259,12 @@ def _tabify(text):
 
 
 def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, response_type, keywords):
-    params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - {route.KW_HEADERS, route.KW_FILE, route.KW_LIST}
-    url_kw = set(url_kw) - {route.KW_HEADERS, route.KW_FILE, route.KW_LIST}
+    params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - {common.KW_HEADERS, common.KW_FILE, common.KW_LIST}
+    url_kw = set(url_kw) - {common.KW_HEADERS, common.KW_FILE, common.KW_LIST}
     defaults = {k: v if type(v) is not str else "'%s'" % v for k, v in defaults.items()}
-    args = [arg for arg in args if arg != route.KW_HEADERS]
-    assert not ((route.KW_FILE in args) and (route.KW_LIST in args)), \
-        "Can only have {} or {} in method args".format(route.KW_FILE, route.KW_LIST)
+    args = [arg for arg in args if arg != common.KW_HEADERS]
+    assert not ((common.KW_FILE in args) and (common.KW_LIST in args)), \
+        "Can only have {} or {} in method args".format(common.KW_FILE, common.KW_LIST)
     if method_name in ("login", "logout", "refresh",):
         method_name = "_%s" % method_name
     return METHOD_TEMPLATE.render(
@@ -276,8 +278,8 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         defaults=defaults,
         success_code=success_code,
         response_type=response_type,
-        kw_file=route.KW_FILE,
-        kw_list=route.KW_LIST,
+        kw_file=common.KW_FILE,
+        kw_list=common.KW_LIST,
         keywords=keywords,
     )
 

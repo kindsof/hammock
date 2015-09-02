@@ -43,7 +43,7 @@ def send_to(request, dest, request_uuid=None):
     inner_request = requests.Request(
         request.method,
         url=redirection_url,
-        data=request.stream if request.method in ("POST", "PUT", "PATCH", "DELETE") else None,
+        data=request.stream if request.method not in common.URL_PARAMS_METHODS else None,
         headers={
             k: v if k.lower() != "host" else urlparse.urlparse(dest).netloc
             for k, v in request.headers.iteritems()

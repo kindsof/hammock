@@ -3,6 +3,16 @@ import falcon
 import logging
 
 
+URL_PARAMS_METHODS = {"GET", "HEAD"}
+KW_HEADERS = "_headers"
+KW_FILE = "_file"
+KW_LIST = "_list"
+CONTENT_TYPE = "content-type"
+TYPE_JSON = "application/json"
+TYPE_OCTET_STREAM = "application/octet-stream"
+TOKEN_ENTRY = "X-Auth-Token"
+
+
 def url_join(*parts):
     return '/'.join(arg.strip('/') for arg in parts if arg)
 

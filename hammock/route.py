@@ -9,15 +9,7 @@ import hammock.headers as headers
 import hammock.passthrough as passthrough_module
 
 
-KW_HEADERS = "_headers"
-KW_FILE = "_file"
-KW_LIST = "_list"
-CONTENT_TYPE = "content-type"
-TYPE_JSON = "application/json"
-TYPE_OCTET_STREAM = "application/octet-stream"
-
-
-def route(path, method, client_methods=None, success_code=200, response_content_type=TYPE_JSON):
+def route(path, method, client_methods=None, success_code=200, response_content_type=common.TYPE_JSON):
     def _decorator(func):
         spec = inspect.getargspec(func)
         func.is_route = True
@@ -96,23 +88,23 @@ def _extract_params(request):
         k: (v if v != "None" else None)
         for k, v in request.params.iteritems()
     }
-    if request.method in ("PUT", "POST"):
-        content_type = request.get_header(CONTENT_TYPE)
-        if content_type == TYPE_JSON:
+    if request.method not in common.URL_PARAMS_METHODS:
+        content_type = request.get_header(common.CONTENT_TYPE)
+        if content_type == common.TYPE_JSON:
             try:
                 data = json.load(request.stream)
                 if type(data) == dict:
                     params.update(data)
                 elif type(data) == list:
-                    params[KW_LIST] = data
+                    params[common.KW_LIST] = data
             except (ValueError, UnicodeDecodeError):
                 raise falcon.HTTPError(
                     falcon.HTTP_753,
                     'Malformed JSON',
                     'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.'
                 )
-        elif content_type == TYPE_OCTET_STREAM:
-            params[KW_FILE] = request.stream
+        elif content_type == common.TYPE_OCTET_STREAM:
+            params[common.KW_FILE] = request.stream
     return params
 
 
@@ -126,11 +118,11 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
         keyword: kwargs.get(keyword, default)
         for keyword, default in zip(keywords, defaults)
     })
-    if KW_HEADERS in args:
-        kwargs[KW_HEADERS] = request_headers
+    if common.KW_HEADERS in args:
+        kwargs[common.KW_HEADERS] = request_headers
     for kw, error_msg in (
-        (KW_FILE, "expected {} as {}".format(CONTENT_TYPE, TYPE_OCTET_STREAM)),
-        (KW_LIST, "expected {} {} as list".format(CONTENT_TYPE, TYPE_JSON)),
+        (common.KW_FILE, "expected {} as {}".format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
+        (common.KW_LIST, "expected {} {} as list".format(common.CONTENT_TYPE, common.TYPE_JSON)),
             ):
         if kw in args:
             try:
@@ -147,19 +139,19 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
 
 
 def _extract_response_headers(result, response):
-    if isinstance(result, dict) and KW_HEADERS in result:
-        for k, v in result.pop(KW_HEADERS).iteritems():
+    if isinstance(result, dict) and common.KW_HEADERS in result:
+        for k, v in result.pop(common.KW_HEADERS).iteritems():
             response.set_header(k, str(v))
 
 
 def _extract_response_body(result, response, content_type):
-    if content_type == TYPE_JSON:
+    if content_type == common.TYPE_JSON:
         response.body = json.dumps(result)
-    elif content_type == TYPE_OCTET_STREAM:
+    elif content_type == common.TYPE_OCTET_STREAM:
         response.stream = result
     else:
         raise Exception("Unsupported response content-type %s", content_type)
-    response.set_header(CONTENT_TYPE, content_type)
+    response.set_header(common.CONTENT_TYPE, content_type)
 
 
 def iter_route_methods(resource_object):
