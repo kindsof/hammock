@@ -3,7 +3,7 @@ import falcon
 import logging
 
 
-URL_PARAMS_METHODS = {"GET", "HEAD"}
+URL_PARAMS_METHODS = {"GET", "HEAD", "DELETE"}
 KW_HEADERS = "_headers"
 KW_FILE = "_file"
 KW_LIST = "_list"
