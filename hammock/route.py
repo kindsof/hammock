@@ -8,6 +8,8 @@ import hammock.common as common
 import hammock.headers as headers
 import hammock.passthrough as passthrough_module
 
+KW_HEADERS = common.KW_HEADERS
+
 
 def route(path, method, client_methods=None, success_code=200, response_content_type=common.TYPE_JSON):
     def _decorator(func):
