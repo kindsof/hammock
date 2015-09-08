@@ -6,6 +6,7 @@ import logging
 import uuid
 import hammock.common as common
 import hammock.headers as headers
+import hammock.types as types
 import hammock.passthrough as passthrough_module
 
 KW_HEADERS = common.KW_HEADERS
@@ -106,7 +107,7 @@ def _extract_params(request):
                     'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.'
                 )
         elif content_type == common.TYPE_OCTET_STREAM:
-            params[common.KW_FILE] = request.stream
+            params[common.KW_FILE] = types.File(request.stream, request.get_header("content-length"))
     return params
 
 

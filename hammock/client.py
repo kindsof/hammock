@@ -11,10 +11,14 @@ FILE_TEMPLATE = jinja2.Template("""
 import requests
 import logging
 import bunch
+import collections
 
 
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
+
+
+File = collections.namedtuple("File", ["stream", "content_length"])
 
 
 class {{ class_name }}(object):
@@ -31,7 +35,7 @@ class {{ class_name }}(object):
     def close(self):
         self._client.close()
 
-    def fetch(self, method, url, json=None, stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None):
+    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None):
         url = url_join(self._url, url)
         if json:
             json.update(kwargs or {})
@@ -40,9 +44,9 @@ class {{ class_name }}(object):
             "stream": True,
         }
         if method not in {{ url_params_methods }}:
-            if stream:
-                _kwargs["data"] = stream
-                _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}"}
+            if file_stream:
+                _kwargs["data"] = file_stream.stream
+                _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}", "content-length": file_stream.content_length}
                 if json:
                     _kwargs["params"] = json
             else:
@@ -141,7 +145,7 @@ dict(\
         kwargs={{ keywords }},
 {% endif %}\
 {% if kw_file in args  %}\
-        stream={{ kw_file }},
+        file_stream={{ kw_file }},
 {% endif %}\
         response_type='{{ response_type }}',
         success_code={{ success_code }},

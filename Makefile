@@ -37,3 +37,6 @@ approve:
 prepareForCleanBuild:
 	pip install -r requirement.txt
 	pip install uwsgi
+
+copy_code_to_node:
+	sshpass -p 'rackattack' scp -r -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null hammock root@$(IP):/usr/lib/python2.7/site-packages/

@@ -7,6 +7,7 @@ import waiting
 import functools
 import hammock
 import hammock.client as client
+import hammock.types as types
 import hammock.testing.server as server
 import tests.resources as resources
 
@@ -49,9 +50,13 @@ class TestWhiteboxUWSGI(unittest.TestCase):
 
     def test_files(self):
         size_mb = 100
+        content_length = size_mb << 20
 
         logging.info("Sending %dmb to server", size_mb)
-        file_object = string_io.StringIO(bytearray(size_mb << 20))
+        file_object = types.File(
+            string_io.StringIO(bytearray(content_length)),
+            content_length,
+        )
         response = self._client.files.check_size(file_object, size_mb)
         self.assertEqual(response, "OK")
 
@@ -61,5 +66,5 @@ class TestWhiteboxUWSGI(unittest.TestCase):
         self.assertEqual(data.__sizeof__() >> 20, size_mb)
 
         logging.info("Echoing %dmb with server", size_mb)
-        file_object = string_io.StringIO(bytearray(int(size_mb) << 20))
+        file_object = types.File(string_io.StringIO(bytearray(content_length)), content_length)
         response = self._client.files.echo(file_object)

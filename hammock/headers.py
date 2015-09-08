@@ -1,10 +1,4 @@
-import falcon.util.structures as structures
+import hammock.types as types
 
 
-class Headers(structures.CaseInsensitiveDict):
-
-    def __init__(self, headers):
-        super(Headers, self).__init__(headers)
-
-    def __call__(self, key):
-        return self.get(key)
+Headers = types.Headers  # XXX: compatibility, should remove this file

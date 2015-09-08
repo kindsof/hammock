@@ -5,7 +5,7 @@ import logging
 import falcon.testing as testing
 import hammock
 import hammock.common as common
-import hammock.headers as hammock_headers
+import hammock.types as hammock_types
 import tests.resources as resources
 import tests.resources.keywords as keywords
 
@@ -156,7 +156,7 @@ class TestResource(testing.TestBase):
         self.assertEqual(int(response["arg"]), expected["arg"])
         self.assertEqual(int(response["default"]), expected["default"])
         self.assertEqual(int(response["c"]), expected["c"])
-        headers = hammock_headers.Headers(response["headers"])
+        headers = hammock_types.Headers(response["headers"])
         self.assertEqual(int(headers["d"]), expected["d"])
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None):

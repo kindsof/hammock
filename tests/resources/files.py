@@ -7,7 +7,7 @@ class Files(resource.Resource):
 
     @resource.post(response_content_type=resource.TYPE_OCTET_STREAM)
     def echo(self, _file):
-        return string_io.StringIO(_file.read())
+        return string_io.StringIO(_file.stream.read())
 
     @resource.get(response_content_type=resource.TYPE_OCTET_STREAM)
     def generate(self, size_mb):
@@ -16,7 +16,7 @@ class Files(resource.Resource):
     @resource.post("check_size")
     def check_size(self, _file, size_mb):
         size_mb = int(size_mb)
-        actual_size = _file.read().__sizeof__() >> 20
+        actual_size = _file.stream.read().__sizeof__() >> 20
         if actual_size != size_mb:
             raise falcon.HTTPError(
                 falcon.HTTP_400,
