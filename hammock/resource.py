@@ -45,7 +45,7 @@ class Resource(object):
             full_path = "/" + common.url_join(base_path, self.name(), method.path)
             pattern = re.compile(re.sub(EXPRESSION_PATTERN, r'(?P<\1>[^/]+)', full_path))
             sinks[pattern] = method.method
-        for pattern in sorted(sinks, cmp=lambda p1, p2: len(p1.pattern) - len(p2.pattern), reverse=True):
+        for pattern in sorted(sinks, cmp=lambda p1, p2: len(p1.pattern) - len(p2.pattern)):
             self._api.add_sink(functools.partial(sinks[pattern], self), pattern)
             logging.debug("Added sink %s for %s", pattern.pattern, repr(sinks[pattern].func_code))
 
