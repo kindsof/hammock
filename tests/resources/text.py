@@ -25,4 +25,4 @@ class Text(resource.Resource):
 
     @resource.get("raise_exception")
     def raise_exception(self):  # pylint: disable=unused-argument
-        raise Exception()
+        raise Exception("This exeption is intentional")

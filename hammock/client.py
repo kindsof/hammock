@@ -45,6 +45,7 @@ class {{ class_name }}(object):
         }
         if method not in {{ url_params_methods }}:
             if file_stream:
+                file_stream.stream.len = int(file_stream.content_length)
                 _kwargs["data"] = file_stream.stream
                 _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}", "content-length": file_stream.content_length}
                 if json:
