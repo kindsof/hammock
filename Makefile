@@ -29,10 +29,10 @@ rename:
 	mv $(wildcard  dist/*.rpm) $(basename $(wildcard dist/*.rpm))-$(shell git rev-parse --short=7 HEAD).rpm
 
 submit:
-	sudo -E solvent submitproduct rpm dist
+	solvent submitproduct rpm dist
 
 approve:
-	sudo -E solvent approve --product rpm
+	solvent approve --product rpm
 
 prepareForCleanBuild:
 	pip install -r requirement.txt

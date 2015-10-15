@@ -23,11 +23,12 @@ File = collections.namedtuple("File", ["stream", "content_length"])
 
 class {{ class_name }}(object):
 
-    def __init__(self, hostname, port, token=None, timeout=None):
+    def __init__(self, hostname, port, token=None, timeout=None, headers=None):
         self._url = "http://%s:%d" % (hostname, port)
         self._client = requests.Session()
         self._timeout = timeout
         self.set_token(token)
+        self._client.headers.update(headers or {})
 {% for resource_name, resource_path in resources_names %}\
         self.{{ resource_name }} = self.{{ resource_name|capitalize }}(self, '{{ resource_path }}')
 {% endfor %}\
