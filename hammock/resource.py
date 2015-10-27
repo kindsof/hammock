@@ -19,6 +19,7 @@ class Resource(object):
 
     def __init__(self, api, base_path):
         self._api = api
+        self._base_path = base_path
         self._add_route_methods(base_path)
         self._add_sink_methods(base_path)
 
