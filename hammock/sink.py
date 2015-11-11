@@ -4,7 +4,7 @@ import functools
 import inspect
 
 
-def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=False):
+def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=False, exception_handler=None):
     def _decorator(func):
         func.is_sink = True
         func.path = path
@@ -23,6 +23,7 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
                 post_process,
                 trim_prefix,
                 func,
+                exception_handler,
                 **params
             )
         func.method = _wrapper

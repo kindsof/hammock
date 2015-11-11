@@ -6,7 +6,7 @@ import hammock.common as common
 import hammock.types as types
 
 
-def passthrough(self, request, response, dest, pre_process, post_process, trim_prefix, func, **params):
+def passthrough(self, request, response, dest, pre_process, post_process, trim_prefix, func, exception_handler, **params):
     request_uuid = uuid.uuid4()
     logging.debug("[Passthrough received %s] requested: %s", request_uuid, request.url)
     try:
@@ -27,9 +27,9 @@ def passthrough(self, request, response, dest, pre_process, post_process, trim_p
             response.stream = body_or_stream
         else:
             response.body = body_or_stream
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         common.log_exception(e, request_uuid)
-        raise
+        self.handle_exception(e, exception_handler)
     finally:
         logging.debug(
             "[Passthrough response %s] status: %s, body: %s",

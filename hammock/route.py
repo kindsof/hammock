@@ -11,7 +11,7 @@ import hammock.passthrough as passthrough_module
 KW_HEADERS = common.KW_HEADERS
 
 
-def route(path, method, client_methods=None, success_code=200, response_content_type=common.TYPE_JSON):
+def route(path, method, client_methods=None, success_code=200, response_content_type=common.TYPE_JSON, exception_handler=None):
     def _decorator(func):
         spec = inspect.getargspec(func)
         func.is_route = True
@@ -32,9 +32,9 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 request_params = _extract_params(request)
                 request_headers = types.Headers(request.headers)
                 kwargs = _convert_to_kwargs(spec, url_kwargs, request_params, request_headers)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logging.warn("[Error parsing request kwargs %s] %s", request_uuid, e)
-                raise
+                self.handle_exception(e, exception_handler)
             else:
                 logging.debug("[kwargs %s] %s", request_uuid, kwargs)
             try:
@@ -42,9 +42,9 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 if result is not None:
                     _extract_response_headers(result, response)
                     _extract_response_body(result, response, response_content_type)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 common.log_exception(e, request_uuid)
-                raise
+                self.handle_exception(e, exception_handler)
             else:
                 response.status = str(success_code)
                 logging.debug(
@@ -57,7 +57,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
     return _decorator
 
 
-def passthrough(path, method, dest, pre_process=None, post_process=None, trim_prefix=False):
+def passthrough(path, method, dest, pre_process=None, post_process=None, trim_prefix=False, exception_handler=None):
     def _decorator(func):
         func.is_route = True
         func.path = path
@@ -77,6 +77,7 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
                 post_process,
                 trim_prefix,
                 func,
+                exception_handler,
                 **params
             )
 

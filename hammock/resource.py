@@ -22,6 +22,7 @@ class Resource(object):
         self._base_path = base_path
         self._add_route_methods(base_path)
         self._add_sink_methods(base_path)
+        self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)
 
     def _add_route_methods(self, base_path):
         paths = collections.defaultdict(dict)
@@ -53,6 +54,14 @@ class Resource(object):
     @classmethod
     def name(cls):
         return getattr(cls, "PATH", cls.__name__.lower())
+
+    def handle_exception(self, exc, exception_handler):
+        if exception_handler:
+            raise exception_handler(exc)
+        elif self._default_exception_handler:
+            raise self._default_exception_handler(exc)
+        else:
+            raise exc
 
 
 def get(path="", **kwargs):
