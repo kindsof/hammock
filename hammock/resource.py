@@ -5,7 +5,7 @@ import collections
 import logging
 import functools
 import re
-
+import falcon
 
 TOKEN_ENTRY = common.TOKEN_ENTRY
 CONTENT_TYPE = common.CONTENT_TYPE
@@ -57,11 +57,20 @@ class Resource(object):
 
     def handle_exception(self, exc, exception_handler):
         if exception_handler:
-            raise exception_handler(exc)
+            exc = exception_handler(exc)
         elif self._default_exception_handler:
-            raise self._default_exception_handler(exc)
+            exc = self._default_exception_handler(exc)
+        raise self._convert_to_internal_server_error(exc)
+
+    @staticmethod
+    def _convert_to_internal_server_error(exc):
+        if isinstance(exc, falcon.HTTPError):
+            return exc
         else:
-            raise exc
+            return falcon.HTTPInternalServerError(
+                falcon.HTTP_INTERNAL_SERVER_ERROR,
+                str(exc)
+            )
 
 
 def get(path="", **kwargs):

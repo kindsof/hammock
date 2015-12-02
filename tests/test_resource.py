@@ -96,7 +96,8 @@ class TestResource(testing.TestBase):
 
     def test_internal_server_error(self):
         logging.info("Testing for exception raising")
-        self.assertRaises(Exception, self._simulate, "GET", "/text/raise_exception")
+        self._simulate('GET', '/text/raise_exception')
+        self.assertIn('500', self.srmock.status)
 
     def test_headers(self):
         headers = {"key1": "value1", "key2": "value2"}
