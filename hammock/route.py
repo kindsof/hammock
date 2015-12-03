@@ -4,6 +4,7 @@ import functools
 import simplejson as json
 import logging
 import uuid
+import itertools
 import hammock.common as common
 import hammock.types as types
 import hammock.passthrough as passthrough_module
@@ -119,7 +120,7 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
     kwargs.update(url_kwargs or {})
     kwargs.update({
         keyword: kwargs.get(keyword, default)
-        for keyword, default in zip(keywords, defaults)
+        for keyword, default in itertools.izip(keywords, defaults)
     })
     if common.KW_HEADERS in args:
         kwargs[common.KW_HEADERS] = request_headers

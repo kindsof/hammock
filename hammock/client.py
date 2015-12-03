@@ -5,6 +5,7 @@ import hammock.common as common
 import jinja2
 import re
 import inspect
+import itertools
 
 
 FILE_TEMPLATE = jinja2.Template("""
@@ -297,7 +298,7 @@ def client_methods_propeties(resource_object):
         for method_name, method_defaults in derivative_methods.iteritems():
             method_defaults = method_defaults or {}
             spec = inspect.getargspec(method)
-            method_kwargs = dict(zip(
+            method_kwargs = dict(itertools.izip(
                 spec.args[len(spec.args) - len(spec.defaults):],
                 spec.defaults
             )) if spec.defaults else {}
