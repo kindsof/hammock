@@ -1,6 +1,7 @@
+from __future__ import absolute_import
+import six
 import logging
 import requests
-import urlparse
 import uuid
 import hammock.common as common
 import hammock.types as types
@@ -45,8 +46,8 @@ def send_to(request, dest, request_uuid=None):
         url=redirection_url,
         data=request.stream if request.method not in common.URL_PARAMS_METHODS else None,
         headers={
-            k: v if k.lower() != "host" else urlparse.urlparse(dest).netloc
-            for k, v in request.headers.iteritems()
+            k: v if k.lower() != "host" else six.moves.urllib.parse.urlparse(dest).netloc
+            for k, v in six.iteritems(request.headers)
             if v != ""
         },
     )

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import hammock.common as common
 import hammock.passthrough as passthrough
 import functools

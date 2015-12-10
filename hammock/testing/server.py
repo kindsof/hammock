@@ -1,10 +1,9 @@
+from __future__ import absolute_import
+import six
 import threading
 import logging
-import SimpleHTTPServer
-import SocketServer
 import json
 import socket
-import urlparse
 
 
 def test_connection(address):
@@ -41,27 +40,27 @@ class Server(object):
         return port
 
 
-class _Server(SocketServer.TCPServer):
+class _Server(six.moves.socketserver.TCPServer):
     allow_reuse_address = True
 
 
-class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
     name = None
 
     def __init__(self, *args, **kwargs):
         self.path = None
-        SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)
+        six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)
 
-    def do_GET(self):
+    def do_GET(self):  # NOQA
         self._do("GET")
 
-    def do_DELETE(self):
+    def do_DELETE(self):  # NOQA
         self._do("DELETE")
 
-    def do_POST(self):
+    def do_POST(self):  # NOQA
         self._do("POST")
 
-    def do_PUT(self):
+    def do_PUT(self):  # NOQA
         self._do("PUT")
 
     def _do(self, method):
@@ -71,7 +70,9 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             body = self.rfile.read(int(self.headers['content-length']))
         else:
             body = None
-        parsed = urlparse.urlsplit(self.path)
+        if body and not isinstance(body, six.string_types):
+            body = body.decode()
+        parsed = six.moves.urllib.parse.urlsplit(self.path)
         content = dict(
             method=method,
             path=parsed.path,
@@ -82,11 +83,18 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         content['server_name'] = self.__class__.name
         logging.info("Server echoing: %s", content)
         self.send_response(200)
-        self.end_headers()
-        # import rpdb; rpdb.set_trace()
-        # if content:
         if not self.headers.get('content-type') or self.headers['content-type'] == 'application/json':
-            self.wfile.write(json.dumps(content))
+            if isinstance(content, six.binary_type):
+                content = content.decode()  # pylint: disable=no-member
+            content = six.b(json.dumps(content))
+            self.send_header('content-length', len(content))
+            self.send_header('content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(content)
         else:
-            self.wfile.write(body)
+            content = six.b(body)
+            self.send_header('content-length', len(content))
+            self.send_header('content-type', 'application/octet-stream')
+            self.end_headers()
+            self.wfile.write(content)
         self.wfile.flush()

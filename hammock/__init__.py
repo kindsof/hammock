@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+import importlib
 import hammock.resource_node as resource_node
 import hammock.resource as resource
 import pkgutil
@@ -28,7 +30,7 @@ def iter_modules(package, callback, parents=None):
     for _, name, ispkg in pkgutil.iter_modules(package.__path__):
         if ispkg:
             package_parents = parents[:]
-            son_package = __import__(".".join([package.__name__, name]), fromlist=[package.__name__])
+            son_package = importlib.import_module(".".join([package.__name__, name]), package.__name__)
             name = getattr(son_package, "PATH", name)
             package_parents.append(name)
             iter_modules(son_package, callback, package_parents)
@@ -41,7 +43,7 @@ def _is_resource_class(obj):
 
 
 def resource_classes(package, module_name):
-    module = __import__(".".join([package.__name__, module_name]), fromlist=[package.__name__])
+    module = importlib.import_module(".".join([package.__name__, module_name]), package.__name__)
     return [
         getattr(module, attr)
         for attr in dir(module)

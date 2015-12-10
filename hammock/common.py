@@ -1,6 +1,9 @@
+from __future__ import absolute_import
 import inspect
 import falcon
 import logging
+import re
+import functools
 
 
 URL_PARAMS_METHODS = {"GET", "HEAD", "DELETE"}
@@ -11,6 +14,7 @@ CONTENT_TYPE = "content-type"
 TYPE_JSON = "application/json"
 TYPE_OCTET_STREAM = "application/octet-stream"
 TOKEN_ENTRY = "X-Auth-Token"
+PATH_TO_NAME = functools.partial(re.compile(r'[{}./-]').sub, '')
 
 
 def url_join(*parts):

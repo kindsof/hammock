@@ -1,26 +1,26 @@
+from __future__ import absolute_import
+import six
 import hammock
 import hammock.resource as resource
 import hammock.route as route
 import hammock.common as common
+import hammock.types as types
 import jinja2
 import re
 import inspect
-import itertools
 
 
 FILE_TEMPLATE = jinja2.Template("""
 import requests
 import logging
 import bunch
-import collections
 
 
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
 
-File = collections.namedtuple("File", ["stream", "content_length"])
-
+{{file_class}}
 
 class {{ class_name }}(object):
 
@@ -99,9 +99,9 @@ class {{ class_name }}(object):
 
 
 METHOD_TEMPLATE = jinja2.Template("""
-def {{ method_name }}({{ args|join(', ') }}\
+def {{ method_name }}(self, {{ args|join(', ') }}\
 {% if kwargs %}\
-{% for k, v in kwargs.iteritems() %}\
+{% for k, v in kwargs.items() %}\
 , {{ k }}={{ v }}\
 {% endfor %}\
 {% endif %}\
@@ -134,7 +134,7 @@ dict(\
 {% for p in params_kw %}\
 {{ p }}={{ p }}, \
 {% endfor %}\
-{% for k, v in defaults.iteritems() %}\
+{% for k, v in defaults.items() %}\
 {{ k }}={{ v }}, \
 {% endfor %}\
 {% for k in kwargs %}\
@@ -202,12 +202,12 @@ class ClientGenerator(object):
             _tabify(_resource_class_code(_resource))
             for _resource in self._resources.get("", [])
         ]
-        resources_names = [(r.name().translate(None, "{}./-"), r.name()) for r in self._resources.get("", [])]
-        for name, resource_hirarchy in self._resources.iteritems():
+        resources_names = [(common.PATH_TO_NAME(r.name()), r.name()) for r in self._resources.get("", [])]
+        for name, resource_hirarchy in six.iteritems(self._resources):
             if name == "":
                 continue
             resource_classes.append(_tabify(_recursion_code(name, resource_hirarchy)))
-            resources_names.append((name.translate(None, "{}./-"), name))
+            resources_names.append((common.PATH_TO_NAME(name), name))
 
         code = FILE_TEMPLATE.render(
             class_name=class_name,
@@ -217,8 +217,9 @@ class ClientGenerator(object):
             type_json=common.TYPE_JSON,
             type_octet_stream=common.TYPE_OCTET_STREAM,
             url_params_methods=common.URL_PARAMS_METHODS,
+            file_class=inspect.getsource(types.File),
         )
-        self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
+        self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n") + '\n'
 
     def _add_resource(self, package, module_name, parents):
         resource_classes = hammock.resource_classes(package, module_name)
@@ -231,13 +232,13 @@ class ClientGenerator(object):
 
 def _resource_class_code(_resource):
     methods = [
-        _method_code(**kwargs)  # pylint: disable=star-args
+        _method_code(**kwargs)
         for kwargs in client_methods_propeties(_resource)
     ]
     if _resource.name() == "auth":
         methods.insert(0, AUTH_METHODS_CODE)
     return RESOURCE_CLASS_TEMPLATE.render(
-        name=_resource.name().translate(None, "{}/.-"), resource=_resource, methods=methods)
+        name=common.PATH_TO_NAME(_resource.name()), resource=_resource, methods=methods)
 
 
 def _recursion_code(name, resource_hirarchy):
@@ -245,14 +246,14 @@ def _recursion_code(name, resource_hirarchy):
         _resource_class_code(_resource)
         for _resource in resource_hirarchy.get("", [])
     ]
-    sub_resources = [(_resource.name().translate(None, "{}/.-"), _resource.name()) for _resource in resource_hirarchy.get("", [])]
-    for key, value in resource_hirarchy.iteritems():
+    sub_resources = [(common.PATH_TO_NAME(_resource.name()), _resource.name()) for _resource in resource_hirarchy.get("", [])]
+    for key, value in six.iteritems(resource_hirarchy):
         if key == "":
             continue
         sub_classes.append(_recursion_code(key, value))
-        sub_resources.append((key.translate(None, "{}/.-"), key))
+        sub_resources.append((common.PATH_TO_NAME(key), key))
     return RESOURCE_CLASS_TEMPLATE.render(
-        name=name.translate(None, "{}/.-"),
+        name=common.PATH_TO_NAME(name),
         sub_resources=sub_resources,
         sub_classes=_tabify("".join(sub_classes))
     )
@@ -295,20 +296,15 @@ def client_methods_propeties(resource_object):
     kwargs = []
     for method in route.iter_route_methods(resource_object):
         derivative_methods = method.client_methods or {method.__name__: None}
-        for method_name, method_defaults in derivative_methods.iteritems():
+        for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}
-            spec = inspect.getargspec(method)
-            method_kwargs = dict(itertools.izip(
-                spec.args[len(spec.args) - len(spec.defaults):],
-                spec.defaults
-            )) if spec.defaults else {}
+            spec = types.FuncSpec(method)
             kwargs.append(dict(
                 method_name=method_name,
                 method=method.method,
                 url=method.path,
-                args=[arg for arg in spec.args
-                      if arg not in (set(method_defaults) | set(method_kwargs))],
-                kwargs=method_kwargs,
+                args=[arg for arg in spec.args if arg not in method_defaults],
+                kwargs=spec.kwargs,
                 url_kw=[arg for arg in spec.args if "{{{}}}".format(arg) in method.path],
                 defaults=method_defaults,
                 success_code=method.success_code,

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+import six
 import hammock.route as route
 import hammock.sink as _sink
 import hammock.common as common
@@ -12,7 +14,7 @@ CONTENT_TYPE = common.CONTENT_TYPE
 TYPE_JSON = common.TYPE_JSON
 TYPE_OCTET_STREAM = common.TYPE_OCTET_STREAM
 KW_HEADERS = common.KW_HEADERS
-EXPRESSION_PATTERN = r'{([a-zA-Z][a-zA-Z_]*)}'
+CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
 
 
 class Resource(object):
@@ -28,13 +30,13 @@ class Resource(object):
         paths = collections.defaultdict(dict)
         for method in route.iter_route_methods(self):
             paths[method.path]["on_%s" % method.method.lower()] = functools.partial(method.responder, self)
-        for path, methods in paths.iteritems():
+        for path, methods in six.iteritems(paths):
             new_route = type(
                 "_".join([
                     "Resource",
                     base_path.replace("/", "_"),
                     self.name().capitalize(),
-                    path.translate(None, "{}/.-"),
+                    common.PATH_TO_NAME(path),
                     ]),
                 (), methods)()
             full_path = "/%s" % common.url_join(base_path, self.name(), path)
@@ -45,11 +47,11 @@ class Resource(object):
         sinks = {}
         for method in _sink.iter_sink_methods(self):
             full_path = "/" + common.url_join(base_path, self.name(), method.path)
-            pattern = re.compile(re.sub(EXPRESSION_PATTERN, r'(?P<\1>[^/]+)', full_path))
+            pattern = re.compile(CONVERT_PATH_VARIABLES(full_path))
             sinks[pattern] = method.method
-        for pattern in sorted(sinks, cmp=lambda p1, p2: len(p1.pattern) - len(p2.pattern)):
+        for pattern in sorted(sinks, key=functools.cmp_to_key(lambda p1, p2: len(p1.pattern) - len(p2.pattern))):
             self._api.add_sink(functools.partial(sinks[pattern], self), pattern)
-            logging.debug("Added sink %s for %s", pattern.pattern, repr(sinks[pattern].func_code))
+            logging.debug("Added sink %s for %s", pattern.pattern, repr(sinks[pattern].__code__))
 
     @classmethod
     def name(cls):
