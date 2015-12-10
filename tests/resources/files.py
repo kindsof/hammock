@@ -1,5 +1,6 @@
+from __future__ import absolute_import
+import io
 from hammock import resource
-import StringIO as string_io
 import falcon
 
 
@@ -7,11 +8,12 @@ class Files(resource.Resource):
 
     @resource.post(response_content_type=resource.TYPE_OCTET_STREAM)
     def echo(self, _file):
-        return string_io.StringIO(_file.stream.read())
+        data = _file.stream.read()
+        return io.BytesIO(data)
 
     @resource.get(response_content_type=resource.TYPE_OCTET_STREAM)
     def generate(self, size_mb):
-        return string_io.StringIO(bytearray(int(size_mb) << 20))
+        return io.BytesIO(bytearray(int(size_mb) << 20))
 
     @resource.post("check_size")
     def check_size(self, _file, size_mb):

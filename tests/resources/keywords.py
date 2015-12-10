@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from hammock import resource
 
 
@@ -18,7 +19,7 @@ class Keywords(resource.Resource):
         return self._answer(arg, default, **kwargs)
 
     @resource.get("headers")
-    def get_with_headers(self, arg, _headers,  default=10, **kwargs):
+    def get_with_headers(self, arg, _headers, default=10, **kwargs):
         return self._answer(arg, default, headers=dict(_headers), **kwargs)
 
     def _answer(self, arg, default, **kwargs):

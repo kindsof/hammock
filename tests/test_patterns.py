@@ -1,5 +1,6 @@
+from __future__ import absolute_import
+import six
 import json
-import falcon
 import hammock
 import falcon.testing as testing
 import tests.resources as resources
@@ -7,22 +8,21 @@ import hammock.common as common
 
 
 class TestResource(testing.TestBase):
-    def setUp(self):
-        super(TestResource, self).setUp()
-        self.api = falcon.API()
+
+    def before(self):
         hammock.Hammock(self.api, resources)
 
     def test_patterns(self):
         url = "/patterns"
 
         response = self._simulate("GET", url)
-        self.assertEquals(response, "base")
+        self.assertEqual(response, "base")
 
         response = self._simulate("GET", url + "/123")
-        self.assertEquals(response, "id-123")
+        self.assertEqual(response, "id-123")
 
         response = self._simulate("GET", url + "/123/extra")
-        self.assertEquals(response, "extra-123")
+        self.assertEqual(response, "extra-123")
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None):
         kwargs = {}
@@ -33,5 +33,7 @@ class TestResource(testing.TestBase):
             kwargs["body"] = json.dumps(body)
             headers.update({common.CONTENT_TYPE: common.TYPE_JSON})
         kwargs["headers"] = headers
-        for resp in self.simulate_request(url, method=method, **kwargs):  # pylint: disable=star-args
+        for resp in self.simulate_request(url, method=method, **kwargs):
+            if isinstance(resp, six.binary_type):
+                resp = resp.decode()
             return json.loads(resp)

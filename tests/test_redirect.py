@@ -1,9 +1,8 @@
+from __future__ import absolute_import
+import six
 import os
 import json
-import urlparse
-import falcon
 import falcon.testing as testing
-import StringIO as string_io
 import tests.resources.redirect as redirect
 import tests.resources as resources
 import hammock
@@ -12,15 +11,16 @@ import hammock.testing.server as server
 
 class TestRedirect(testing.TestBase):
 
-    def setUp(self):
-        super(TestRedirect, self).setUp()
-        self._server = server.Server(port=redirect.PORT)
-        self.api = falcon.API()
+    def before(self):
         hammock.Hammock(self.api, resources)
 
-    def tearDown(self):
-        super(TestRedirect, self).tearDown()
-        self._server.close()
+    @classmethod
+    def setUpClass(cls):
+        cls._server = server.Server(port=redirect.PORT)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._server.close()
 
     def test_redirect_get_request(self):
         """
@@ -43,7 +43,7 @@ class TestRedirect(testing.TestBase):
         self._exec_request(redirect_path, method, body, headers)
 
     @staticmethod
-    def _getStreamSize(stream):
+    def _get_stream_size(stream):
         stream.seek(0, os.SEEK_END)
         body_length = stream.tell()
         stream.seek(0, os.SEEK_SET)
@@ -63,19 +63,21 @@ class TestRedirect(testing.TestBase):
     def test_redirect_post_request_with_large_binary_body(self):
         method = "POST"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
-        body_stream = string_io.StringIO()
+        body_stream = six.moves.StringIO()
         with open(__file__, 'rb') as fd:
             for _ in range(100):
-                body_stream.write(fd.read())
+                content = fd.read()
+                if not isinstance(content, six.string_types):
+                    content = content.decode()
+                body_stream.write(content)
 
         headers = {"content-type": "application/octet-stream",
                    "host": "localhost",
-                   "content-length": str(TestRedirect._getStreamSize(body_stream))}
+                   "content-length": str(TestRedirect._get_stream_size(body_stream))}
         self._exec_request(redirect_path, method, body_stream.getvalue(), headers)
 
     def _exec_request(self, redirect_path, method, body, headers):
-        # url = urlparse.urlunsplit(('', '', redirect_path, query_string, ''))
-        parsed = urlparse.urlsplit(redirect_path)
+        parsed = six.moves.urllib.parse.urlsplit(redirect_path)
         response = self._simulate(
             url=redirect_path,
             method=method,
@@ -87,14 +89,16 @@ class TestRedirect(testing.TestBase):
             self.assertEqual(response["path"], parsed.path[len("/redirect"):])
             self.assertEqual(response["query_string"], parsed.query)
             self.assertEqual(response["method"], method)
-            self.assertDictContainsSubset({k: v for k, v in headers.iteritems() if k.lower() != "host"},
-                                          {k: v for k, v in response["headers"].iteritems() if k.lower() != "host"},
+            self.assertDictContainsSubset({k.lower(): v.lower() for k, v in six.iteritems(headers) if k.lower() != "host"},
+                                          {k.lower(): v.lower() for k, v in six.iteritems(response["headers"]) if k.lower() != "host"},
                                           '{} should be a subset in {}'.format(headers, response["headers"]))
             if body:
                 self.assertDictEqual(json.loads(response["body"]), json.loads(body))
             else:
                 self.assertEqual(response["body"], None)
         else:
+            if not isinstance(body, six.string_types):
+                body = body.decode()
             self.assertEqual(response, body)
 
     def test_redirect_with_resource_conflicts(self):
@@ -108,4 +112,7 @@ class TestRedirect(testing.TestBase):
         )
         if type(response) is not list:
             response = list(response)
-        return response[0]
+        response = response[0]
+        if not isinstance(response, six.string_types):
+            response = response.decode()  # pylint: disable=no-member
+        return response

@@ -1,47 +1,30 @@
+from __future__ import absolute_import
+import six
 import subprocess
 import unittest
-import falcon
 import logging
-import StringIO as string_io
 import waiting
 import functools
-import hammock
-import hammock.client as client
 import hammock.types as types
 import hammock.testing.server as server
-import tests.resources as resources
-
-
-api = falcon.API()
-hammock.Hammock(api, resources)
-
-
-exec client.ClientGenerator("TestClient", resources).code  # pylint: disable=exec-used
-TestClient = locals()["TestClient"]
+import tests.app as app
+import tests.test_client as test_client
 
 
 class TestWhiteboxUWSGI(unittest.TestCase):
-
     PORT = 7001
     TOKEN = "token"
-    WORKLOAD_COUNT = 50
 
     @classmethod
     def setUpClass(cls):
-        subprocess.Popen(["pkill", "-9", "uwsgi"]).communicate()
-        api_name = [name for name, attr in globals().iteritems() if attr == api][0]
-        file_name = __file__.replace(".pyc", ".py")
-        cls._server = subprocess.Popen([
-            "uwsgi", "--http", ":%d" % cls.PORT,
-            "--wsgi-file", file_name,
-            "--callable", api_name,
-        ])
+        subprocess.call(["pkill", "-9", "uwsgi"])
+        cls._server = subprocess.Popen(app.command(cls.PORT))
         waiting.wait(
             functools.partial(server.test_connection, ("localhost", cls.PORT)),
             timeout_seconds=10,
             waiting_for="server to start listening",
         )
-        cls._client = TestClient("localhost", cls.PORT, cls.TOKEN)
+        cls._client = test_client.get_client("localhost", cls.PORT, token=cls.TOKEN)
 
     @classmethod
     def tearDownClass(cls):
@@ -54,7 +37,7 @@ class TestWhiteboxUWSGI(unittest.TestCase):
 
         logging.info("Sending %dmb to server", size_mb)
         file_object = types.File(
-            string_io.StringIO(bytearray(content_length)),
+            six.BytesIO(bytearray(content_length)),
             content_length,
         )
         response = self._client.files.check_size(file_object, size_mb)
@@ -66,5 +49,9 @@ class TestWhiteboxUWSGI(unittest.TestCase):
         self.assertEqual(data.__sizeof__() >> 20, size_mb)
 
         logging.info("Echoing %dmb with server", size_mb)
-        file_object = types.File(string_io.StringIO(bytearray(content_length)), content_length)
+        data = bytearray(content_length)
+        file_object = types.File(six.BytesIO(data), content_length)
         response = self._client.files.echo(file_object)
+        response_data = list(response.stream())
+        response_data = six.b('').join(response_data)
+        self.assertEqual(data, response_data)
