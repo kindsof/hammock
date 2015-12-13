@@ -24,10 +24,13 @@ pylint:
 	pylint -r n --py3k --rcfile=.pylintrc hammock tests
 	pylint -r n --rcfile=.pylintrc hammock tests
 
-unittest:
+coverage:
 	coverage erase
 	coverage run --omit="*__init__*" --omit="*.j2" --include="hammock/*" -m unittest $(TESTS)
 	coverage html
+
+unittest:
+	python -m unittest $(TESTS)
 
 install:$ requirements setup.py hammock/*
 	python setup.py install
