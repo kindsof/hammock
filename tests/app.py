@@ -10,17 +10,20 @@ application = falcon.API()
 hammock.Hammock(application, resources)
 
 
-def command(port):
+def command(listen_port):
     return [
         'uwsgi',
-        '--http', ':{:d}'.format(port),
+        '--http', ':{:d}'.format(listen_port),
         '--wsgi-file', __file__.replace('.pyc', '.py'),
-        '--honour-stdin',
         '--need-app',
-        '--py-auto-reload', '1',
         '--procname', 'hammock-test',
     ]
 
+COMMAND_LINE_ARGS = [
+    '--py-auto-reload', '1',
+    '--honour-stdin',
+]
 
 if __name__ == '__main__':
-    subprocess.check_output(command(sys.argv[1]))
+    port = sys.argv[1]
+    subprocess.check_output(command(port) + COMMAND_LINE_ARGS)

@@ -1,27 +1,14 @@
 from __future__ import absolute_import
+import tests.base as base
 import six
 import os
-import json
-import falcon
 import logging
-import falcon.testing as testing
-
-import hammock
 import hammock.common as common
 import hammock.types as hammock_types
-import tests.resources as resources
 import tests.resources.keywords as keywords
 
 
-def default_404(req, res):  # pylint: disable=unused-argument
-    raise falcon.HTTPError(falcon.HTTP_404, "404")
-
-
-class TestResource(testing.TestBase):
-
-    def before(self):
-        hammock.Hammock(self.api, resources)
-        self.api.add_sink(default_404)
+class TestResource(base.TestBase):
 
     def test_resource(self):
         def dict_url(key):
@@ -49,9 +36,9 @@ class TestResource(testing.TestBase):
         mb_to_test = 100
         logging.info("Testing post and get of %d mb", mb_to_test)
         body = bytearray(mb_to_test << 20)
-        response = self._simulate_request(
+        response = self._simulate(
+            "POST",
             path,
-            method="POST",
             body=body,
             headers={
                 common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
@@ -63,22 +50,22 @@ class TestResource(testing.TestBase):
         self.assertEqual(response, body)
 
         logging.info("Testing get of %d mb", mb_to_test)
-        response = self._simulate_request(
+        response = self._simulate(
+            "GET",
             path,
-            method="GET",
             query_string="size_mb={:d}".format(mb_to_test)
         )
         size_bytes = len(response) if not isinstance(response, six.binary_type) else response.__sizeof__()
         self.assertEqual(mb_to_test, size_bytes >> 20)
         logging.info("Testing reading in server of %d mb", mb_to_test)
-        response = self._simulate_request(
+        response = self._simulate(
+            "POST",
             os.path.join(path, "check_size"),
-            method="POST",
             query_string="size_mb={:d}".format(mb_to_test),
             body=body,
             headers={common.CONTENT_TYPE: common.TYPE_OCTET_STREAM},
         )
-        self.assertEqual(json.loads(response), "OK")
+        self.assertEqual(response, "OK")
 
     def test_sink(self):
         self.assert_404("GET", "/get_something_wrong")
@@ -163,24 +150,3 @@ class TestResource(testing.TestBase):
         self.assertEqual(int(response["c"]), expected["c"])
         headers = hammock_types.Headers(response["headers"])
         self.assertEqual(int(headers["d"]), expected["d"])
-
-    def _simulate(self, method, url, query_string=None, body=None, headers=None):
-        kwargs = {}
-        headers = headers or {}
-        if query_string:
-            kwargs["query_string"] = query_string
-        if body:
-            kwargs["body"] = json.dumps(body)
-            headers.update({common.CONTENT_TYPE: common.TYPE_JSON})
-        kwargs["headers"] = headers
-        return json.loads(self._simulate_request(url, method=method, **kwargs))
-
-    def assert_404(self, *args, **kwargs):
-        self.assertDictEqual({"title": "404"}, self._simulate(*args, **kwargs))
-
-    def assert_400(self, *args, **kwargs):
-        self.assertDictEqual({"title": "400"}, self._simulate(*args, **kwargs))
-
-    def _simulate_request(self, *args, **kwargs):
-        response = self.simulate_request(*args, **kwargs)
-        return six.b('').join(list(response)).decode()

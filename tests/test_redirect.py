@@ -1,18 +1,14 @@
 from __future__ import absolute_import
+import tests.base as base
 import six
 import os
 import json
-import falcon.testing as testing
 import tests.resources.redirect as redirect
-import tests.resources as resources
-import hammock
 import hammock.testing.server as server
+import hammock.common as common
 
 
-class TestRedirect(testing.TestBase):
-
-    def before(self):
-        hammock.Hammock(self.api, resources)
+class TestRedirect(base.TestBase):
 
     @classmethod
     def setUpClass(cls):
@@ -36,10 +32,11 @@ class TestRedirect(testing.TestBase):
     def test_redirect_post_request_with_json_body(self):
         method = "POST"
         redirect_path = "/redirect/v3/users"
-        body = json.dumps({"desc": "sent from test", "method": "POST"})
-        headers = {"content-type": "application/json",
-                   "host": "127.0.0.1",
-                   "content-length": str(len(body))}
+        body = {"desc": "sent from test", "method": "POST"}
+        headers = {
+            common.CONTENT_TYPE: common.TYPE_JSON,
+            "host": "127.0.0.1",
+        }
         self._exec_request(redirect_path, method, body, headers)
 
     @staticmethod
@@ -58,7 +55,7 @@ class TestRedirect(testing.TestBase):
         headers = {"content-type": "application/octet-stream",
                    "host": "localhost",
                    "content-length": str(len(body))}
-        self._exec_request(redirect_path, method, body, headers)
+        self._exec_request(redirect_path, method, body, headers, binary_response=True)
 
     def test_redirect_post_request_with_large_binary_body(self):
         method = "POST"
@@ -74,18 +71,18 @@ class TestRedirect(testing.TestBase):
         headers = {"content-type": "application/octet-stream",
                    "host": "localhost",
                    "content-length": str(TestRedirect._get_stream_size(body_stream))}
-        self._exec_request(redirect_path, method, body_stream.getvalue(), headers)
+        self._exec_request(redirect_path, method, body_stream.getvalue(), headers, binary_response=True)
 
-    def _exec_request(self, redirect_path, method, body, headers):
+    def _exec_request(self, redirect_path, method, body, headers, binary_response=False):
         parsed = six.moves.urllib.parse.urlsplit(redirect_path)
         response = self._simulate(
             url=redirect_path,
             method=method,
             body=body,
             headers=headers,
+            binary_response=binary_response,
         )
         if "content-type" not in headers or headers["content-type"] == "application/json":
-            response = json.loads(response)
             self.assertEqual(response["path"], parsed.path[len("/redirect"):])
             self.assertEqual(response["query_string"], parsed.query)
             self.assertEqual(response["method"], method)
@@ -93,7 +90,7 @@ class TestRedirect(testing.TestBase):
                                           {k.lower(): v.lower() for k, v in six.iteritems(response["headers"]) if k.lower() != "host"},
                                           '{} should be a subset in {}'.format(headers, response["headers"]))
             if body:
-                self.assertDictEqual(json.loads(response["body"]), json.loads(body))
+                self.assertDictEqual(json.loads(response["body"]), body)
             else:
                 self.assertEqual(response["body"], None)
         else:
@@ -102,17 +99,10 @@ class TestRedirect(testing.TestBase):
             self.assertEqual(response, body)
 
     def test_redirect_with_resource_conflicts(self):
-        self.assertEqual(json.loads(self._simulate("/redirect/specific")), "specific")
-        self.assertEqual(json.loads(self._simulate("/redirect/specific/not"))["path"], "/specific/not")
-        self.assertEqual(json.loads(self._simulate("/redirect"))["path"], "/")
+        self.assertEqual(self._simulate('GET', "/redirect/specific"), "specific")
+        self.assertEqual(self._simulate('GET', "/redirect/specific/not")["path"], "/specific/not")
+        self.assertEqual(self._simulate('GET', "/redirect")["path"], "/")
 
-    def _simulate(self, url, method="GET", body=None, headers=None):
-        response = self.simulate_request(
-            url, method=method, body=body, headers=headers
-        )
-        if type(response) is not list:
-            response = list(response)
-        response = response[0]
-        if not isinstance(response, six.string_types):
-            response = response.decode()  # pylint: disable=no-member
-        return response
+    def test_passthroughs(self):
+        self._simulate('POST', '/redirect/post-passthrough', body={'some_data': 'a'})
+        self._simulate('POST', '/redirect/post-passthrough-with-body', body={'some_data': 'a'})

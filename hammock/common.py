@@ -1,16 +1,18 @@
 from __future__ import absolute_import
+import six
 import inspect
 import falcon
 import logging
 import re
 import functools
-
+import simplejson as json
 
 URL_PARAMS_METHODS = {"GET", "HEAD", "DELETE"}
 KW_HEADERS = "_headers"
 KW_FILE = "_file"
 KW_LIST = "_list"
 CONTENT_TYPE = "content-type"
+CONTENT_LENGTH = "content-length"
 TYPE_JSON = "application/json"
 TYPE_OCTET_STREAM = "application/octet-stream"
 TOKEN_ENTRY = "X-Auth-Token"
@@ -35,3 +37,29 @@ def func_is_pass(func):
     empty = "".join(lines).strip() == "pass"
     if not empty:
         raise Exception("Passthrough function %s is not empty", func.__name__)
+
+
+def set_request_body(request, body):
+    request.stream = body
+    _set_headers(request, **{CONTENT_LENGTH: len(body)})
+
+
+def get_response_json(response):
+    if hasattr(response.stream, 'read'):
+        return json.load(response.stream)
+    else:
+        return json.loads(response.stream)
+
+
+def _set_headers(request, **kwargs):
+    """
+    Set a header for a falcon.request instance.
+    It's not possible to set it through the request.headers, since it's a property that receives a copy of the dict,
+    So this function sets it through the internal _cached_headers property
+    :param request: The request that which headers you want to change
+    :param kwargs: All the parameters to change, and the value to set for them, will create if header doesn't exist
+    """
+    # Call the headers property, so the request instance will load all the headers
+    _ = request.headers  # NOQA
+    request._cached_headers.update(  # pylint: disable=protected-access
+        {k.upper(): str(v) for k, v in six.iteritems(kwargs)})
