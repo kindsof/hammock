@@ -4,7 +4,7 @@ import six
 import os
 import json
 import tests.resources.redirect as redirect
-import hammock.testing.server as server
+import tests.server as server
 import hammock.common as common
 
 

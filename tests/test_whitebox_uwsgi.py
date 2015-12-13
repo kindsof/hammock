@@ -6,7 +6,7 @@ import logging
 import waiting
 import functools
 import hammock.types as types
-import hammock.testing.server as server
+import tests.server as server
 import tests.app as app
 import tests.test_client as test_client
 
