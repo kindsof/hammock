@@ -1,6 +1,6 @@
 import requests
 import logging
-import bunch
+import munch
 import collections
 
 
@@ -76,9 +76,9 @@ class {{ class_name }}(object):
         try:
             result = response.json()
             if type(result) == dict:
-                result = bunch.Bunch(result)
+                result = munch.Munch(result)
             elif type(result) == list:
-                result = [item if type(item) != dict else bunch.Bunch(item) for item in result]
+                result = [item if type(item) != dict else munch.Munch(item) for item in result]
             return result
         except ValueError:
             if response.text:
