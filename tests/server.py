@@ -4,6 +4,7 @@ import threading
 import logging
 import json
 import socket
+import hammock.common as common
 
 
 def test_connection(address):
@@ -64,14 +65,16 @@ class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
         self._do("PUT")
 
     def _do(self, method):
-        if 'content-length' in self.headers \
-                and int(self.headers['content-length']) > 0 \
+        if common.CONTENT_LENGTH in self.headers \
+                and int(self.headers[common.CONTENT_LENGTH]) > 0 \
                 and method in ("PUT", "POST"):
-            body = self.rfile.read(int(self.headers['content-length']))
+            body = self.rfile.read(int(self.headers[common.CONTENT_LENGTH]))
         else:
             body = None
         if body and not isinstance(body, six.string_types):
             body = body.decode()
+        if self.headers.get(common.CONTENT_TYPE) == common.TYPE_JSON:
+            body = json.loads(body)
         parsed = six.moves.urllib.parse.urlsplit(self.path)
         content = dict(
             method=method,
@@ -83,18 +86,18 @@ class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
         content['server_name'] = self.__class__.name
         logging.info("Server echoing: %s", content)
         self.send_response(200)
-        if not self.headers.get('content-type') or self.headers['content-type'] == 'application/json':
+        if not self.headers.get(common.CONTENT_TYPE) or self.headers[common.CONTENT_TYPE] == common.TYPE_JSON:
             if isinstance(content, six.binary_type):
                 content = content.decode()  # pylint: disable=no-member
             content = six.b(json.dumps(content))
-            self.send_header('content-length', len(content))
-            self.send_header('content-type', 'application/json')
+            self.send_header(common.CONTENT_LENGTH, len(content))
+            self.send_header(common.CONTENT_TYPE, common.TYPE_JSON)
             self.end_headers()
             self.wfile.write(content)
         else:
             content = six.b(body)
-            self.send_header('content-length', len(content))
-            self.send_header('content-type', 'application/octet-stream')
+            self.send_header(common.CONTENT_LENGTH, len(content))
+            self.send_header(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)
             self.end_headers()
             self.wfile.write(content)
         self.wfile.flush()

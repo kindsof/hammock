@@ -3,6 +3,7 @@ import falcon
 import falcon.testing as testing
 import hammock
 import hammock.common as common
+import hammock.types as types
 import tests.resources as resources
 import json
 import six
@@ -32,8 +33,8 @@ class TestBase(testing.TestBase):
         result = six.b('').join(list(response))
         if not binary_response:
             result = result.decode()
-        headers = dict(self.srmock.headers)
-        if headers.get(common.CONTENT_TYPE, common.TYPE_JSON) == common.TYPE_JSON:
+        headers = types.Headers(dict(self.srmock.headers))
+        if not binary_response and headers.get(common.CONTENT_TYPE, common.TYPE_JSON) == common.TYPE_JSON:
             result = json.loads(result)
         return result
 

@@ -17,9 +17,7 @@ def pre_manipulate(request, _):
 
 def post_manipulate(response, _):
     body = common.get_response_json(response)
-    inner_body = json.loads(body['body'])
-    assert inner_body.pop('some_more_data') == 'b'
-    body['body'] = json.dumps(inner_body)
+    assert body['body'].pop('some_more_data') == 'b'
     body = json.dumps(body)
     headers = types.Headers(response.headers)
     headers[common.CONTENT_LENGTH] = str(len(body))

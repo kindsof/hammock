@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import tests.base as base
 import six
 import os
-import json
 import tests.resources.redirect as redirect
 import tests.server as server
 import hammock.common as common
@@ -94,7 +93,7 @@ class TestRedirect(base.TestBase):
                                           {k.lower(): v.lower() for k, v in six.iteritems(response["headers"]) if k.lower() != "host"},
                                           '{} should be a subset in {}'.format(headers, response["headers"]))
             if body:
-                self.assertDictEqual(json.loads(response["body"]), body)
+                self.assertDictEqual(response["body"], body)
             else:
                 self.assertEqual(response["body"], None)
         else:

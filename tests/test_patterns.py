@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import tests.base as base
 
 
-class TestResource(base.TestBase):
+class TestPatterns(base.TestBase):
 
     def test_patterns(self):
         url = "/patterns"
