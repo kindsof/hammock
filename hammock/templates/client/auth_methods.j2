@@ -1,0 +1,16 @@
+def login(self, username, password, tenant):
+    token = self._login(username, password, tenant)
+    self._client.set_token(token.token)
+    return token
+
+def logout(self, token=None):
+    result = self._logout(token)
+    if not token:
+        self._client.set_token(None)
+    return result
+
+def refresh(self, token=None):
+    new_token = self._refresh(token)
+    if not token:
+        self._client.set_token(new_token.token)
+    return new_token

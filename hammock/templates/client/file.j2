@@ -1,0 +1,87 @@
+import requests
+import logging
+import bunch
+import collections
+
+
+def url_join(*args):
+    return '/'.join(arg.strip('/') for arg in args)
+
+
+{{file_class}}
+
+
+class {{ class_name }}(object):
+
+    def __init__(self, hostname, port, token=None, timeout=None, headers=None):
+        self._url = "http://%s:%d" % (hostname, port)
+        self._client = requests.Session()
+        self._timeout = timeout
+        self.set_token(token)
+        self._client.headers.update(headers or {})
+{%- for resource_name, resource_class, resource_path in resources_names %}
+        self.{{ resource_name }} = self.{{ resource_class }}(self, '{{ resource_path }}')
+{%- endfor %}
+
+    def close(self):
+        self._client.close()
+
+    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None):
+        url = url_join(self._url, url)
+        if json:
+            json.update(kwargs or {})
+        _kwargs = {
+            "timeout": self._timeout,
+            "stream": True,
+        }
+        if method.upper() not in {{ url_params_methods }}:
+            if file_stream:
+                file_stream.stream.len = int(file_stream.content_length)
+                _kwargs["data"] = file_stream.stream
+                _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}", "content-length": file_stream.content_length}
+                if json:
+                    _kwargs["params"] = json
+            else:
+                if json:
+                    _kwargs["json"] = json
+        else:
+            _kwargs["params"] = json
+        logging.debug("Sending %s request: %s %s", method, url, json)
+        response = getattr(self._client, method.lower())(url, **_kwargs)  # pylint: disable=star-args
+        result = None
+        if response_type == '{{ type_json }}':
+            result = self.jsonify(response)
+            logging.debug("Got response status %s, body: %s", response.status_code, result)
+        elif response_type == '{{ type_octet_stream }}':
+            result = response.raw
+        if response.status_code != success_code:
+            logging.warn(
+                "Response status %d does not match expected success status %d",
+                response.status_code, success_code
+            )
+        response.raise_for_status()
+        return result
+
+    def set_token(self, token):
+        if token:
+            self._client.headers.update({"{{ token_entry }}": token})
+        elif "{{ token_entry }}" in self._client.headers:
+            del self._client.headers["{{ token_entry }}"]
+
+    @property
+    def token(self):
+        return self._client.headers.get("{{ token_entry }}")
+
+    def jsonify(self, response):
+        try:
+            result = response.json()
+            if type(result) == dict:
+                result = bunch.Bunch(result)
+            elif type(result) == list:
+                result = [item if type(item) != dict else bunch.Bunch(item) for item in result]
+            return result
+        except ValueError:
+            if response.text:
+                logging.warn("Could not parse json from '%s'", response.text)
+
+{{ resource_classes|join("") }}

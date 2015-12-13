@@ -17,6 +17,7 @@ setuptools.setup(
     license="BSD",
     keywords="REST",
     url="http://packages.python.org/hammock",
-    packages=['hammock'],
+    packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
     long_description=read('README.md'),
+    include_package_data=True,
 )

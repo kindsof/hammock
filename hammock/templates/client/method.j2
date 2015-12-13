@@ -1,0 +1,42 @@
+def {{ method_name }}(self, {{ args|join(', ') }}
+        {%- if kwargs -%}
+            {%- for k, v in kwargs.iteritems() -%}
+                , {{ k }}={{ v }}
+            {%- endfor -%}
+        {%- endif -%}
+        {%- if keywords %}, **{{ keywords }}{% endif -%}
+        ):
+    return self._client.fetch(
+        method='{{ method }}',
+        url=
+            {%- if url %}url_join({% endif -%}
+            self._url
+            {%- if url -%}
+                , '{{ url }}'
+                {%- if url_kw -%}
+                    .format(
+                    {%- for name in url_kw %}{{ name }}={{ name }}, {% endfor -%}
+                    )
+                {%- endif -%}
+                )
+            {%- endif -%}
+        ,
+        json=
+            {%- if kw_list not in args -%}
+                dict(
+                {%- for p in params_kw %}{{ p }}={{ p }}, {% endfor -%}
+                {%- for k, v in defaults.iteritems() %}{{ k }}={{ v }}, {% endfor -%}
+                {%- for k in kwargs %}{{ k }}={{ k }}, {% endfor -%}
+                ),
+            {%- else -%}
+                {{ kw_list }},
+            {% endif -%}
+        {%- if keywords %}
+        kwargs={{ keywords }},
+        {% endif -%}
+        {%- if kw_file in args  %}
+        file_stream={{ kw_file }},
+        {%- endif %}
+        response_type='{{ response_type }}',
+        success_code={{ success_code }},
+    )
