@@ -25,7 +25,7 @@ class TestRedirect(base.TestBase):
         """
         method = "GET"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
-        headers = {"host": "localhost", "content-length": "0"}
+        headers = {"host": "localhost", common.CONTENT_LENGTH: "0"}
         body = None
         self._exec_request(redirect_path, method, body, headers)
 
@@ -52,9 +52,11 @@ class TestRedirect(base.TestBase):
 
         with open(__file__, 'rb') as fd:
             body = fd.read()
-        headers = {"content-type": "application/octet-stream",
-                   "host": "localhost",
-                   "content-length": str(len(body))}
+        headers = {
+            common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
+            common.CONTENT_LENGTH: str(len(body)),
+            "host": "localhost",
+        }
         self._exec_request(redirect_path, method, body, headers, binary_response=True)
 
     def test_redirect_post_request_with_large_binary_body(self):
@@ -68,9 +70,11 @@ class TestRedirect(base.TestBase):
                     content = content.decode()
                 body_stream.write(content)
 
-        headers = {"content-type": "application/octet-stream",
-                   "host": "localhost",
-                   "content-length": str(TestRedirect._get_stream_size(body_stream))}
+        headers = {
+            common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
+            common.CONTENT_LENGTH: str(TestRedirect._get_stream_size(body_stream)),
+            "host": "localhost",
+        }
         self._exec_request(redirect_path, method, body_stream.getvalue(), headers, binary_response=True)
 
     def _exec_request(self, redirect_path, method, body, headers, binary_response=False):
@@ -82,7 +86,7 @@ class TestRedirect(base.TestBase):
             headers=headers,
             binary_response=binary_response,
         )
-        if "content-type" not in headers or headers["content-type"] == "application/json":
+        if common.CONTENT_TYPE not in headers or headers[common.CONTENT_TYPE] == common.TYPE_JSON:
             self.assertEqual(response["path"], parsed.path[len("/redirect"):])
             self.assertEqual(response["query_string"], parsed.query)
             self.assertEqual(response["method"], method)

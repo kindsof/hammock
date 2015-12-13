@@ -42,7 +42,7 @@ class TestResource(base.TestBase):
             body=body,
             headers={
                 common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
-                'content-length': str(len(body)),
+                common.CONTENT_LENGTH: str(len(body)),
             },
         )
         if not isinstance(response, six.binary_type):

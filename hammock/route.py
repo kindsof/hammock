@@ -109,7 +109,7 @@ def _extract_params(request):
                     'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.'
                 )
         elif content_type == common.TYPE_OCTET_STREAM:
-            params[common.KW_FILE] = types.File(request.stream, request.get_header("content-length"))
+            params[common.KW_FILE] = types.File(request.stream, request.get_header(common.CONTENT_LENGTH))
     return params
 
 

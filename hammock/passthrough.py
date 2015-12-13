@@ -54,8 +54,8 @@ def send_to(request, dest, request_uuid=None):
     session = requests.Session()
     try:
         prepared = session.prepare_request(inner_request)
-        if request.headers.get('CONTENT-LENGTH'):
-            prepared.headers['CONTENT-LENGTH'] = request.headers.get('CONTENT-LENGTH')
+        if request.headers.get(common.CONTENT_LENGTH):
+            prepared.headers[common.CONTENT_LENGTH] = request.headers.get(common.CONTENT_LENGTH)
         if request.headers.get('TRANSFER-ENCODING'):
             del prepared.headers['TRANSFER-ENCODING']
         inner_response = session.send(prepared, stream=True)
