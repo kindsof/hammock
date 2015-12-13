@@ -11,10 +11,10 @@ def read(fname):
 setuptools.setup(
     name="hammock",
     version="0.0.1",
-    author="Stratoscale",
-    author_email="stratoscale@stratoscale.com",
+    author="Eyal Posener",
+    author_email="eyal@stratoscale.com",
     description=("a good place to REST"),
-    license="BSD",
+    license="Apache Software License",
     keywords="REST",
     url="http://packages.python.org/hammock",
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
