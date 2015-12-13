@@ -31,7 +31,7 @@ class ClientGenerator(object):
             resource_classes.append(_tabify(_recursion_code(name, resource_hirarchy)))
             resources_names.append(_resource_tuple(name))
 
-        code = FILE_TEMPLATE.render(
+        code = FILE_TEMPLATE.render(  # pylint: disable=no-member
             class_name=class_name,
             resources_names=resources_names,
             resource_classes=resource_classes,
@@ -58,8 +58,8 @@ def _resource_class_code(_resource):
         for kwargs in client_methods_propeties(_resource)
         ]
     if _resource.name() == "auth":
-        methods.insert(0, AUTH_METHODS_CODE.render())
-    return RESOURCE_CLASS_TEMPLATE.render(
+        methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
+    return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
         name=_class_name(common.PATH_TO_NAME(_resource.name())), resource=_resource, methods=methods)
 
 
@@ -74,7 +74,7 @@ def _recursion_code(name, resource_hirarchy):
             continue
         sub_classes.append(_recursion_code(key, value))
         sub_resources.append(_resource_tuple(key))
-    return RESOURCE_CLASS_TEMPLATE.render(
+    return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
         name=_class_name(common.PATH_TO_NAME(name)),
         sub_resources=sub_resources,
         sub_classes=_tabify("".join(sub_classes))
@@ -110,7 +110,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         "Can only have {} or {} in method args".format(common.KW_FILE, common.KW_LIST)
     if method_name in ("login", "logout", "refresh",):
         method_name = "_%s" % method_name
-    return METHOD_TEMPLATE.render(
+    return METHOD_TEMPLATE.render(  # pylint: disable=no-member
         method_name=method_name,
         method=method,
         url=url,
