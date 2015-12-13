@@ -26,7 +26,7 @@ pylint:
 
 unittest:
 	coverage erase
-	coverage run --omit="*__init__*" --include="hammock/*" -m unittest $(TESTS)
+	coverage run --omit="*__init__*" --omit="*.j2" --include="hammock/*" -m unittest $(TESTS)
 	coverage html
 
 install:$ requirements setup.py hammock/*

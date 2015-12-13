@@ -4,7 +4,7 @@ import six
 import os
 import logging
 import hammock.common as common
-import hammock.types as hammock_types
+import hammock.types as types
 import tests.resources.keywords as keywords
 
 
@@ -105,6 +105,14 @@ class TestResource(base.TestBase):
             self._simulate("GET", "/headers/some_wrong_key", query_string="value=None", headers=headers)
         )
 
+    def test_response_headers(self):
+        key = 'test'
+        headers = {key: 'this'}
+        self._simulate('GET', '/headers', headers=headers)
+        response_headers = types.Headers(dict(self.srmock.headers))
+        self.assertIn(key, response_headers)
+        self.assertEqual(headers[key], response_headers[key])
+
     def test_keywords(self):
         url = "/keywords"
         expected = {"arg": 1, "default": 2, "c": 3, "d": 4}
@@ -148,5 +156,5 @@ class TestResource(base.TestBase):
         self.assertEqual(int(response["arg"]), expected["arg"])
         self.assertEqual(int(response["default"]), expected["default"])
         self.assertEqual(int(response["c"]), expected["c"])
-        headers = hammock_types.Headers(response["headers"])
+        headers = types.Headers(response["headers"])
         self.assertEqual(int(headers["d"]), expected["d"])

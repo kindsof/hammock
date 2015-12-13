@@ -9,5 +9,5 @@ class Headers(resource.Resource):
         return _headers(key) == value
 
     @resource.get()
-    def response_headers(self):
-        return {resource.KW_HEADERS: {"some_key": "some_value"}}
+    def response_headers(self, _headers):
+        return {resource.KW_HEADERS: _headers}
