@@ -158,3 +158,10 @@ class TestResource(base.TestBase):
         self.assertEqual(int(response["c"]), expected["c"])
         headers = types.Headers(response["headers"])
         self.assertEqual(int(headers["d"]), expected["d"])
+
+    def test_lists(self):
+        response = self._simulate('GET', '/lists/3', query_string='a=1&a=2')
+        self.assertListEqual(response['a'], [1, 2])
+        self.assertEquals(response['path'], 3)
+        response = self._simulate('POST', 'lists/3', body=[1, 2])
+        self.assertListEqual(response, [1, 2, 3])
