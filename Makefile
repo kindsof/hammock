@@ -1,9 +1,13 @@
+all: tox packages rename
+
+ifndef TESTS
+ TESTS := discover tests -p "test_*.py"
+endif
+
 ifndef TOXENV
  TOXENV := py27
 endif
 ENV := TOXENV=$(TOXENV)
-
-all: tox packages rename
 
 .PHONY: tox
 tox:
@@ -14,13 +18,16 @@ clean:
 	rm -rf dist *.egg-info htmlcov
 
 flake8:
-	$(ENV) tox -e flake8
+	flake8 --max-line-length=145 hammock tests
 
 pylint:
-	$(ENV) tox -e pylint
+	pylint -r n --py3k --rcfile=.pylintrc hammock tests
+	pylint -r n --rcfile=.pylintrc hammock tests
 
 unittest:
-	$(ENV) tox -e unittest
+	coverage erase
+	coverage run --omit="*__init__*" --include="hammock/*" -m unittest $(TESTS)
+	coverage html
 
 install:$ requirements setup.py hammock/*
 	python setup.py install
