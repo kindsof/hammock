@@ -18,7 +18,7 @@ class HttpError(Exception):
     def to_dict(self):
         return {'title': self.title, 'description': self.description, 'status': self.status}
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return '<{} {}>(title="{}", description="{}")'.format(
             self.__class__.__name__, self.status, self.title, self.description)
 

@@ -39,5 +39,6 @@ class TestBase(testing.TestBase):
         return result
 
     def assert_status(self, status, *args, **kwargs):
-        self._simulate(*args, **kwargs)
+        response = self._simulate(*args, **kwargs)
         self.assertIn(str(status), self.srmock.status)
+        return response

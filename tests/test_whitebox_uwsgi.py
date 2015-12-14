@@ -5,9 +5,11 @@ import unittest
 import logging
 import waiting
 import functools
+import requests
 import hammock.types as types
 import hammock.testing as testing
 import tests.app as app
+import tests.resources.exceptions as exceptions_resouce
 import tests.test_client as test_client
 
 
@@ -55,3 +57,36 @@ class TestWhiteboxUWSGI(unittest.TestCase):
         response_data = list(response.stream())
         response_data = six.b('').join(response_data)
         self.assertEqual(data, response_data)
+
+    def test_exceptions(self):
+        try:
+            self._client.exceptions.internal()
+        except requests.HTTPError as e:
+            self.assertFalse(e.response.ok)
+            self.assertEqual(500, e.response.status_code)
+            self.assertDictEqual(
+                {
+                    'status': 500,
+                    'title': 'Internal Server Error',
+                    'description': exceptions_resouce.DESCRIPTION,
+                },
+                e.response.json()
+            )
+        else:
+            raise AssertionError('An exception should have been raised.')
+
+        try:
+            self._client.exceptions.not_found()
+        except requests.HTTPError as e:
+            self.assertFalse(e.response.ok)
+            self.assertEqual(404, e.response.status_code)
+            self.assertDictEqual(
+                {
+                    'status': 404,
+                    'title': 'Not Found',
+                    'description': exceptions_resouce.DESCRIPTION,
+                },
+                e.response.json()
+            )
+        else:
+            raise AssertionError('An exception should have been raised.')

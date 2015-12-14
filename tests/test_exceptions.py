@@ -1,11 +1,12 @@
 from __future__ import absolute_import
 import hammock.exceptions as exceptions
-import unittest
+import hammock.testing as testing
+import tests.resources.exceptions as exceptions_resource
 import json
+import logging
 
 
-class TestExceptions(unittest.TestCase):
-
+class TestExceptions(testing.TestBase):
     def test_init_and_methods(self):
         internal_server_error = exceptions.InternalServerError('description0')
         self.assertEqual(internal_server_error.status, 500)
@@ -19,3 +20,16 @@ class TestExceptions(unittest.TestCase):
         self.assertEqual(bad_request.description, bad_request_dict['description'])
         self.assertDictEqual(bad_request.to_dict, bad_request_dict)
         self.assertDictEqual(json.loads(bad_request.to_json), bad_request_dict)
+
+    def test_internal_server_error(self):
+        logging.info("Testing for exception raising")
+
+        response = self.assert_status(500, 'GET', '/exceptions/internal')
+        self.assertEqual(500, response['status'])
+        self.assertEqual('Internal Server Error', response['title'])
+        self.assertEqual(exceptions_resource.DESCRIPTION, response['description'])
+
+        response = self.assert_status(404, 'GET', '/exceptions/not_found')
+        self.assertEqual(404, response['status'])
+        self.assertEqual('Not Found', response['title'])
+        self.assertEqual(exceptions_resource.DESCRIPTION, response['description'])
