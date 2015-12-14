@@ -96,6 +96,8 @@ class TestRedirect(testing.TestBase):
             else:
                 self.assertEqual(response["body"], None)
         else:
+            if not isinstance(response, six.string_types):
+                response = response.decode()
             if not isinstance(body, six.string_types):
                 body = body.decode()
             self.assertEqual(response, body)

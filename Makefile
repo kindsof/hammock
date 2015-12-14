@@ -4,6 +4,7 @@ ifndef TESTS
  TESTS := discover tests -p "test_*.py"
 endif
 
+# TODO: remove this paragraph, python3.5 is not yet installed on the slaves...
 ifndef TOXENV
  TOXENV := py27
 endif

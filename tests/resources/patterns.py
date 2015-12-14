@@ -18,7 +18,7 @@ class Patterns(resource.Resource):
     @resource.sink("{my_id}/extra")
     def get_id_metadata(self, request, my_id):  # pylint: disable=unused-argument
         return types.Response(
-            stream=six.moves.StringIO(json.dumps('extra-%s') % my_id),
+            stream=six.BytesIO(six.b(json.dumps('extra-%s') % my_id)),
             status=200,
             headers={common.CONTENT_TYPE: common.TYPE_JSON},
         )

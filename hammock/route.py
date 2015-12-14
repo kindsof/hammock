@@ -135,9 +135,9 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
     kwargs = request_params or {}
     kwargs.update(url_kwargs or {})
     kwargs.update({
-        keyword: kwargs.get(keyword, default)
-        for keyword, default in six.iteritems(spec.kwargs)
-    })
+                      keyword: kwargs.get(keyword, default)
+                      for keyword, default in six.iteritems(spec.kwargs)
+                      })
     if common.KW_HEADERS in spec.args:
         kwargs[common.KW_HEADERS] = request_headers
     for kw, error_msg in (

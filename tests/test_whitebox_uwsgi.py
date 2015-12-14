@@ -33,6 +33,13 @@ class TestWhiteboxUWSGI(unittest.TestCase):
         cls._client.close()
         cls._server.terminate()
 
+    @unittest.skipIf(
+        six.PY3,
+        '''
+        Due to a bug in uwsgi with BytesIO under python 3,
+        https://github.com/unbit/uwsgi/issues/1126
+        '''
+    )
     def test_files(self):
         size_mb = 100
         content_length = size_mb << 20

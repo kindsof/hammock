@@ -3,7 +3,7 @@ def {{ method_name }}(self
             , {{ args|join(', ') }}
         {%- endif -%}
         {%- if kwargs -%}
-            {%- for k, v in kwargs.iteritems() -%}
+            {%- for k, v in kwargs.items() -%}
                 , {{ k }}={{ v }}
             {%- endfor -%}
         {%- endif -%}
@@ -28,7 +28,7 @@ def {{ method_name }}(self
             {%- if kw_list not in args -%}
                 dict(
                 {%- for p in params_kw %}{{ p }}={{ p }}, {% endfor -%}
-                {%- for k, v in defaults.iteritems() %}{{ k }}={{ v }}, {% endfor -%}
+                {%- for k, v in defaults.items() %}{{ k }}={{ v }}, {% endfor -%}
                 {%- for k in kwargs %}{{ k }}={{ k }}, {% endfor -%}
                 ),
             {%- else -%}
