@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import importlib
 import hammock.resource_node as resource_node
 import hammock.resource as resource
+import hammock.exceptions as exceptions
 import pkgutil
 import inspect
 
