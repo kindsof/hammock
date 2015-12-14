@@ -10,6 +10,17 @@ import hammock.types as types
 import hammock.passthrough as passthrough_module
 import hammock.exceptions as exceptions
 
+
+# XXX: temporary workaround,
+# until all dependencies will change their exceptions to hammock.exceptions.
+try:
+    import falcon
+except ImportError:
+    # fake falcon module and some specific exception, so we can except it later.
+    falcon = type('falcon', (object,), {'HTTPError': type('HTTPError', (Exception,), {})})
+# XXX
+
+
 KW_HEADERS = common.KW_HEADERS
 
 
@@ -34,9 +45,11 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 request_params = _extract_params(request)
                 request_headers = types.Headers(request.headers)
                 kwargs = _convert_to_kwargs(spec, url_kwargs, request_params, request_headers)
+            except exceptions.HttpError:
+                raise
             except Exception as e:  # pylint: disable=broad-except
                 logging.warning("[Error parsing request kwargs %s] %s", request_uuid, e)
-                self.handle_exception(e, exception_handler)
+                raise exceptions.BadRequest('Error parsing request parameters, {}'.format(e))
             else:
                 logging.debug("[kwargs %s] %s", request_uuid, kwargs)
             try:
@@ -46,6 +59,10 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                     _extract_response_body(result, response, response_content_type)
             except exceptions.HttpError:
                 raise
+            # XXX: temporary, until all dependencies will transfer to hammock exceptions
+            except falcon.HTTPError:
+                raise
+            # XXX
             except Exception as e:  # pylint: disable=broad-except
                 common.log_exception(e, request_uuid)
                 self.handle_exception(e, exception_handler)
@@ -58,6 +75,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
 
         func.responder = _wrapper
         return func
+
     return _decorator
 
 
@@ -87,6 +105,7 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
 
         func.responder = _wrapper
         return func
+
     return _decorator
 
 
@@ -94,7 +113,7 @@ def _extract_params(request):
     params = {
         k: (v if v != "None" else None)
         for k, v in six.iteritems(request.params)
-    }
+        }
     if request.method not in common.URL_PARAMS_METHODS:
         content_type = request.get_header(common.CONTENT_TYPE)
         if content_type == common.TYPE_JSON:
@@ -124,7 +143,7 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
     for kw, error_msg in (
         (common.KW_FILE, "expected {} as {}".format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
         (common.KW_LIST, "expected {} {} as list".format(common.CONTENT_TYPE, common.TYPE_JSON)),
-            ):
+    ):
         if kw in args:
             try:
                 kwargs[kw] = request_params[kw]
