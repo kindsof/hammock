@@ -1,8 +1,8 @@
 from __future__ import absolute_import
-import tests.base as base
+import hammock.testing as testing
 
 
-class TestPatterns(base.TestBase):
+class TestPatterns(testing.TestBase):
 
     def test_patterns(self):
         url = "/patterns"

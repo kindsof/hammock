@@ -6,7 +6,7 @@ import logging
 import waiting
 import functools
 import hammock.types as types
-import tests.server as server
+import hammock.testing as testing
 import tests.app as app
 import tests.test_client as test_client
 
@@ -20,7 +20,7 @@ class TestWhiteboxUWSGI(unittest.TestCase):
         subprocess.call(["pkill", "-9", "uwsgi"])
         cls._server = subprocess.Popen(app.command(cls.PORT))
         waiting.wait(
-            functools.partial(server.test_connection, ("localhost", cls.PORT)),
+            functools.partial(testing.test_connection, ("localhost", cls.PORT)),
             timeout_seconds=10,
             waiting_for="server to start listening",
         )

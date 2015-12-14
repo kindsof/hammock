@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-import tests.base as base
+import hammock.testing as testing
 import six
 import os
 import logging
@@ -8,7 +8,7 @@ import hammock.types as types
 import tests.resources.keywords as keywords
 
 
-class TestResource(base.TestBase):
+class TestResource(testing.TestBase):
 
     def test_resource(self):
         def dict_url(key):

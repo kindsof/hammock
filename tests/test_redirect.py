@@ -1,17 +1,16 @@
 from __future__ import absolute_import
-import tests.base as base
+import hammock.testing as testing
 import six
 import os
 import tests.resources.redirect as redirect
-import tests.server as server
 import hammock.common as common
 
 
-class TestRedirect(base.TestBase):
+class TestRedirect(testing.TestBase):
 
     @classmethod
     def setUpClass(cls):
-        cls._server = server.Server(port=redirect.PORT)
+        cls._server = testing.Server(port=redirect.PORT)
 
     @classmethod
     def tearDownClass(cls):
