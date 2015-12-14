@@ -38,8 +38,6 @@ class TestBase(testing.TestBase):
             result = json.loads(result)
         return result
 
-    def assert_404(self, *args, **kwargs):
-        self.assertDictEqual({"title": "404"}, self._simulate(*args, **kwargs))
-
-    def assert_400(self, *args, **kwargs):
-        self.assertDictEqual({"title": "400"}, self._simulate(*args, **kwargs))
+    def assert_status(self, status, *args, **kwargs):
+        self._simulate(*args, **kwargs)
+        self.assertIn(str(status), self.srmock.status)

@@ -3,6 +3,7 @@ import importlib
 import hammock.resource_node as resource_node
 import hammock.resource as resource
 import hammock.exceptions as exceptions
+import hammock.common as common
 import pkgutil
 import inspect
 
@@ -12,6 +13,7 @@ class Hammock(resource_node.ResourceNode):
     def __init__(self, api, resource_package):
         self._api = api
         iter_modules(resource_package, self._add_resource)
+        self._api.add_error_handler(exceptions.HttpError, self._handle_http_error)
 
     def _add_resource(self, package, module_name, parents):
         prefix = "/".join(parents)
@@ -24,6 +26,11 @@ class Hammock(resource_node.ResourceNode):
             node = node.add(parent)
         for _resource in resources:
             node.add(_resource.name(), _resource)
+
+    def _handle_http_error(self, exc, request, response, params):  # pylint: disable=unused-argument
+        response.status = str(exc.status)
+        response.body = exc.to_json
+        response.content_type = common.TYPE_JSON
 
 
 def iter_modules(package, callback, parents=None):

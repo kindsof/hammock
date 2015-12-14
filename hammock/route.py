@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import six
-import falcon
 import inspect
 import functools
 import simplejson as json
@@ -9,6 +8,7 @@ import uuid
 import hammock.common as common
 import hammock.types as types
 import hammock.passthrough as passthrough_module
+import hammock.exceptions as exceptions
 
 KW_HEADERS = common.KW_HEADERS
 
@@ -44,6 +44,8 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 if result is not None:
                     _extract_response_headers(result, response)
                     _extract_response_body(result, response, response_content_type)
+            except exceptions.HttpError:
+                raise
             except Exception as e:  # pylint: disable=broad-except
                 common.log_exception(e, request_uuid)
                 self.handle_exception(e, exception_handler)
@@ -103,11 +105,7 @@ def _extract_params(request):
                 elif type(data) == list:
                     params[common.KW_LIST] = data
             except (ValueError, UnicodeDecodeError):
-                raise falcon.HTTPError(
-                    falcon.HTTP_753,
-                    'Malformed JSON',
-                    'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.'
-                )
+                raise exceptions.MalformedJson()
         elif content_type == common.TYPE_OCTET_STREAM:
             params[common.KW_FILE] = types.File(request.stream, request.get_header(common.CONTENT_LENGTH))
     return params
@@ -131,13 +129,11 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
             try:
                 kwargs[kw] = request_params[kw]
             except KeyError:
-                raise falcon.HTTPError(falcon.HTTP_415, 'Bad data', error_msg)
+                raise exceptions.BadData(error_msg)
             args.remove(kw)
     missing = set(args) - set(kwargs)
     if missing:
-        raise falcon.HTTPBadRequest(
-            "Missing parameters: %s" % ", ".join(missing),
-            "Bad request")
+        raise exceptions.BadRequest('Missing parameters: {}'.format(', '.join(missing)))
     return kwargs
 
 
@@ -153,7 +149,7 @@ def _extract_response_body(result, response, content_type):
     elif content_type == common.TYPE_OCTET_STREAM:
         response.stream = result
     else:
-        raise Exception("Unsupported response content-type %s", content_type)
+        raise exceptions.BadRequest("Unsupported response content-type {}".format(content_type))
     response.set_header(common.CONTENT_TYPE, content_type)
 
 

@@ -3,11 +3,11 @@ import six
 import hammock.route as route
 import hammock.sink as _sink
 import hammock.common as common
+import hammock.exceptions as exceptions
 import collections
 import logging
 import functools
 import re
-import falcon
 
 TOKEN_ENTRY = common.TOKEN_ENTRY
 CONTENT_TYPE = common.CONTENT_TYPE
@@ -66,13 +66,7 @@ class Resource(object):
 
     @staticmethod
     def _convert_to_internal_server_error(exc):
-        if isinstance(exc, falcon.HTTPError):
-            return exc
-        else:
-            return falcon.HTTPInternalServerError(
-                falcon.HTTP_INTERNAL_SERVER_ERROR,
-                str(exc)
-            )
+        return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
 
 
 def get(path="", **kwargs):

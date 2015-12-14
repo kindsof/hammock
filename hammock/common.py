@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import six
 import inspect
-import falcon
+import hammock.exceptions as exceptions
 import logging
 import re
 import functools
@@ -24,7 +24,7 @@ def url_join(*parts):
 
 
 def log_exception(exc, request_uuid):
-    if isinstance(exc, falcon.HTTPError):
+    if isinstance(exc, exceptions.HttpError):
         logging.warning("[Http %s Exception %s] %s", exc.status, request_uuid, exc.title)
     else:
         logging.exception("[Internal server error %s]", request_uuid)

@@ -1,6 +1,11 @@
 from __future__ import absolute_import
-import falcon
-from hammock import resource
+import hammock.resource as resource
+import hammock.exceptions as exceptions
+
+
+class KeyNotFound(exceptions.NotFound):
+    def __init__(self):  # pylint: disable=super-on-old-class
+        super(KeyNotFound, self).__init__('Key not found')
 
 
 class Dict(resource.Resource):
@@ -12,27 +17,27 @@ class Dict(resource.Resource):
     @resource.post("{key}")
     def item_create(self, key, value):  # pylint: disable=unused-argument
         if key in self._dict:
-            raise falcon.HTTPError(falcon.HTTP_400, "400")
+            raise exceptions.BadRequest('Key already exists')
         self._dict[key] = value
         return {"post": value}
 
     @resource.get("{key}")
     def item_get(self, key):  # pylint: disable=unused-argument
         if key not in self._dict:
-            raise falcon.HTTPError(falcon.HTTP_404, "404")
+            raise KeyNotFound()
         return {"get": self._dict[key]}
 
     @resource.put("{key}")
     def item_change(self, key, value):  # pylint: disable=unused-argument
         if key not in self._dict:
-            raise falcon.HTTPError(falcon.HTTP_404, "404")
+            raise KeyNotFound()
         self._dict[key] = value
         return {"put": value}
 
     @resource.delete("{key}")
     def item_delete(self, key):  # pylint: disable=unused-argument
         if key not in self._dict:
-            raise falcon.HTTPError(falcon.HTTP_404, "404")
+            raise KeyNotFound()
         value = self._dict[key]
         del self._dict[key]
         return {"delete": value}
