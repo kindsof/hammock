@@ -2,6 +2,8 @@ import requests
 import logging
 import munch
 
+log = logging.getLogger(__name__)
+
 
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
@@ -44,16 +46,16 @@ class {{ class_name }}(object):
                     _kwargs["json"] = json
         else:
             _kwargs["params"] = json
-        logging.debug("Sending %s request: %s %s", method, url, json)
+        log.debug("Sending %s request: %s %s", method, url, json)
         response = getattr(self._client, method.lower())(url, **_kwargs)  # pylint: disable=star-args
         result = None
         if response_type == '{{ type_json }}':
             result = self.jsonify(response)
-            logging.debug("Got response status %s, body: %s", response.status_code, result)
+            log.debug("Got response status %s, body: %s", response.status_code, result)
         elif response_type == '{{ type_octet_stream }}':
             result = response.raw
         if response.status_code != success_code:
-            logging.warn(
+            log.warning(
                 "Response status %d does not match expected success status %d",
                 response.status_code, success_code
             )
@@ -80,6 +82,6 @@ class {{ class_name }}(object):
             return result
         except ValueError:
             if response.text:
-                logging.warn("Could not parse json from '%s'", response.text)
+                log.warning("Could not parse json from '%s'", response.text)
 
 {{ resource_classes|join("") }}
