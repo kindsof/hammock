@@ -6,6 +6,8 @@ import logging
 import re
 import functools
 import simplejson as json
+import random
+import string
 
 URL_PARAMS_METHODS = {"GET", "HEAD", "DELETE"}
 KW_HEADERS = "_headers"
@@ -18,6 +20,7 @@ TYPE_OCTET_STREAM = "application/octet-stream"
 TOKEN_ENTRY = "X-Auth-Token"
 PATH_TO_NAME = functools.partial(re.compile(r'[{}./-]').sub, '')
 CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
+ID_LETTERS = string.lowercase + string.digits
 
 
 def url_join(*parts):
@@ -50,6 +53,10 @@ def get_response_json(response):
         return json.load(response.stream)
     else:
         return json.loads(response.stream)
+
+
+def uid(length=8):
+    return ''.join(random.sample(ID_LETTERS, length))
 
 
 def _set_headers(request, **kwargs):

@@ -4,7 +4,6 @@ import inspect
 import functools
 import simplejson as json
 import logging
-import uuid
 import hammock.common as common
 import hammock.types as types
 import hammock.passthrough as passthrough_module
@@ -37,7 +36,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
 
         @functools.wraps(func)
         def _wrapper(self, request, response, **url_kwargs):
-            request_uuid = uuid.uuid4()
+            request_uuid = common.uid()
             logging.debug(
                 "[request %s] %s %s",
                 request_uuid, request.method, request.url)

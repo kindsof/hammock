@@ -2,13 +2,12 @@ from __future__ import absolute_import
 import six
 import logging
 import requests
-import uuid
 import hammock.common as common
 import hammock.types as types
 
 
 def passthrough(self, request, response, dest, pre_process, post_process, trim_prefix, func, exception_handler, **params):
-    request_uuid = uuid.uuid4()
+    request_uuid = common.uid()
     logging.debug("[Passthrough received %s] requested: %s", request_uuid, request.url)
     try:
         context = {}
