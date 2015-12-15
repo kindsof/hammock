@@ -17,6 +17,7 @@ TYPE_JSON = "application/json"
 TYPE_OCTET_STREAM = "application/octet-stream"
 TOKEN_ENTRY = "X-Auth-Token"
 PATH_TO_NAME = functools.partial(re.compile(r'[{}./-]').sub, '')
+CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
 
 
 def url_join(*parts):

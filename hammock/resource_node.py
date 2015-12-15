@@ -9,7 +9,7 @@ class ResourceNode(object):
             setattr(self, name, node)
         return getattr(self, name)
 
-    def _get_node(self, walk_node_names):
+    def get_node(self, walk_node_names):
         node = self
         for name in walk_node_names:
             node = node.add(name)
