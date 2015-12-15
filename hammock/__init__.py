@@ -1,59 +1,26 @@
 from __future__ import absolute_import
-import importlib
 import hammock.resource_node as resource_node
-import hammock.resource as resource
 import hammock.exceptions as exceptions
 import hammock.common as common
-import pkgutil
-import inspect
+import hammock.packages as packages
 
 
 class Hammock(resource_node.ResourceNode):
 
     def __init__(self, api, resource_package):
         self._api = api
-        iter_modules(resource_package, self._add_resource)
+        self._add_resources(resource_package)
         self._api.add_error_handler(exceptions.HttpError, self._handle_http_error)
 
-    def _add_resource(self, package, module_name, parents):
-        prefix = "/".join(parents)
-        resources = [
+    def _add_resources(self, resource_package):
+        for resource_class, parents in packages.iter_resource_classes(resource_package):
+            prefix = '/'.join(parents)
             resource_class(self._api, prefix)
-            for resource_class in resource_classes(package, module_name)
-        ]
-        node = self
-        for parent in parents:
-            node = node.add(parent)
-        for _resource in resources:
-            node.add(_resource.name(), _resource)
+            node = self._get_node(parents)
+            node.add(resource_class.name(), resource_class)
 
-    def _handle_http_error(self, exc, request, response, params):  # pylint: disable=unused-argument
+    @staticmethod
+    def _handle_http_error(exc, request, response, params):  # pylint: disable=unused-argument
         response.status = str(exc.status)
         response.body = exc.to_json
         response.content_type = common.TYPE_JSON
-
-
-def iter_modules(package, callback, parents=None):
-    parents = parents or []
-    for _, name, ispkg in pkgutil.iter_modules(package.__path__):
-        if ispkg:
-            package_parents = parents[:]
-            son_package = importlib.import_module(".".join([package.__name__, name]), package.__name__)
-            name = getattr(son_package, "PATH", name)
-            package_parents.append(name)
-            iter_modules(son_package, callback, package_parents)
-        else:
-            callback(package, name, parents)
-
-
-def _is_resource_class(obj):
-    return inspect.isclass(obj) and issubclass(obj, resource.Resource)
-
-
-def resource_classes(package, module_name):
-    module = importlib.import_module(".".join([package.__name__, module_name]), package.__name__)
-    return [
-        getattr(module, attr)
-        for attr in dir(module)
-        if _is_resource_class(getattr(module, attr))
-    ]

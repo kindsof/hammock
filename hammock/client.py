@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 import six
-import hammock
 import hammock.resource as resource
 import hammock.route as route
 import hammock.common as common
 import hammock.types as types
+import hammock.packages as packages
 import jinja2
 import re
 import inspect
@@ -19,11 +19,12 @@ AUTH_METHODS_CODE = ENV.get_template('auth_methods.j2')
 class ClientGenerator(object):
     def __init__(self, class_name, resources_package):
         self._resources = {}
-        hammock.iter_modules(resources_package, self._add_resource)
+
+        self._add_resources(resources_package)
         resource_classes = [
             _tabify(_resource_class_code(_resource))
             for _resource in self._resources.get("", [])
-            ]
+        ]
         resources_names = [_resource_tuple(r.name()) for r in self._resources.get("", [])]
         for name, resource_hirarchy in six.iteritems(self._resources):
             if name == "":
@@ -43,12 +44,11 @@ class ClientGenerator(object):
         )
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n") + '\n'
 
-    def _add_resource(self, package, module_name, parents):
-        resource_classes = hammock.resource_classes(package, module_name)
-        cur = self._resources
-        for p in parents:
-            cur = cur.setdefault(p, {})
-        for resource_class in resource_classes:
+    def _add_resources(self, package):
+        for resource_class, parents in packages.iter_resource_classes(package):
+            cur = self._resources
+            for p in parents:
+                cur = cur.setdefault(p, {})
             cur.setdefault("", []).append(resource_class)
 
 

@@ -1,7 +1,16 @@
 class ResourceNode(object):
+    """
+    A directional graph of nodes.
+    """
 
-    def add(self, name, resource=None):
-        resource = resource or ResourceNode()
+    def add(self, name, node=None):
+        node = node or ResourceNode()
         if not hasattr(self, name):
-            setattr(self, name, resource)
+            setattr(self, name, node)
         return getattr(self, name)
+
+    def _get_node(self, walk_node_names):
+        node = self
+        for name in walk_node_names:
+            node = node.add(name)
+        return node
