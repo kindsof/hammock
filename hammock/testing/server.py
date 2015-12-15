@@ -34,10 +34,10 @@ class Server(object):
         logging.info("Server closed")
 
     def _get_available_port(self):
-        s = socket.socket()
-        s.bind(("", 0))
-        port = s.getsockname()[1]
-        s.close()
+        sock = socket.socket()
+        sock.bind(("", 0))
+        port = sock.getsockname()[1]
+        sock.close()
         return port
 
 
@@ -52,16 +52,16 @@ class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.path = None
         six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)
 
-    def do_GET(self):  # NOQA
+    def do_GET(self):  # NOQA  # pylint: disable=invalid-name
         self._do("GET")
 
-    def do_DELETE(self):  # NOQA
+    def do_DELETE(self):  # NOQA  # pylint: disable=invalid-name
         self._do("DELETE")
 
-    def do_POST(self):  # NOQA
+    def do_POST(self):  # NOQA  # pylint: disable=invalid-name
         self._do("POST")
 
-    def do_PUT(self):  # NOQA
+    def do_PUT(self):  # NOQA  # pylint: disable=invalid-name
         self._do("PUT")
 
     def _do(self, method):

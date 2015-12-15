@@ -32,6 +32,7 @@ def class_factory(status, title, description=''):
 
     return type(title, (HttpError,), {'__init__': init})
 
+# pylint: disable=invalid-name
 BadRequest = class_factory(400, 'Bad Request')
 Unauthorized = class_factory(401, 'Unauthorized')
 Forbidden = class_factory(403, 'Forbidden')
@@ -47,3 +48,4 @@ ServiceUnavailable = class_factory(503, 'Service Unavailable')
 MalformedJson = class_factory(
     753, 'Malformed JSON',
     'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.')
+# pylint: enable=invalid-name

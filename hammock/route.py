@@ -17,7 +17,7 @@ try:
     import falcon
 except ImportError:
     # fake falcon module and some specific exception, so we can except it later.
-    falcon = type('falcon', (object,), {'HTTPError': type('HTTPError', (Exception,), {})})
+    falcon = type('falcon', (object,), {'HTTPError': type('HTTPError', (Exception,), {})})  # pylint: disable=invalid-name
 # XXX
 
 
@@ -47,9 +47,9 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 kwargs = _convert_to_kwargs(spec, url_kwargs, request_params, request_headers)
             except exceptions.HttpError:
                 raise
-            except Exception as e:  # pylint: disable=broad-except
-                logging.warning("[Error parsing request kwargs %s] %s", request_uuid, e)
-                raise exceptions.BadRequest('Error parsing request parameters, {}'.format(e))
+            except Exception as exc:  # pylint: disable=broad-except
+                logging.warning("[Error parsing request kwargs %s] %s", request_uuid, exc)
+                raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
             else:
                 logging.debug("[kwargs %s] %s", request_uuid, kwargs)
             try:
@@ -63,9 +63,9 @@ def route(path, method, client_methods=None, success_code=200, response_content_
             except falcon.HTTPError:
                 raise
             # XXX
-            except Exception as e:  # pylint: disable=broad-except
-                common.log_exception(e, request_uuid)
-                self.handle_exception(e, exception_handler)
+            except Exception as exc:  # pylint: disable=broad-except
+                common.log_exception(exc, request_uuid)
+                self.handle_exception(exc, exception_handler)
             else:
                 response.status = str(success_code)
                 logging.debug(
@@ -113,7 +113,7 @@ def _extract_params(request):
     params = {
         k: (v if v != "None" else None)
         for k, v in six.iteritems(request.params)
-        }
+    }
     if request.method not in common.URL_PARAMS_METHODS:
         content_type = request.get_header(common.CONTENT_TYPE)
         if content_type == common.TYPE_JSON:
@@ -140,16 +140,16 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
     })
     if common.KW_HEADERS in spec.args:
         kwargs[common.KW_HEADERS] = request_headers
-    for kw, error_msg in (
+    for keyword, error_msg in (
         (common.KW_FILE, "expected {} as {}".format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
         (common.KW_LIST, "expected {} {} as list".format(common.CONTENT_TYPE, common.TYPE_JSON)),
     ):
-        if kw in args:
+        if keyword in args:
             try:
-                kwargs[kw] = request_params[kw]
+                kwargs[keyword] = request_params[keyword]
             except KeyError:
                 raise exceptions.BadData(error_msg)
-            args.remove(kw)
+            args.remove(keyword)
     missing = set(args) - set(kwargs)
     if missing:
         raise exceptions.BadRequest('Missing parameters: {}'.format(', '.join(missing)))
@@ -158,8 +158,8 @@ def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
 
 def _extract_response_headers(result, response):
     if isinstance(result, dict) and common.KW_HEADERS in result:
-        for k, v in six.iteritems(result.pop(common.KW_HEADERS)):
-            response.set_header(k, str(v))
+        for key, value in six.iteritems(result.pop(common.KW_HEADERS)):
+            response.set_header(key, str(value))
 
 
 def _extract_response_body(result, response, content_type):

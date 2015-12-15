@@ -6,7 +6,7 @@ import sys
 import subprocess
 import tests.resources as resources
 
-application = falcon.API()
+application = falcon.API()  # pylint: disable=invalid-name
 hammock.Hammock(application, resources)
 
 
@@ -25,5 +25,5 @@ COMMAND_LINE_ARGS = [
 ]
 
 if __name__ == '__main__':
-    port = sys.argv[1]
+    port = sys.argv[1]  # pylint: disable=invalid-name
     subprocess.check_output(command(port) + COMMAND_LINE_ARGS)

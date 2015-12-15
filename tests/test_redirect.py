@@ -16,7 +16,7 @@ class TestRedirect(testing.TestBase):
     def tearDownClass(cls):
         cls._server.close()
 
-    def test_redirect_get_request(self):
+    def test_redirect_get_request(self):  # pylint: disable=invalid-name
         """
         verify that we don't pass the body on GET requests.
         :return:
@@ -27,7 +27,7 @@ class TestRedirect(testing.TestBase):
         body = None
         self._exec_request(redirect_path, method, body, headers)
 
-    def test_redirect_post_request_with_json_body(self):
+    def test_redirect_post_request_with_json_body(self):  # pylint: disable=invalid-name
         method = "POST"
         redirect_path = "/redirect/v3/users"
         body = {"desc": "sent from test", "method": "POST"}
@@ -44,12 +44,12 @@ class TestRedirect(testing.TestBase):
         stream.seek(0, os.SEEK_SET)
         return body_length
 
-    def test_redirect_post_request_with_binary_body(self):
+    def test_redirect_post_request_with_binary_body(self):  # pylint: disable=invalid-name
         method = "POST"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
 
-        with open(__file__, 'rb') as fd:
-            body = fd.read()
+        with open(__file__, 'rb') as file_object:
+            body = file_object.read()
         headers = {
             common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
             common.CONTENT_LENGTH: str(len(body)),
@@ -57,13 +57,13 @@ class TestRedirect(testing.TestBase):
         }
         self._exec_request(redirect_path, method, body, headers, binary_response=True)
 
-    def test_redirect_post_request_with_large_binary_body(self):
+    def test_redirect_post_request_with_large_binary_body(self):  # pylint: disable=invalid-name
         method = "POST"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
         body_stream = six.moves.StringIO()
-        with open(__file__, 'rb') as fd:
+        with open(__file__, 'rb') as file_object:
             for _ in range(100):
-                content = fd.read()
+                content = file_object.read()
                 if not isinstance(content, six.string_types):
                     content = content.decode()
                 body_stream.write(content)
@@ -102,7 +102,7 @@ class TestRedirect(testing.TestBase):
                 body = body.decode()
             self.assertEqual(response, body)
 
-    def test_redirect_with_resource_conflicts(self):
+    def test_redirect_with_resource_conflicts(self):  # pylint: disable=invalid-name
         self.assertEqual(self._simulate('GET', "/redirect/specific"), "specific")
         self.assertEqual(self._simulate('GET', "/redirect/specific/not")["path"], "/specific/not")
         self.assertEqual(self._simulate('GET', "/redirect")["path"], "/")

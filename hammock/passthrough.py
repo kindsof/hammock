@@ -28,9 +28,9 @@ def passthrough(self, request, response, dest, pre_process, post_process, trim_p
             response.stream = body_or_stream
         else:
             response.body = body_or_stream
-    except Exception as e:  # pylint: disable=broad-except
-        common.log_exception(e, request_uuid)
-        self.handle_exception(e, exception_handler)
+    except Exception as exc:  # pylint: disable=broad-except
+        common.log_exception(exc, request_uuid)
+        self.handle_exception(exc, exception_handler)
     finally:
         logging.debug(
             "[Passthrough response %s] status: %s, body: %s",

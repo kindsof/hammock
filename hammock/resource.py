@@ -25,10 +25,10 @@ class Resource(object):
             exc = exception_handler(exc)
         elif self._default_exception_handler:
             exc = self._default_exception_handler(exc)
-        raise self._convert_to_internal_server_error(exc)
+        raise self._to_internal_server_error(exc)
 
     @staticmethod
-    def _convert_to_internal_server_error(exc):
+    def _to_internal_server_error(exc):
         return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
 
 

@@ -10,7 +10,7 @@ import hammock.route as route
 import hammock.sink as sink
 import hammock.exceptions as exceptions
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class Falcon(object):

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 import six
 import hammock.resource as resource
 import hammock.route as route
@@ -42,13 +43,13 @@ class ClientGenerator(object):
             url_params_methods=common.URL_PARAMS_METHODS,
             file_class=inspect.getsource(types.File),
         )
-        self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n") + '\n'
+        self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
     def _add_resources(self, package):
         for resource_class, parents in packages.iter_resource_classes(package):
             cur = self._resources
-            for p in parents:
-                cur = cur.setdefault(p, {})
+            for parent in parents:
+                cur = cur.setdefault(parent, {})
             cur.setdefault("", []).append(resource_class)
 
 
@@ -147,3 +148,12 @@ def client_methods_propeties(resource_object):
                 keywords=spec.keywords,
             ))
     return kwargs
+
+
+def main(class_name, package_name):
+    print(ClientGenerator(class_name, __import__(package_name)).code)
+
+
+if __name__ == '__main__':
+    import sys
+    main(*sys.argv[1:])

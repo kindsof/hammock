@@ -5,10 +5,10 @@ from hammock import resource
 class Lists(resource.Resource):
 
     @resource.get('{path}')
-    def get(self, path, a):
+    def get(self, path, argument):
         return {
             'path': int(path),
-            'a': [int(ai) for ai in a],
+            'argument': [int(ai) for ai in argument],
         }
 
     @resource.post('{path}')

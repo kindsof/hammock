@@ -86,10 +86,10 @@ class TestResource(testing.TestBase):
 
     def test_headers(self):
         headers = {"key1": "value1", "key2": "value2"}
-        for k, v in six.iteritems(headers):
+        for key, value in six.iteritems(headers):
             self.assertEqual(
                 True,
-                self._simulate("GET", "/headers/%s" % k, query_string="value=%s" % v, headers=headers)
+                self._simulate("GET", "/headers/%s" % key, query_string="value=%s" % value, headers=headers)
             )
         self.assertEqual(
             False,
@@ -155,8 +155,8 @@ class TestResource(testing.TestBase):
         self.assertEqual(int(headers["d"]), expected["d"])
 
     def test_lists(self):
-        response = self._simulate('GET', '/lists/3', query_string='a=1&a=2')
-        self.assertListEqual(response['a'], [1, 2])
+        response = self._simulate('GET', '/lists/3', query_string='argument=1&argument=2')
+        self.assertListEqual(response['argument'], [1, 2])
         self.assertEqual(response['path'], 3)
         response = self._simulate('POST', 'lists/3', body=[1, 2])
         self.assertListEqual(response, [1, 2, 3])
