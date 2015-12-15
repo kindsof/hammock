@@ -20,7 +20,7 @@ TYPE_OCTET_STREAM = "application/octet-stream"
 TOKEN_ENTRY = "X-Auth-Token"
 PATH_TO_NAME = functools.partial(re.compile(r'[{}./-]').sub, '')
 CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
-ID_LETTERS = string.lowercase + string.digits
+ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.digits
 
 
 def url_join(*parts):

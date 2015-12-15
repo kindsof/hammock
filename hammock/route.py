@@ -8,6 +8,7 @@ import hammock.common as common
 import hammock.types as types
 import hammock.passthrough as passthrough_module
 import hammock.exceptions as exceptions
+import hammock.request as request
 
 
 # XXX: temporary workaround,
@@ -35,27 +36,14 @@ def route(path, method, client_methods=None, success_code=200, response_content_
         func.response_content_type = response_content_type
 
         @functools.wraps(func)
-        def _wrapper(self, request, response, **url_kwargs):
-            request_uuid = common.uid()
-            logging.debug(
-                "[request %s] %s %s",
-                request_uuid, request.method, request.url)
-            try:
-                request_params = _extract_params(request)
-                request_headers = types.Headers(request.headers)
-                kwargs = _convert_to_kwargs(spec, url_kwargs, request_params, request_headers)
-            except exceptions.HttpError:
-                raise
-            except Exception as exc:  # pylint: disable=broad-except
-                logging.warning("[Error parsing request kwargs %s] %s", request_uuid, exc)
-                raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
-            else:
-                logging.debug("[kwargs %s] %s", request_uuid, kwargs)
+        def _wrapper(self, req, resp, **url_kwargs):
+            req = request.Request.from_falcon(req)
+            kwargs = _extract_kwargs(spec, url_kwargs, req)
             try:
                 result = func(self, **kwargs)
                 if result is not None:
-                    _extract_response_headers(result, response)
-                    _extract_response_body(result, response, response_content_type)
+                    _extract_response_headers(result, resp)
+                    _extract_response_body(result, resp, response_content_type)
             except exceptions.HttpError:
                 raise
             # XXX: temporary, until all dependencies will transfer to hammock exceptions
@@ -63,14 +51,11 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 raise
             # XXX
             except Exception as exc:  # pylint: disable=broad-except
-                common.log_exception(exc, request_uuid)
+                common.log_exception(exc, req.uid)
                 self.handle_exception(exc, exception_handler)
             else:
-                response.status = str(success_code)
-                logging.debug(
-                    "[response %s] status: %s, body: %s",
-                    request_uuid, response.status, response.body,
-                )
+                resp.status = str(success_code)
+                logging.debug('[response %s] status: %s, body: %s', req.uid, resp.status, resp.body)
 
         func.responder = _wrapper
         return func
@@ -88,11 +73,11 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
         func.response_content_type = None
 
         @functools.wraps(func)
-        def _wrapper(self, request, response, **params):
+        def _wrapper(self, req, resp, **params):
             passthrough_module.passthrough(
                 self,
-                request,
-                response,
+                req,
+                resp,
                 dest,
                 pre_process,
                 post_process,
@@ -108,44 +93,35 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
     return _decorator
 
 
-def _extract_params(request):
-    params = {
-        k: (v if v != "None" else None)
-        for k, v in six.iteritems(request.params)
-    }
-    if request.method not in common.URL_PARAMS_METHODS:
-        content_type = request.get_header(common.CONTENT_TYPE)
-        if content_type == common.TYPE_JSON:
-            try:
-                data = json.load(request.stream)
-                if type(data) == dict:
-                    params.update(data)
-                elif type(data) == list:
-                    params[common.KW_LIST] = data
-            except (ValueError, UnicodeDecodeError):
-                raise exceptions.MalformedJson()
-        elif content_type == common.TYPE_OCTET_STREAM:
-            params[common.KW_FILE] = types.File(request.stream, request.get_header(common.CONTENT_LENGTH))
-    return params
+def _extract_kwargs(spec, url_kwargs, req):
+    try:
+        kwargs = _convert_to_kwargs(spec, url_kwargs, req)
+        logging.debug("[kwargs %s] %s", req.uid, kwargs)
+        return kwargs
+    except exceptions.HttpError:
+        raise
+    except Exception as exc:  # pylint: disable=broad-except
+        logging.warning("[Error parsing request kwargs %s] %s", req.uid, exc)
+        raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
 
 
-def _convert_to_kwargs(spec, url_kwargs, request_params, request_headers):
+def _convert_to_kwargs(spec, url_kwargs, req):
     args = spec.args[:]
-    kwargs = request_params or {}
+    kwargs = req.collected_data
     kwargs.update(url_kwargs or {})
     kwargs.update({
         keyword: kwargs.get(keyword, default)
         for keyword, default in six.iteritems(spec.kwargs)
     })
     if common.KW_HEADERS in spec.args:
-        kwargs[common.KW_HEADERS] = request_headers
+        kwargs[common.KW_HEADERS] = req.headers
     for keyword, error_msg in (
         (common.KW_FILE, "expected {} as {}".format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
         (common.KW_LIST, "expected {} {} as list".format(common.CONTENT_TYPE, common.TYPE_JSON)),
     ):
         if keyword in args:
             try:
-                kwargs[keyword] = request_params[keyword]
+                kwargs[keyword] = req.collected_data[keyword]
             except KeyError:
                 raise exceptions.BadData(error_msg)
             args.remove(keyword)
