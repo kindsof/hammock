@@ -22,8 +22,8 @@ flake8:
 	flake8 --max-line-length=145 hammock tests
 
 pylint:
-	pylint -r n --py3k --rcfile=.pylintrc hammock tests
-	pylint -r n --rcfile=.pylintrc hammock tests
+	pylint -r n --py3k hammock tests
+	pylint -r n hammock tests
 
 coverage:
 	coverage erase

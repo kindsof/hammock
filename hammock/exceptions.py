@@ -27,10 +27,10 @@ class HttpError(Exception):
 
 def class_factory(status, title, description=''):
 
-    def __init__(self, description=description):
+    def init(self, description=description):
         HttpError.__init__(self, status, title, description)
 
-    return type(title, (HttpError,), {'__init__': __init__})
+    return type(title, (HttpError,), {'__init__': init})
 
 BadRequest = class_factory(400, 'Bad Request')
 Unauthorized = class_factory(401, 'Unauthorized')
