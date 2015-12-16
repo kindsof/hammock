@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 import copy
 import logging
-import requests
 import simplejson as json
-import six
 import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions
-from . import response as response
+import hammock.backends as backends
 from . import url as url_module
 from . import headers as headers_module
 from . import file as file_module
@@ -26,8 +24,11 @@ class Request(object):
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
 
     @classmethod
-    def from_falcon(cls, req):
-        return cls(req.method, req.url, req.headers, req.stream)
+    def from_backend(cls, req):
+        if backends.falcon and isinstance(req, backends.falcon.Request):
+            return cls(req.method, req.url, req.headers, req.stream)
+        else:
+            raise Exception('Unsupported request type %s', type(req))
 
     @property
     def url(self):
@@ -83,31 +84,6 @@ class Request(object):
     def set_content(self, content):
         self.stream = content
         self.headers[common.CONTENT_LENGTH] = len(content)
-
-    def send_to(self, dest):
-        redirection_url = common.url_join(dest, self.path) + '?' + self.query
-        logging.info('[Passthrough %s] redirecting to %s', self.uid, redirection_url)
-        inner_request = requests.Request(
-            self.method,
-            url=redirection_url,
-            data=self.stream if self.method not in common.URL_PARAMS_METHODS else None,
-            headers={
-                k: v if k.lower() != "host" else six.moves.urllib.parse.urlparse(dest).netloc
-                for k, v in six.iteritems(self.headers)
-                if v != ""
-            },
-        )
-        session = requests.Session()
-        try:
-            prepared = session.prepare_request(inner_request)
-            if self.headers.get(common.CONTENT_LENGTH):
-                prepared.headers[common.CONTENT_LENGTH] = self.headers.get(common.CONTENT_LENGTH)
-            if self.headers.get('TRANSFER-ENCODING'):
-                del prepared.headers['TRANSFER-ENCODING']
-            inner_response = session.send(prepared, stream=True)
-            return response.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
-        finally:
-            session.close()
 
     def _collect_body(self):
         content_type = self.headers.get(common.CONTENT_TYPE)

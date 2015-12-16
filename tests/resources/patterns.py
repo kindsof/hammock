@@ -1,21 +1,21 @@
 from __future__ import absolute_import
 import six
 import simplejson as json
-import hammock.resource as resource
+import hammock
 import hammock.types as types
 import hammock.common as common
 
 
-class Patterns(resource.Resource):
-    @resource.get()
+class Patterns(hammock.Resource):
+    @hammock.get()
     def get(self):
         return "base"
 
-    @resource.get("{my_id}")
+    @hammock.get("{my_id}")
     def get_id(self, my_id):
         return "id-%s" % my_id
 
-    @resource.sink("{my_id}/extra")
+    @hammock.sink("{my_id}/extra")
     def get_id_metadata(self, request, my_id):  # pylint: disable=unused-argument
         return types.Response(
             stream=six.BytesIO(six.b(json.dumps('extra-%s') % my_id)),

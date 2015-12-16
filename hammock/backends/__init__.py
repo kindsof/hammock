@@ -2,5 +2,17 @@
 # pylint: disable=unused-import
 
 from __future__ import absolute_import
-from .falcon import Falcon
-AWeb = dict
+from ._falcon import Falcon
+from ._aweb import AWeb
+
+try:
+    import falcon
+except ImportError:
+    falcon = None
+
+try:
+    import aiohttp.web as aweb
+except ImportError:
+    aweb = None
+
+

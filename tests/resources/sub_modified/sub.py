@@ -1,10 +1,10 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
 
 
-class Sub(resource.Resource):
+class Sub(hammock.Resource):
     PATH = "different_sub"
 
-    @resource.get()
+    @hammock.get()
     def test_headers(self):
         return "modified-in-modified"

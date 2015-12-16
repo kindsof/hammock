@@ -1,24 +1,24 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
 
 
-class Keywords(resource.Resource):
+class Keywords(hammock.Resource):
 
     DEFAULT = 10
 
-    @resource.get()
+    @hammock.get()
     def get(self, arg, default=DEFAULT, **kwargs):
         return self._answer(arg, default, **kwargs)
 
-    @resource.post()
+    @hammock.post()
     def post(self, arg, default=DEFAULT, **kwargs):
         return self._answer(arg, default, **kwargs)
 
-    @resource.put()
+    @hammock.put()
     def put(self, arg, default=DEFAULT, **kwargs):
         return self._answer(arg, default, **kwargs)
 
-    @resource.get("headers")
+    @hammock.get("headers")
     def get_with_headers(self, arg, _headers, default=10, **kwargs):
         return self._answer(arg, default, headers=dict(_headers), **kwargs)
 

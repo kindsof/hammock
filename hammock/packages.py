@@ -2,12 +2,12 @@ from __future__ import absolute_import
 import importlib
 import pkgutil
 import inspect
-import hammock.resource as resource
+import hammock
 
 
 def iter_resource_classes(package):
     """
-    Iterate recursively over all classes inherit from hammock.resource.Resource in the package.
+    Iterate recursively over all classes inherit from hammock.hammock.Resource in the package.
     :param package: package to iterate over
     :return: a list of tuples: (
         resource_class: a resource class
@@ -58,4 +58,4 @@ def _iter_resource_classes(module):
 
 
 def _is_resource_class(obj):
-    return inspect.isclass(obj) and issubclass(obj, resource.Resource)
+    return inspect.isclass(obj) and issubclass(obj, hammock.Resource)

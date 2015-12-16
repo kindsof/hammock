@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import hammock.common as common
 import hammock.passthrough as passthrough
 import functools
-import inspect
 
 
 def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=False, exception_handler=None):
@@ -30,10 +29,3 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
         func.method = _wrapper
         return func
     return _decorator
-
-
-def iter_sink_methods(resource_object):
-    return (
-        attr for _, attr in inspect.getmembers(resource_object)
-        if getattr(attr, "is_sink", False)
-    )

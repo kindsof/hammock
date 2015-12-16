@@ -1,17 +1,17 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
 
 
-class Lists(resource.Resource):
+class Lists(hammock.Resource):
 
-    @resource.get('{path}')
+    @hammock.get('{path}')
     def get(self, path, argument):
         return {
             'path': int(path),
             'argument': [int(ai) for ai in argument],
         }
 
-    @resource.post('{path}')
+    @hammock.post('{path}')
     def append(self, path, _list):
         _list.append(int(path))
         return _list

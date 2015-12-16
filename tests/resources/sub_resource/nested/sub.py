@@ -1,9 +1,9 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
 
 
-class Sub(resource.Resource):
+class Sub(hammock.Resource):
 
-    @resource.get()
+    @hammock.get()
     def test_headers(self):
         return "sub-in-nested-in-sub"

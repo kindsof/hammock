@@ -6,11 +6,10 @@ import re
 import logging
 import hammock.packages as packages
 import hammock.common as common
-import hammock.route as route
-import hammock.sink as sink
 import hammock.exceptions as exceptions
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+LOG = logging.getLogger(__name__)
 
 
 class Falcon(object):
@@ -34,7 +33,7 @@ class Falcon(object):
 
     def _add_route_methods(self, resource, base_path):
         paths = collections.defaultdict(dict)
-        for method in route.iter_route_methods(resource):
+        for method in common.iter_route_methods(resource):
             falcon_method = 'on_{}'.format(method.method.lower())
             paths[method.path][falcon_method] = functools.partial(method.responder, resource)
         for route_path, methods in six.iteritems(paths):
@@ -45,17 +44,17 @@ class Falcon(object):
             )
             full_path = "/%s" % common.url_join(base_path, resource.name(), route_path)
             self._api.add_route(full_path, new_route_class())
-            log.debug("Added route %s", full_path)
+            LOG.debug("Added route %s", full_path)
 
     def _add_sink_methods(self, resource, base_path):
         sinks = {}
-        for method in sink.iter_sink_methods(resource):
+        for method in common.iter_sink_methods(resource):
             full_path = '/' + common.url_join(base_path, resource.name(), method.path)
             pattern = re.compile(common.CONVERT_PATH_VARIABLES(full_path))
             sinks[pattern] = method.method
         for pattern in sorted(sinks, key=functools.cmp_to_key(lambda p1, p2: len(p1.pattern) - len(p2.pattern))):
             self._api.add_sink(functools.partial(sinks[pattern], resource), pattern)
-            log.debug("Added sink %s for %s", pattern.pattern, repr(sinks[pattern].__code__))
+            LOG.debug("Added sink %s for %s", pattern.pattern, repr(sinks[pattern].__code__))
 
     @staticmethod
     def _falcon_class_name(base_path, resource, route_path):

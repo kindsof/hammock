@@ -3,6 +3,7 @@ import simplejson as json
 import six
 import warnings
 import hammock.common as common
+import hammock.backends as backends
 from . import headers as headers_module
 
 
@@ -49,14 +50,15 @@ class Response(object):
             })
         return cls(content, response_headers, response_status)
 
-    def update_falcon(self, response):
-        response.status = self.status
-        for key, value in six.iteritems(self.headers):
-            response.set_header(key, value)
-        if hasattr(self.content, 'read'):
-            response.stream = self.content
-        else:
-            response.body = self.content
+    def update_backend(self, resp):
+        if backends.falcon and isinstance(resp, backends.falcon.Response):
+            resp.status = self.status
+            for key, value in six.iteritems(self.headers):
+                resp.set_header(key, value)
+            if hasattr(self.content, 'read'):
+                resp.stream = self.content
+            else:
+                resp.body = self.content
 
     def set_header(self, key, value):
         warnings.warn('set_header is deprecated, use headers[key] = value instead', DeprecationWarning)
@@ -74,11 +76,9 @@ class Response(object):
 
     @classmethod
     def _convert_result_to_dict(cls, result):
-        if result is None:
-            return {}
-        elif isinstance(result, dict):
+        if isinstance(result, dict):
             return result
-        elif isinstance(result, (list, six.string_types, six.binary_type, bool)):
+        elif isinstance(result, (list, six.string_types, six.binary_type, bool, type(None))):
             return {common.KW_CONTENT: result}
         else:
             return {common.KW_FILE: result}

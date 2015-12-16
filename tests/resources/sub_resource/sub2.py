@@ -1,9 +1,9 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
 
 
-class Sub2(resource.Resource):
+class Sub2(hammock.Resource):
 
-    @resource.get()
+    @hammock.get()
     def test_headers(self):
         return "sub2-in-sub1"

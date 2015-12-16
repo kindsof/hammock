@@ -6,8 +6,7 @@ import re
 import six
 import hammock.common as common
 import hammock.packages as packages
-import hammock.resource as resource
-import hammock.route as route
+import hammock
 import hammock.types.func_spec as func_spec
 import hammock.types.file as file_module
 
@@ -38,7 +37,7 @@ class ClientGenerator(object):
             class_name=class_name,
             resources_names=resources_names,
             resource_classes=resource_classes,
-            token_entry=resource.TOKEN_ENTRY,
+            token_entry=hammock.TOKEN_ENTRY,
             type_json=common.TYPE_JSON,
             type_octet_stream=common.TYPE_OCTET_STREAM,
             url_params_methods=common.URL_PARAMS_METHODS,
@@ -131,7 +130,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
 
 def client_methods_propeties(resource_object):
     kwargs = []
-    for method in route.iter_route_methods(resource_object):
+    for method in common.iter_route_methods(resource_object):
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}

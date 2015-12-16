@@ -1,29 +1,29 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
 
 
-class Text(resource.Resource):
+class Text(hammock.Resource):
 
-    @resource.get("upper/{text}")
+    @hammock.get("upper/{text}")
     def upper(self, text):  # pylint: disable=unused-argument
         return text.upper()
 
-    @resource.get("replace/{text}")
+    @hammock.get("replace/{text}")
     def replace(self, text, old, new):  # pylint: disable=unused-argument
         return text.replace(old, new)
 
-    @resource.put("replace/{text}")
+    @hammock.put("replace/{text}")
     def replace_put(self, text, old, new):  # pylint: disable=unused-argument
         return text.replace(old, new)
 
-    @resource.post("replace/{text}")
+    @hammock.post("replace/{text}")
     def replace_post(self, text, old, new):  # pylint: disable=unused-argument
         return text.replace(old, new)
 
-    @resource.delete("replace/{text}")
+    @hammock.delete("replace/{text}")
     def replace_delete(self, text, old, new):  # pylint: disable=unused-argument
         return text.replace(old, new)
 
-    @resource.get("raise_exception")
+    @hammock.get("raise_exception")
     def raise_exception(self):  # pylint: disable=unused-argument
         raise Exception("This exeption is intentional")

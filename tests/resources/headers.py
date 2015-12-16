@@ -1,13 +1,14 @@
 from __future__ import absolute_import
-from hammock import resource
+import hammock
+import hammock.common as common
 
 
-class Headers(resource.Resource):
+class Headers(hammock.Resource):
 
-    @resource.get("{key}")
+    @hammock.get("{key}")
     def request_headers(self, key, value, _headers):
         return _headers(key) == value
 
-    @resource.get()
+    @hammock.get()
     def response_headers(self, _headers):
-        return {resource.KW_HEADERS: _headers}
+        return {common.KW_HEADERS: _headers}

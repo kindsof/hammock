@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import codecs
 import json
-from hammock import resource
+import hammock
 from hammock import common
 from hammock import types
 
@@ -37,17 +37,17 @@ def post_manipulate_path(response, _):
     return types.Response(body, headers, response.status)
 
 
-class Redirect(resource.Resource):
+class Redirect(hammock.Resource):
 
-    @resource.passthrough(dest=DEST, trim_prefix="redirect")
+    @hammock.sink(dest=DEST, trim_prefix="redirect")
     def passthrough(self):
         pass
 
-    @resource.get("specific")
+    @hammock.get("specific")
     def specific(self):
         return "specific"
 
-    @resource.post_passthrough(
+    @hammock.post_passthrough(
         dest=DEST,
         path='post-passthrough',
         trim_prefix='redirect',
@@ -57,7 +57,7 @@ class Redirect(resource.Resource):
     def post_passthrough(self):
         pass
 
-    @resource.post_passthrough(
+    @hammock.post_passthrough(
         dest=None,
         path='post-passthrough-with-body',
         trim_prefix='redirect',
@@ -78,7 +78,7 @@ class Redirect(resource.Resource):
             200
         )
 
-    @resource.get_passthrough(
+    @hammock.get_passthrough(
         dest=DEST,
         path='manipulate-path',
         trim_prefix='redirect',

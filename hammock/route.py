@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import functools
-import inspect
 import logging
 import six
 import hammock.common as common
@@ -36,7 +35,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
 
         @functools.wraps(func)
         def _wrapper(self, backend_req, backend_resp, **url_kwargs):
-            req = request.Request.from_falcon(backend_req)
+            req = request.Request.from_backend(backend_req)
             kwargs = _extract_kwargs(spec, url_kwargs, req)
             try:
                 result = func(self, **kwargs)
@@ -51,7 +50,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 common.log_exception(exc, req.uid)
                 self.handle_exception(exc, exception_handler)
             else:
-                resp.update_falcon(backend_resp)
+                resp.update_backend(backend_resp)
                 logging.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
 
         func.responder = _wrapper
@@ -126,10 +125,3 @@ def _convert_to_kwargs(spec, url_kwargs, req):
     if missing:
         raise exceptions.BadRequest('Missing parameters: {}'.format(', '.join(missing)))
     return kwargs
-
-
-def iter_route_methods(resource_object):
-    return (
-        attr for _, attr in inspect.getmembers(resource_object)
-        if getattr(attr, "is_route", False)
-    )
