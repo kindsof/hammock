@@ -1,9 +1,7 @@
 from __future__ import absolute_import
-import six
+import warnings
 import logging
-import requests
 import hammock.common as common
-import hammock.types as types
 import hammock.request as request
 
 
@@ -17,7 +15,7 @@ def passthrough(self, req, response, dest, pre_process, post_process, trim_prefi
         if pre_process:
             pre_process(req, context, **params)
         if dest:
-            output = send_to(req, dest)
+            output = req.send_to(dest)
         else:
             output = func(self, req, **params)
         if post_process:
@@ -38,26 +36,5 @@ def passthrough(self, req, response, dest, pre_process, post_process, trim_prefi
 
 
 def send_to(req, dest):
-    redirection_url = common.url_join(dest, req.path) + '?' + req.query
-    logging.info('[Passthrough %s] redirecting to %s', req.uid, redirection_url)
-    inner_request = requests.Request(
-        req.method,
-        url=redirection_url,
-        data=req.stream if req.method not in common.URL_PARAMS_METHODS else None,
-        headers={
-            k: v if k.lower() != "host" else six.moves.urllib.parse.urlparse(dest).netloc
-            for k, v in six.iteritems(req.headers)
-            if v != ""
-        },
-    )
-    session = requests.Session()
-    try:
-        prepared = session.prepare_request(inner_request)
-        if req.headers.get(common.CONTENT_LENGTH):
-            prepared.headers[common.CONTENT_LENGTH] = req.headers.get(common.CONTENT_LENGTH)
-        if req.headers.get('TRANSFER-ENCODING'):
-            del prepared.headers['TRANSFER-ENCODING']
-        inner_response = session.send(prepared, stream=True)
-        return types.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
-    finally:
-        session.close()
+    warnings.warn('deprecated, use req.send_to(dest) instead', DeprecationWarning)
+    return req.send_to(dest)
