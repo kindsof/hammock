@@ -9,6 +9,7 @@ from hammock import common
 from hammock import exceptions
 from hammock import types
 from hammock import url as url_module
+from hammock import response as response
 
 LOG = logging.getLogger(__name__)
 
@@ -103,7 +104,7 @@ class Request(object):
             if self.headers.get('TRANSFER-ENCODING'):
                 del prepared.headers['TRANSFER-ENCODING']
             inner_response = session.send(prepared, stream=True)
-            return types.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
+            return response.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
         finally:
             session.close()
 

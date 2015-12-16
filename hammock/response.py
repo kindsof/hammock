@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import six
 import warnings
 import hammock.common as common
-import hammock.types as types
+import hammock.headers as headers_module
 import simplejson as json
 
 
@@ -10,7 +10,7 @@ class Response(object):
 
     def __init__(self, content, headers, status):
         self.content = content
-        self.headers = headers
+        self.headers = headers_module.Headers(headers)
         self.status = str(status)
 
     @classmethod
@@ -26,7 +26,7 @@ class Response(object):
         """
         result = cls._convert_result_to_dict(result)
 
-        response_headers = types.Headers(result.pop(common.KW_HEADERS, {}))
+        response_headers = headers_module.Headers(result.pop(common.KW_HEADERS, {}))
         content_stream = result.pop(common.KW_FILE, None)
         response_status = result.pop(common.KW_STATUS, status)
         content = result.pop(common.KW_CONTENT, None)
@@ -34,7 +34,6 @@ class Response(object):
         if content_stream:
             content = content_stream
             response_headers.update({
-                # common.CONTENT_LENGTH: response_stream.content_length,
                 common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
             })
             response_headers.update(result)
@@ -66,6 +65,11 @@ class Response(object):
     @property
     def body(self):
         warnings.warn('body is deprecated, use .content instead', DeprecationWarning)
+        return self.content
+
+    @property
+    def stream(self):
+        warnings.warn('stream is deprecated, use .content instead', DeprecationWarning)
         return self.content
 
     @classmethod

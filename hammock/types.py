@@ -1,11 +1,13 @@
 from __future__ import absolute_import
 import six
-import falcon.util.structures as structures
-import collections
 import inspect
+import hammock.response as response
+from hammock.headers import Headers  # noqa  # pylint: disable=unused-import
 
 
-Response = collections.namedtuple("Response", ["stream", "headers", "status"])
+# XXX: temporary workaround, until dependencies will convert stream to content
+def Response(stream, headers, status):  # noqa  # pylint: disable=invalid-name
+    return response.Response(stream, headers, status)
 
 
 class File(object):
@@ -17,14 +19,6 @@ class File(object):
 
     def __len__(self):
         return self.content_length
-
-
-class Headers(structures.CaseInsensitiveDict):
-    def __init__(self, headers):
-        super(Headers, self).__init__(headers)
-
-    def __call__(self, key):
-        return self.get(key)
 
 
 class FuncSpec(object):
