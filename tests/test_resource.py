@@ -160,3 +160,9 @@ class TestResource(testing.TestBase):
         self.assertEqual(response['path'], 3)
         response = self._simulate('POST', 'lists/3', body=[1, 2])
         self.assertListEqual(response, [1, 2, 3])
+
+    def test_invalid_json_body(self):
+        self.assert_status(
+            753,
+            'POST', '/dict/a', '{"value":', headers={common.CONTENT_TYPE: common.TYPE_JSON}
+        )
