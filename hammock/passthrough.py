@@ -13,7 +13,7 @@ def passthrough(self, req, response, dest, pre_process, post_process, trim_prefi
     try:
         context = {}
         if trim_prefix:
-            _trim_prefix(req, trim_prefix)
+            req.trim_prefix(trim_prefix)
         if pre_process:
             pre_process(req, context, **params)
         if dest:
@@ -61,7 +61,3 @@ def send_to(req, dest):
         return types.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
     finally:
         session.close()
-
-
-def _trim_prefix(request, trim_prefix):
-    request.path = request.path.lstrip("/")[len(trim_prefix.strip("/")):]

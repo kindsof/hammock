@@ -1,15 +1,11 @@
 from __future__ import absolute_import
-
 import copy
-
 import simplejson as json
-import six
-import six.moves.urllib as urllib  # pylint: disable=import-error
 import logging
 from hammock import common
 from hammock import exceptions
-
 from hammock import types
+from hammock import url as url_module
 
 LOG = logging.getLogger(__name__)
 
@@ -17,11 +13,8 @@ LOG = logging.getLogger(__name__)
 class Request(object):
     def __init__(self, method, url, headers, stream):
         self.method = method.upper()
-        self._url = None
-        self._parsed_url = None
-        self._params = None
         self._collected_data = None
-        self.url = url
+        self._url = url_module.Url(url)
         self.headers = types.Headers(headers)
         self.stream = stream
         self.uid = common.uid()
@@ -33,49 +26,27 @@ class Request(object):
 
     @property
     def url(self):
-        return self._url
-
-    @url.setter
-    def url(self, url):
-        self._url = url
-        self._parsed_url = None
-        self._params = None
-
-    @property
-    def parsed_url(self):
-        """lazy evaluation of parsed url"""
-        if not self._parsed_url:
-            self._parsed_url = urllib.parse.urlparse(self.url)
-        return self._parsed_url
+        return self._url.url
 
     @property
     def path(self):
-        return self.parsed_url.path
+        return self._url.path
 
     @path.setter
     def path(self, path):
-        path = '/' + path.lstrip('/')
-        new_url = urllib.parse.urljoin(self.url, path)
-        if self.parsed_url.query:
-            new_url += '?' + self.parsed_url.query
-        self.url = new_url
+        self._url.path = path
 
     @property
     def scheme(self):
-        return self.parsed_url.scheme
+        return self._url.scheme
 
     @property
     def query(self):
-        return self.parsed_url.query
+        return self._url.query
 
     @property
     def params(self):
-        if not self._params:
-            self._params = {
-                key: self._param_value(value)
-                for key, value in six.iteritems(urllib.parse.parse_qs(self.parsed_url.query))
-                }
-        return self._params
+        return self._url.params
 
     @property
     def _cached_headers(self):  # XXX: backward compatibility, should be removed
@@ -96,6 +67,13 @@ class Request(object):
                 self._collected_data.update(self._collect_body())
         return self._collected_data.copy()
 
+    def trim_prefix(self, prefix):
+        """
+        Trims a prefix from the request's path
+        :param prefix: a prefix to trim
+        """
+        self.path = self.path.lstrip("/")[len(prefix.strip("/")):]
+
     def _collect_body(self):
         content_type = self.headers.get(common.CONTENT_TYPE)
         if content_type == common.TYPE_JSON:
@@ -109,10 +87,3 @@ class Request(object):
                 raise exceptions.MalformedJson()
         elif content_type == common.TYPE_OCTET_STREAM:
             return {common.KW_FILE: types.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}
-
-    @staticmethod
-    def _param_value(value):
-        if len(value) > 1:
-            return value
-        value = value[0]
-        return value if value != 'None' else None
