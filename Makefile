@@ -67,4 +67,4 @@ test_gunicorn:
 	gunicorn tests.app:application
 
 test_uwsgi:
-	uwsgi --http :8000 --module tests.app --honour-stdin --need-app
+	python -m tests.app

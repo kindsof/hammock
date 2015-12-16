@@ -25,5 +25,5 @@ COMMAND_LINE_ARGS = [
 ]
 
 if __name__ == '__main__':
-    port = sys.argv[1]  # pylint: disable=invalid-name
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000  # pylint: disable=invalid-name
     subprocess.check_output(command(port) + COMMAND_LINE_ARGS)
