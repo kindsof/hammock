@@ -12,7 +12,7 @@ DEST = "http://localhost:{:d}".format(PORT)
 def pre_manipulate(request, _):
     body = json.load(codecs.getreader('utf-8')(request.stream))
     body['some_more_data'] = 'b'
-    common.set_request_body(request, json.dumps(body))
+    request.set_content(json.dumps(body))
 
 
 def post_manipulate(response, _):

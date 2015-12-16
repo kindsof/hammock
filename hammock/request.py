@@ -4,6 +4,9 @@ import six
 import requests
 import simplejson as json
 import logging
+
+import warnings
+
 from hammock import common
 from hammock import exceptions
 from hammock import types
@@ -52,6 +55,7 @@ class Request(object):
 
     @property
     def _cached_headers(self):  # XXX: backward compatibility, should be removed
+        warnings.warn('_cached_headers is deprecated, use headers', DeprecationWarning)
         return self.headers
 
     @property
@@ -75,6 +79,10 @@ class Request(object):
         :param prefix: A prefix to trim
         """
         self.path = self.path.lstrip("/")[len(prefix.strip("/")):]
+
+    def set_content(self, content):
+        self.stream = content
+        self.headers[common.CONTENT_LENGTH] = len(content)
 
     def send_to(self, dest):
         redirection_url = common.url_join(dest, self.path) + '?' + self.query
