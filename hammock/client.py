@@ -1,14 +1,15 @@
 from __future__ import absolute_import
 from __future__ import print_function
-import six
-import hammock.resource as resource
-import hammock.route as route
-import hammock.common as common
-import hammock.types as types
-import hammock.packages as packages
+import inspect
 import jinja2
 import re
-import inspect
+import six
+import hammock.common as common
+import hammock.packages as packages
+import hammock.resource as resource
+import hammock.route as route
+import hammock.types.func_spec as func_spec
+import hammock.types.file as file_module
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader('hammock.templates', 'client'))
 FILE_TEMPLATE = ENV.get_template('file.j2')
@@ -41,7 +42,7 @@ class ClientGenerator(object):
             type_json=common.TYPE_JSON,
             type_octet_stream=common.TYPE_OCTET_STREAM,
             url_params_methods=common.URL_PARAMS_METHODS,
-            file_class=inspect.getsource(types.File),
+            file_class=inspect.getsource(file_module.File),
         )
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
@@ -134,7 +135,7 @@ def client_methods_propeties(resource_object):
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}
-            spec = types.FuncSpec(method)
+            spec = func_spec.FuncSpec(method)
             kwargs.append(dict(
                 method_name=method_name,
                 method=method.method,

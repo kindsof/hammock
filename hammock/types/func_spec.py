@@ -1,24 +1,6 @@
 from __future__ import absolute_import
-import six
 import inspect
-import hammock.response as response
-from hammock.headers import Headers  # noqa  # pylint: disable=unused-import
-
-
-# XXX: temporary workaround, until dependencies will convert stream to content
-def Response(stream, headers, status):  # noqa  # pylint: disable=invalid-name
-    return response.Response(stream, headers, status)
-
-
-class File(object):
-
-    def __init__(self, stream, content_length):
-        self.stream = stream
-        self.content_length = int(content_length)
-        self.len = self.content_length
-
-    def __len__(self):
-        return self.content_length
+import six
 
 
 class FuncSpec(object):

@@ -6,7 +6,7 @@ import logging
 import waiting
 import functools
 import requests
-import hammock.types as types
+import hammock.types.file as file_module
 import hammock.testing as testing
 import tests.app as app
 import tests.resources.exceptions as exceptions_resouce
@@ -45,7 +45,7 @@ class TestWhiteboxUWSGI(unittest.TestCase):
         content_length = size_mb << 20
 
         logging.info("Sending %dmb to server", size_mb)
-        file_object = types.File(
+        file_object = file_module.File(
             six.BytesIO(bytearray(content_length)),
             content_length,
         )
@@ -59,7 +59,7 @@ class TestWhiteboxUWSGI(unittest.TestCase):
 
         logging.info("Echoing %dmb with server", size_mb)
         data = bytearray(content_length)
-        file_object = types.File(six.BytesIO(data), content_length)
+        file_object = file_module.File(six.BytesIO(data), content_length)
         response = self._client.files.echo(file_object)
         response_data = list(response.stream())
         response_data = six.b('').join(response_data)

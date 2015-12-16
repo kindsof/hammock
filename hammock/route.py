@@ -1,15 +1,14 @@
 from __future__ import absolute_import
-import six
-import inspect
 import functools
+import inspect
 import logging
+import six
 import hammock.common as common
-import hammock.types as types
-import hammock.passthrough as passthrough_module
 import hammock.exceptions as exceptions
-import hammock.request as request
-import hammock.response as response
-
+import hammock.passthrough as passthrough_module
+import hammock.types.response as response
+import hammock.types.request as request
+import hammock.types.func_spec as func_spec
 
 # XXX: temporary workaround,
 # until all dependencies will change their exceptions to hammock.exceptions.
@@ -26,7 +25,7 @@ KW_HEADERS = common.KW_HEADERS
 
 def route(path, method, client_methods=None, success_code=200, response_content_type=common.TYPE_JSON, exception_handler=None):
     def _decorator(func):
-        spec = types.FuncSpec(func)
+        spec = func_spec.FuncSpec(func)
         func.is_route = True
         func.path = path
         func.method = method

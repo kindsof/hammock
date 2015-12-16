@@ -1,8 +1,11 @@
 from __future__ import absolute_import
-import warnings
+
 import logging
+
+import warnings
+
 import hammock.common as common
-import hammock.request as request
+import hammock.types.request as request
 
 
 def passthrough(self, backend_req, backend_resp, dest, pre_process, post_process, trim_prefix, func, exception_handler, **params):

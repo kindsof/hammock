@@ -1,15 +1,16 @@
 from __future__ import absolute_import
 import copy
-import six
+import logging
 import requests
 import simplejson as json
-import logging
+import six
 import warnings
-from hammock import common
-from hammock import exceptions
-from hammock import types
-from hammock import url as url_module
-from hammock import response as response
+import hammock.common as common
+import hammock.exceptions as exceptions
+from . import response as response
+from . import url as url_module
+from . import headers as headers_module
+from . import file as file_module
 
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class Request(object):
         self.method = method.upper()
         self._collected_data = None
         self._url = url_module.Url(url)
-        self.headers = types.Headers(headers)
+        self.headers = headers_module.Headers(headers)
         self.stream = stream
         self.uid = common.uid()
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
@@ -63,7 +64,7 @@ class Request(object):
         Generate data object combined out of query params, json body, or streamed data.
         :return: A dict, query params override by json body if relevant.
             Special fields:
-            - common.KW_FILE: a types.File object containing a stream if content-type is octet-stream.
+            - common.KW_FILE: a hammock.types.file.File object containing a stream if content-type is octet-stream.
             - common.KW_LIST: a list, if content-type is json and the content is of type list.
         """
         if not self._collected_data:
@@ -120,4 +121,4 @@ class Request(object):
             except (ValueError, UnicodeDecodeError):
                 raise exceptions.MalformedJson()
         elif content_type == common.TYPE_OCTET_STREAM:
-            return {common.KW_FILE: types.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}
+            return {common.KW_FILE: file_module.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}

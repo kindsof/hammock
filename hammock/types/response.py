@@ -1,9 +1,9 @@
 from __future__ import absolute_import
+import simplejson as json
 import six
 import warnings
 import hammock.common as common
-import hammock.headers as headers_module
-import simplejson as json
+from . import headers as headers_module
 
 
 class Response(object):
