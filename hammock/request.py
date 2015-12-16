@@ -4,9 +4,7 @@ import six
 import requests
 import simplejson as json
 import logging
-
 import warnings
-
 from hammock import common
 from hammock import exceptions
 from hammock import types
@@ -27,7 +25,7 @@ class Request(object):
 
     @classmethod
     def from_falcon(cls, req):
-        return Request(req.method, req.url, req.headers, req.stream)
+        return cls(req.method, req.url, req.headers, req.stream)
 
     @property
     def url(self):

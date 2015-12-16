@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import collections
 import falcon
 import falcon.testing as testing
 import hammock
@@ -30,7 +31,7 @@ class TestBase(testing.TestBase):
             headers.update({common.CONTENT_TYPE: content_type})
         kwargs["headers"] = headers
         response = self.simulate_request(url, method=method, **kwargs)
-        result = six.b('').join(response)
+        result = six.b('').join(response) if isinstance(response, collections.Iterable) else response
         if not binary_response:
             result = result.decode()
         headers = types.Headers(dict(self.srmock.headers))

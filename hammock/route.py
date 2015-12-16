@@ -2,13 +2,13 @@ from __future__ import absolute_import
 import six
 import inspect
 import functools
-import simplejson as json
 import logging
 import hammock.common as common
 import hammock.types as types
 import hammock.passthrough as passthrough_module
 import hammock.exceptions as exceptions
 import hammock.request as request
+import hammock.response as response
 
 
 # XXX: temporary workaround,
@@ -36,14 +36,12 @@ def route(path, method, client_methods=None, success_code=200, response_content_
         func.response_content_type = response_content_type
 
         @functools.wraps(func)
-        def _wrapper(self, req, resp, **url_kwargs):
-            req = request.Request.from_falcon(req)
+        def _wrapper(self, backend_req, backend_resp, **url_kwargs):
+            req = request.Request.from_falcon(backend_req)
             kwargs = _extract_kwargs(spec, url_kwargs, req)
             try:
                 result = func(self, **kwargs)
-                if result is not None:
-                    _extract_response_headers(result, resp)
-                    _extract_response_body(result, resp, response_content_type)
+                resp = response.Response.from_result(result, success_code)
             except exceptions.HttpError:
                 raise
             # XXX: temporary, until all dependencies will transfer to hammock exceptions
@@ -54,8 +52,8 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 common.log_exception(exc, req.uid)
                 self.handle_exception(exc, exception_handler)
             else:
-                resp.status = str(success_code)
-                logging.debug('[response %s] status: %s, body: %s', req.uid, resp.status, resp.body)
+                resp.update_falcon(backend_resp)
+                logging.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
 
         func.responder = _wrapper
         return func
@@ -129,22 +127,6 @@ def _convert_to_kwargs(spec, url_kwargs, req):
     if missing:
         raise exceptions.BadRequest('Missing parameters: {}'.format(', '.join(missing)))
     return kwargs
-
-
-def _extract_response_headers(result, response):
-    if isinstance(result, dict) and common.KW_HEADERS in result:
-        for key, value in six.iteritems(result.pop(common.KW_HEADERS)):
-            response.set_header(key, str(value))
-
-
-def _extract_response_body(result, response, content_type):
-    if content_type == common.TYPE_JSON:
-        response.body = json.dumps(result)
-    elif content_type == common.TYPE_OCTET_STREAM:
-        response.stream = result
-    else:
-        raise exceptions.BadRequest("Unsupported response content-type {}".format(content_type))
-    response.set_header(common.CONTENT_TYPE, content_type)
 
 
 def iter_route_methods(resource_object):
