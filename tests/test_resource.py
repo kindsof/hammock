@@ -166,3 +166,7 @@ class TestResource(testing.TestBase):
             753,
             'POST', '/dict/a', '{"value":', headers={common.CONTENT_TYPE: common.TYPE_JSON}
         )
+
+    def test_return_none(self):
+        result = self._simulate('GET', '/none')
+        self.assertEqual(result, None)

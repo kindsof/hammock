@@ -30,7 +30,6 @@ class Response(object):
         response_headers = headers_module.Headers(result.pop(common.KW_HEADERS, {}))
         content_stream = result.pop(common.KW_FILE, None)
         response_status = result.pop(common.KW_STATUS, status)
-        content = result.pop(common.KW_CONTENT, None)
 
         if content_stream:
             content = content_stream
@@ -39,11 +38,12 @@ class Response(object):
             })
             response_headers.update(result)
         else:
-            if content is not None:
-                content = json.dumps(content)
+            if common.KW_CONTENT in result:
+                content = result.pop(common.KW_CONTENT)
                 response_headers.update(result)
             else:
-                content = json.dumps(result)
+                content = result
+            content = json.dumps(content)
             response_headers.update({
                 common.CONTENT_LENGTH: len(content),
                 common.CONTENT_TYPE: common.TYPE_JSON,
