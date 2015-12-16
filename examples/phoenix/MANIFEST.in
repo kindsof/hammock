@@ -1,0 +1,4 @@
+# List of instructions for how to generate your manifest file.
+
+include etc/uwsgi.yml
+include etc/phoenix.service

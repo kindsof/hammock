@@ -1,0 +1,12 @@
+[Unit]
+Description=Disaster Recovery
+After=systemd-user-sessions.service
+
+[Service]
+ExecStart=/usr/bin/phoenix --start
+ExecReload=/usr/bin/phoenix --reload
+ExecStop=/usr/bin/phoenix --stop
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

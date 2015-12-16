@@ -1,0 +1,9 @@
+ipdb==0.8.1
+rpdb==0.1.5
+jinja2==2.7.3
+flake8==2.5.1
+uwsgi==2.0.11.2
+coverage==4.0.3
+
+# TODO (Shay): Update URLs to concrete hash once Yogi is done
+git+http://github.com/Stratoscale/strato-pylint.git@yogev/add-setup-file

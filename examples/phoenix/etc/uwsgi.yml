@@ -1,0 +1,18 @@
+uwsgi:
+  buffer-size: 65535
+  callable: API
+  enable-threads: true
+  http: :8000
+  http-timeout: 3600
+  lazy-apps: true
+  master: true
+  module: phoenix.api
+  max-requests: 100
+  need-app: true
+  procname: phoenix
+  queue: 100
+  queue-blocksize: 20480
+  socket-timeout: 60
+  stats: 127.0.0.1:8001
+  workers: 2
+  worker-reload-mercy: 86400
