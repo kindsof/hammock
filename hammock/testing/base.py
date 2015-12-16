@@ -2,12 +2,12 @@ from __future__ import absolute_import
 import collections
 import falcon
 import falcon.testing as testing
+import json
+import six
+import importlib
 import hammock
 import hammock.common as common
 import hammock.types as types
-import tests.resources as resources
-import json
-import six
 
 
 def default_404(req, res):  # pylint: disable=unused-argument
@@ -16,8 +16,11 @@ def default_404(req, res):  # pylint: disable=unused-argument
 
 class TestBase(testing.TestBase):
 
+    RESOURCES = 'tests.resources'
+
     def before(self):
         self.api.add_sink(default_404)
+        resources = importlib.import_module(self.RESOURCES)
         hammock.Hammock(self.api, resources)
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None, binary_response=False):
