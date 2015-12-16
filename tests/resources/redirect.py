@@ -5,7 +5,6 @@ from hammock import resource
 from hammock import common
 from hammock import types
 
-
 PORT = 12345
 DEST = "http://localhost:{:d}".format(PORT)
 
@@ -19,6 +18,19 @@ def pre_manipulate(request, _):
 def post_manipulate(response, _):
     body = common.get_response_json(response)
     assert body['body'].pop('some_more_data') == 'b'
+    body = json.dumps(body)
+    headers = types.Headers(response.headers)
+    headers[common.CONTENT_LENGTH] = str(len(body))
+    return types.Response(body, headers, response.status)
+
+
+def pre_manipulate_path(request, _):
+    request.path = 'a'
+
+
+def post_manipulate_path(response, _):
+    body = common.get_response_json(response)
+    assert body['path'] == '/a'
     body = json.dumps(body)
     headers = types.Headers(response.headers)
     headers[common.CONTENT_LENGTH] = str(len(body))
@@ -39,8 +51,8 @@ class Redirect(resource.Resource):
         dest=DEST,
         path='post-passthrough',
         trim_prefix='redirect',
-        post_process=post_manipulate,
         pre_process=pre_manipulate,
+        post_process=post_manipulate,
     )
     def post_passthrough(self):
         pass
@@ -49,13 +61,13 @@ class Redirect(resource.Resource):
         dest=None,
         path='post-passthrough-with-body',
         trim_prefix='redirect',
-        post_process=post_manipulate,
         pre_process=pre_manipulate,
+        post_process=post_manipulate,
     )
     def post_passthrough_with_body(self, request):
         body = json.dumps(dict(
             body=json.loads(request.stream),
-            headers=request.headers,
+            headers=dict(request.headers),
         ))
         return types.Response(
             body,
@@ -65,3 +77,13 @@ class Redirect(resource.Resource):
             },
             200
         )
+
+    @resource.get_passthrough(
+        dest=DEST,
+        path='manipulate-path',
+        trim_prefix='redirect',
+        pre_process=pre_manipulate_path,
+        post_process=post_manipulate_path,
+    )
+    def manipulate_path(self):
+        pass

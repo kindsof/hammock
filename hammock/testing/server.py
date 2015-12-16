@@ -73,7 +73,7 @@ class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
             body = None
         if body and not isinstance(body, six.string_types):
             body = body.decode()
-        if self.headers.get(common.CONTENT_TYPE) == common.TYPE_JSON:
+        if common.TYPE_JSON in self.headers.get(common.CONTENT_TYPE, ''):
             body = json.loads(body)
         parsed = six.moves.urllib.parse.urlsplit(self.path)
         content = dict(
@@ -86,7 +86,7 @@ class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
         content['server_name'] = self.__class__.name
         logging.info("Server echoing: %s", content)
         self.send_response(200)
-        if not self.headers.get(common.CONTENT_TYPE) or self.headers[common.CONTENT_TYPE] == common.TYPE_JSON:
+        if not self.headers.get(common.CONTENT_TYPE) or common.TYPE_JSON in self.headers[common.CONTENT_TYPE]:
             if isinstance(content, six.binary_type):
                 content = content.decode()  # pylint: disable=no-member
             content = six.b(json.dumps(content))

@@ -8,13 +8,13 @@ import six.moves.urllib as urllib  # pylint: disable=import-error
 import logging
 from hammock import common
 from hammock import exceptions
+
 from hammock import types
 
 LOG = logging.getLogger(__name__)
 
 
 class Request(object):
-
     def __init__(self, method, url, headers, stream):
         self.method = method.upper()
         self._url = None
@@ -74,8 +74,12 @@ class Request(object):
             self._params = {
                 key: self._param_value(value)
                 for key, value in six.iteritems(urllib.parse.parse_qs(self.parsed_url.query))
-            }
+                }
         return self._params
+
+    @property
+    def _cached_headers(self):  # XXX: backward compatibility, should be removed
+        return self.headers
 
     @property
     def collected_data(self):

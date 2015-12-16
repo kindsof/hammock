@@ -110,3 +110,4 @@ class TestRedirect(testing.TestBase):
     def test_passthroughs(self):
         self._simulate('POST', '/redirect/post-passthrough', body={'some_data': 'a'})
         self._simulate('POST', '/redirect/post-passthrough-with-body', body={'some_data': 'a'})
+        self._simulate('GET', '/redirect/manipulate-path')
