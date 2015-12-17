@@ -1,4 +1,7 @@
-def {{ method_name }}(self, {{ args|join(', ') }}
+def {{ method_name }}(self
+        {%- if args -%}
+            , {{ args|join(', ') }}
+        {%- endif -%}
         {%- if kwargs -%}
             {%- for k, v in kwargs.iteritems() -%}
                 , {{ k }}={{ v }}
