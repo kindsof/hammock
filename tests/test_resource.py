@@ -167,6 +167,10 @@ class TestResource(testing.TestBase):
             'POST', '/dict/a', '{"value":', headers={common.CONTENT_TYPE: common.TYPE_JSON}
         )
 
-    def test_return_none(self):
-        result = self._simulate('GET', '/responses/none')
-        self.assertEqual(result, None)
+    def test_return_values(self):
+        self.assertEqual(None, self._simulate('GET', '/responses/none'))
+        self.assertEqual('string', self._simulate('GET', '/responses/string'))
+        self.assertEqual('string', self._simulate('GET', '/responses/string-io'))
+        self.assertEqual('bytes', self._simulate('GET', '/responses/bytes'))
+        self.assertEqual('bytes', self._simulate('GET', '/responses/bytes-io'))
+        self.assertListEqual([1, 2, 3], self._simulate('GET', '/responses/list'))
