@@ -13,19 +13,17 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
             common.func_is_pass(func)
 
         @functools.wraps(func)
-        def _wrapper(self, request, response, **params):
-            passthrough.passthrough(
+        def _wrapper(self, request):
+            return passthrough.passthrough(
                 self,
                 request,
-                response,
                 dest,
                 pre_process,
                 post_process,
                 trim_prefix,
                 func,
                 exception_handler,
-                **params
             )
-        func.method = _wrapper
+        func.responder = _wrapper
         return func
     return _decorator

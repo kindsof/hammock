@@ -3,33 +3,28 @@ import six
 import logging
 import requests
 import hammock.common as common
-import hammock.backends as backends
 import hammock.types.response as response
 
 
-def passthrough(self, backend_req, backend_resp, dest, pre_process, post_process, trim_prefix, func, exception_handler, **params):
-    req = backends.get_request(backend_req)
+def passthrough(self, req, dest, pre_process, post_process, trim_prefix, func, exception_handler):
     logging.debug('[Passthrough received %s] requested: %s', req.uid, req.url)
     try:
         context = {}
         if trim_prefix:
             req.trim_prefix(trim_prefix)
         if pre_process:
-            pre_process(req, context, **params)
-        if dest:
-            resp = send_to(req, dest)
-        else:
-            resp = func(self, req, **params)
+            pre_process(req, context, **req.url_params)
+
+        resp = send_to(req, dest) if dest else func(self, req, **req.url_params)
+
         if post_process:
-            resp = post_process(resp, context, **params)  # XXX: should remove the resp = once harbour will adapt
-        backends.update_response(resp, backend_resp)
+            resp = post_process(resp, context, **req.url_params)  # XXX: should remove the resp = once harbour will adapt
     except Exception as exc:  # pylint: disable=broad-except
         common.log_exception(exc, req.uid)
         self.handle_exception(exc, exception_handler)
     else:
-        logging.debug(
-            '[Passthrough response %s] status: %s, body: %s', req.uid, resp.status, resp.content,
-        )
+        logging.debug('[Passthrough response %s] status: %s, body: %s', req.uid, resp.status, resp.content)
+        return resp
 
 
 def send_to(req, dest):

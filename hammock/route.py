@@ -3,7 +3,6 @@ import functools
 import logging
 import six
 import hammock.common as common
-import hammock.backends as backends
 import hammock.exceptions as exceptions
 import hammock.passthrough as passthrough_module
 import hammock.types.response as response
@@ -31,12 +30,10 @@ def route(path, method, client_methods=None, success_code=200, response_content_
         func.response_content_type = response_content_type
 
         @functools.wraps(func)
-        def _wrapper(self, backend_req, backend_resp, **url_kwargs):
-            req = backends.get_request(backend_req)
-            kwargs = _extract_kwargs(spec, url_kwargs, req)
+        def _wrapper(self, req):
+            kwargs = _extract_kwargs(spec, req)
             try:
                 result = func(self, **kwargs)
-                resp = response.Response.from_result(result, success_code)
             except exceptions.HttpError:
                 raise
             # XXX: temporary, until all dependencies will transfer to hammock exceptions
@@ -47,8 +44,9 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 common.log_exception(exc, req.uid)
                 self.handle_exception(exc, exception_handler)
             else:
-                backends.update_response(resp, backend_resp)
+                resp = response.Response.from_result(result, success_code)
                 logging.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
+                return resp
 
         func.responder = _wrapper
         return func
@@ -66,18 +64,16 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
         func.response_content_type = None
 
         @functools.wraps(func)
-        def _wrapper(self, req, resp, **params):
-            passthrough_module.passthrough(
+        def _wrapper(self, req):
+            return passthrough_module.passthrough(
                 self,
                 req,
-                resp,
                 dest,
                 pre_process,
                 post_process,
                 trim_prefix,
                 func,
                 exception_handler,
-                **params
             )
 
         func.responder = _wrapper
@@ -86,9 +82,9 @@ def passthrough(path, method, dest, pre_process=None, post_process=None, trim_pr
     return _decorator
 
 
-def _extract_kwargs(spec, url_kwargs, req):
+def _extract_kwargs(spec, req):
     try:
-        kwargs = _convert_to_kwargs(spec, url_kwargs, req)
+        kwargs = _convert_to_kwargs(spec, req)
         logging.debug("[kwargs %s] %s", req.uid, kwargs)
         return kwargs
     except exceptions.HttpError:
@@ -98,10 +94,9 @@ def _extract_kwargs(spec, url_kwargs, req):
         raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
 
 
-def _convert_to_kwargs(spec, url_kwargs, req):
+def _convert_to_kwargs(spec, req):
     args = spec.args[:]
     kwargs = req.collected_data
-    kwargs.update(url_kwargs or {})
     kwargs.update({
         keyword: kwargs.get(keyword, default)
         for keyword, default in six.iteritems(spec.kwargs)

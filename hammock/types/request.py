@@ -13,12 +13,13 @@ LOG = logging.getLogger(__name__)
 
 
 class Request(object):
-    def __init__(self, method, url, headers, stream):
+    def __init__(self, method, url, headers, stream, url_params):
         self.method = method.upper()
         self._collected_data = None
         self._url = url_module.Url(url)
         self.headers = headers_module.Headers(headers)
         self.stream = stream
+        self.url_params = url_params
         self.uid = common.uid()
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
 
@@ -70,6 +71,7 @@ class Request(object):
                 body = self._collect_body()
                 if body:
                     self._collected_data.update(body)
+            self._collected_data.update(self.url_params)
         return self._collected_data.copy()
 
     def trim_prefix(self, prefix):
