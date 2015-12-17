@@ -7,7 +7,7 @@ class Backend(object):
 
     def __init__(self, api):
         self._api = api
-        self._api.add_error_handler(exceptions.HttpError, self._handle_http_error)
+        self.add_error_handler(exceptions.HttpError, self._api)
 
     def add_resources(self, base_node, resource_package):
         """
@@ -19,5 +19,14 @@ class Backend(object):
             node = base_node.get_node(parents)
             node.add(resource_class.name(), resource_class)
             resource = resource_class()
-            self._add_route_methods(resource, prefix)
-            self._add_sink_methods(resource, prefix)
+            self.add_route_methods(resource, prefix)
+            self.add_sink_methods(resource, prefix)
+
+    def add_route_methods(self, resource, base_path):
+        raise NotImplementedError()
+
+    def add_sink_methods(self, resource, base_path):
+        raise NotImplementedError()
+
+    def add_error_handler(self, exc_class, api):
+        raise NotImplementedError()

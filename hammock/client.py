@@ -130,7 +130,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
 
 def client_methods_propeties(resource_object):
     kwargs = []
-    for method in common.iter_route_methods(resource_object):
+    for method in resource_object.iter_route_methods():
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}

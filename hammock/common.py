@@ -56,20 +56,6 @@ def uid(length=8):
     return ''.join(random.sample(ID_LETTERS, length))
 
 
-def iter_route_methods(resource_object):
-    return (
-        attr for _, attr in inspect.getmembers(resource_object)
-        if getattr(attr, "is_route", False)
-    )
-
-
-def iter_sink_methods(resource_object):
-    return (
-        attr for _, attr in inspect.getmembers(resource_object)
-        if getattr(attr, "is_sink", False)
-    )
-
-
 def get_stream_length(stream):
     if hasattr(stream, 'len'):
         return stream.len
