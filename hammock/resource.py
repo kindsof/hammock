@@ -3,6 +3,7 @@ import collections
 import functools
 import hammock.exceptions as exceptions
 import hammock.common as common
+import hammock.route as route
 
 
 class Resource(object):
@@ -40,7 +41,7 @@ class Resource(object):
         return [
             (common.url_join(self.name(), sink.path), sink.responder)
             for sink in self.iter_sink_methods()
-        ]
+            ]
 
     @staticmethod
     def _to_internal_server_error(exc):
@@ -62,3 +63,21 @@ class Resource(object):
             ),
             key=functools.cmp_to_key(lambda p1, p2: len(p1.pattern) - len(p2.pattern))
         )
+
+
+# XXX: will be removed. HERE FOR COMPATIBILITY
+
+def get(path="", **kwargs):
+    return route.route(path, "GET", **kwargs)
+
+
+def head(path="", **kwargs):
+    return route.route(path, "HEAD", **kwargs)
+
+
+def post(path="", **kwargs):
+    return route.route(path, "POST", **kwargs)
+
+
+def put(path="", **kwargs):
+    return route.route(path, "PUT", **kwargs)
