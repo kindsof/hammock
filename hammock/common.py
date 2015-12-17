@@ -68,3 +68,11 @@ def iter_sink_methods(resource_object):
         attr for _, attr in inspect.getmembers(resource_object)
         if getattr(attr, "is_sink", False)
     )
+
+
+def get_stream_length(stream):
+    if hasattr(stream, 'len'):
+        return stream.len
+    if hasattr(stream, '__len__'):
+        return len(stream)
+    return None

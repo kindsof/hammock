@@ -32,9 +32,10 @@ class Response(object):
 
         if content_stream:
             content = content_stream
-            response_headers.update({
-                common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
-            })
+            response_headers[common.CONTENT_TYPE] = common.TYPE_OCTET_STREAM
+            length = common.get_stream_length(content)
+            if length:
+                response_headers[common.CONTENT_LENGTH] = length
             response_headers.update(result)
         else:
             if common.KW_CONTENT in result:
