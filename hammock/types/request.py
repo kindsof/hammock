@@ -5,7 +5,6 @@ import simplejson as json
 import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions
-import hammock.backends as backends
 from . import url as url_module
 from . import headers as headers_module
 from . import file as file_module
@@ -22,13 +21,6 @@ class Request(object):
         self.stream = stream
         self.uid = common.uid()
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
-
-    @classmethod
-    def from_backend(cls, req):
-        if backends.falcon and isinstance(req, backends.falcon.Request):
-            return cls(req.method, req.url, req.headers, req.stream)
-        else:
-            raise Exception('Unsupported request type %s', type(req))
 
     @property
     def url(self):

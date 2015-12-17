@@ -3,7 +3,6 @@ import simplejson as json
 import six
 import warnings
 import hammock.common as common
-import hammock.backends as backends
 from . import headers as headers_module
 
 
@@ -49,16 +48,6 @@ class Response(object):
                 common.CONTENT_TYPE: common.TYPE_JSON,
             })
         return cls(content, response_headers, response_status)
-
-    def update_backend(self, resp):
-        if backends.falcon and isinstance(resp, backends.falcon.Response):
-            resp.status = self.status
-            for key, value in six.iteritems(self.headers):
-                resp.set_header(key, value)
-            if hasattr(self.content, 'read'):
-                resp.stream = self.content
-            else:
-                resp.body = self.content
 
     def set_header(self, key, value):
         warnings.warn('set_header is deprecated, use headers[key] = value instead', DeprecationWarning)

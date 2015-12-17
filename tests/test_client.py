@@ -11,7 +11,7 @@ def get_client(*args, **kwargs):
     if not os.path.exists('build'):
         os.mkdir('build')
     with open('build/hammock_client.py', 'w') as client_file:
-        client_file.write(client.ClientGenerator("HammockClient", resources).code)
+        client_file.write(client.ClientGenerator("HammockClient", resources).code + '\n')
     sys.path.append('build')
     client_class = importlib.import_module("hammock_client").HammockClient
     return client_class(*args, **kwargs)

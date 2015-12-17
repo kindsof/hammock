@@ -11,11 +11,7 @@ from hammock.common import CONTENT_TYPE, CONTENT_LENGTH   # noqa  # pylint: disa
 class Hammock(resource_node.ResourceNode):
     def __init__(self, api, resource_package):
         self._api = api
-        self._backend = None
-        if backends.falcon and isinstance(api, backends.falcon.API):
-            self._backend = backends.Falcon(api)
-        elif backends.aweb and isinstance(api, backends.aweb.Application):
-            self._backend = backends.AWeb(api)
+        self._backend = backends.get(api)
         self._backend.add_resources(self, resource_package)
 
 

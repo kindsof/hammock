@@ -3,10 +3,10 @@ import functools
 import logging
 import six
 import hammock.common as common
+import hammock.backends as backends
 import hammock.exceptions as exceptions
 import hammock.passthrough as passthrough_module
 import hammock.types.response as response
-import hammock.types.request as request
 import hammock.types.func_spec as func_spec
 
 # XXX: temporary workaround,
@@ -17,9 +17,6 @@ except ImportError:
     # fake falcon module and some specific exception, so we can except it later.
     falcon = type('falcon', (object,), {'HTTPError': type('HTTPError', (Exception,), {})})  # pylint: disable=invalid-name
 # XXX
-
-
-KW_HEADERS = common.KW_HEADERS
 
 
 def route(path, method, client_methods=None, success_code=200, response_content_type=common.TYPE_JSON, exception_handler=None):
@@ -35,7 +32,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
 
         @functools.wraps(func)
         def _wrapper(self, backend_req, backend_resp, **url_kwargs):
-            req = request.Request.from_backend(backend_req)
+            req = backends.get_request(backend_req)
             kwargs = _extract_kwargs(spec, url_kwargs, req)
             try:
                 result = func(self, **kwargs)
@@ -50,7 +47,7 @@ def route(path, method, client_methods=None, success_code=200, response_content_
                 common.log_exception(exc, req.uid)
                 self.handle_exception(exc, exception_handler)
             else:
-                resp.update_backend(backend_resp)
+                backends.update_response(resp, backend_resp)
                 logging.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
 
         func.responder = _wrapper

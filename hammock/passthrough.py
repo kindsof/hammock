@@ -3,12 +3,12 @@ import six
 import logging
 import requests
 import hammock.common as common
-import hammock.types.request as request
+import hammock.backends as backends
 import hammock.types.response as response
 
 
 def passthrough(self, backend_req, backend_resp, dest, pre_process, post_process, trim_prefix, func, exception_handler, **params):
-    req = request.Request.from_backend(backend_req)
+    req = backends.get_request(backend_req)
     logging.debug('[Passthrough received %s] requested: %s', req.uid, req.url)
     try:
         context = {}
@@ -22,7 +22,7 @@ def passthrough(self, backend_req, backend_resp, dest, pre_process, post_process
             resp = func(self, req, **params)
         if post_process:
             resp = post_process(resp, context, **params)  # XXX: should remove the resp = once harbour will adapt
-        resp.update_backend(backend_resp)
+        backends.update_response(resp, backend_resp)
     except Exception as exc:  # pylint: disable=broad-except
         common.log_exception(exc, req.uid)
         self.handle_exception(exc, exception_handler)
