@@ -26,14 +26,14 @@ def passthrough(self, backend_req, backend_resp, dest, pre_process, post_process
     except Exception as exc:  # pylint: disable=broad-except
         common.log_exception(exc, req.uid)
         self.handle_exception(exc, exception_handler)
-    finally:
+    else:
         logging.debug(
             '[Passthrough response %s] status: %s, body: %s', req.uid, resp.status, resp.content,
         )
 
 
 def send_to(req, dest):
-    redirection_url = common.url_join(dest, req.path) + '?' + req.query
+    redirection_url = common.url_join(dest, req.relative_uri)
     logging.info('[Passthrough %s] redirecting to %s', req.uid, redirection_url)
     inner_request = requests.Request(
         req.method,

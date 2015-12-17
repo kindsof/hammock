@@ -55,6 +55,10 @@ class Request(object):
         return self._url.params
 
     @property
+    def relative_uri(self):
+        return self._url.path + (('?' + self._url.query) if self._url.query else '')
+
+    @property
     def _cached_headers(self):  # XXX: backward compatibility, should be removed
         warnings.warn('_cached_headers is deprecated, use headers', DeprecationWarning)
         return self.headers
@@ -71,7 +75,9 @@ class Request(object):
         if not self._collected_data:
             self._collected_data = copy.deepcopy(self.params)
             if self.method not in common.URL_PARAMS_METHODS:
-                self._collected_data.update(self._collect_body())
+                body = self._collect_body()
+                if body:
+                    self._collected_data.update(body)
         return self._collected_data.copy()
 
     def trim_prefix(self, prefix):
@@ -94,6 +100,10 @@ class Request(object):
                     return body
                 elif type(body) == list:
                     return {common.KW_LIST: body}
+                elif body is None:
+                    return None
+                else:
+                    return {common.KW_CONTENT: body}
             except (ValueError, UnicodeDecodeError):
                 raise exceptions.MalformedJson()
         elif content_type == common.TYPE_OCTET_STREAM:

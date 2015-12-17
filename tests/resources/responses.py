@@ -2,9 +2,8 @@ from __future__ import absolute_import
 import hammock
 
 
-class NoneTest(hammock.Resource):
-    PATH = 'none'
+class Responses(hammock.Resource):
 
-    @hammock.get()
+    @hammock.get(path='none')
     def none(self):
         return None

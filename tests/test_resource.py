@@ -168,5 +168,5 @@ class TestResource(testing.TestBase):
         )
 
     def test_return_none(self):
-        result = self._simulate('GET', '/none')
+        result = self._simulate('GET', '/responses/none')
         self.assertEqual(result, None)

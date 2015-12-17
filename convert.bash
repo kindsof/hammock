@@ -3,7 +3,7 @@
     "s/from hammock import resource/import hammock/" \
     s/resource.passthrough/hammock.sink/ \
     s/resource.delete/hammock.delete/ \
-    s/resource.get/hammock.get/ \
+    s/@resource.get/@hammock.get/ \
     s/resource.put/hammock.put/ \
     s/resource.post/hammock.post/ \
     s/resource.head/hammock.head/ \
