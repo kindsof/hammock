@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import abc
 import hammock.packages as packages
 import hammock.exceptions as exceptions
 
@@ -22,11 +23,23 @@ class Backend(object):
             self.add_route_methods(resource, prefix)
             self.add_sink_methods(resource, prefix)
 
+    @abc.abstractmethod
     def add_route_methods(self, resource, base_path):
-        raise NotImplementedError()
+        """Add route methods of a resource
+        :param resource: a Resource class
+        :param base_path: path of resource mounting
+        """
 
+    @abc.abstractmethod
     def add_sink_methods(self, resource, base_path):
-        raise NotImplementedError()
+        """Add sink methods of a resource
+        :param resource: a Resource class
+        :param base_path: path of resource mounting
+        """
 
+    @abc.abstractmethod
     def add_error_handler(self, exc_class, api):
-        raise NotImplementedError()
+        """Add error handler for exception of class exc_class
+        :param exc_class: type of exception
+        :param api: api instance
+        """
