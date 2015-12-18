@@ -16,7 +16,7 @@ def pre_manipulate(request, _):
 
 
 def post_manipulate(response, _):
-    body = common.get_response_json(response)
+    body = response.json
     assert body['body'].pop('some_more_data') == 'b'
     body = json.dumps(body)
     headers = types.Headers(response.headers)
@@ -29,7 +29,7 @@ def pre_manipulate_path(request, _):
 
 
 def post_manipulate_path(response, _):
-    body = common.get_response_json(response)
+    body = response.json
     assert body['path'] == '/a'
     body = json.dumps(body)
     headers = types.Headers(response.headers)

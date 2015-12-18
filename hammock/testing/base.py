@@ -34,9 +34,12 @@ class TestBase(testing.TestBase):
             headers.update({common.CONTENT_TYPE: content_type})
         kwargs["headers"] = headers
         response = self.simulate_request(url, method=method, **kwargs)
-        result = six.b('').join(response) if isinstance(response, collections.Iterable) else response
+        if isinstance(response, collections.Iterable):
+            result = six.b('').join(response)
+        else:
+            result = response
         if not binary_response:
-            result = result.decode()
+            result = result.decode(common.ENCODING)
         headers = types.Headers(dict(self.srmock.headers))
         if not binary_response and common.TYPE_JSON in headers.get(common.CONTENT_TYPE, common.TYPE_JSON):
             result = json.loads(result)

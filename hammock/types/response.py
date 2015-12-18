@@ -9,6 +9,7 @@ from . import headers as headers_module
 class Response(object):
 
     def __init__(self, content, headers, status):
+        self._json = None
         self.content = content
         self.headers = headers_module.Headers(headers)
         self.status = str(status)
@@ -31,7 +32,7 @@ class Response(object):
         response_status = result.pop(common.KW_STATUS, status)
 
         if content_stream:
-            content = content_stream
+            content = common.to_bytes(content_stream)
             response_headers[common.CONTENT_TYPE] = common.TYPE_OCTET_STREAM
             length = common.get_stream_length(content)
             if length:
@@ -63,6 +64,16 @@ class Response(object):
     def stream(self):
         warnings.warn('stream is deprecated, use .content instead', DeprecationWarning)
         return self.content
+
+    @property
+    def is_stream(self):
+        return hasattr(self.content, 'read')
+
+    @property
+    def json(self):
+        if not self._json:
+            self._json = json.load(self.content) if self.is_stream else json.loads(self.content)
+        return self._json
 
     @classmethod
     def _convert_result_to_dict(cls, result):
