@@ -7,8 +7,8 @@ import six
 import hammock.common as common
 import hammock.packages as packages
 import hammock
-import hammock.types.func_spec as func_spec
 import hammock.types.file as file_module
+import hammock.wrappers as wrappers
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader('hammock.templates', 'client'))
 FILE_TEMPLATE = ENV.get_template('file.j2')
@@ -130,22 +130,21 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
 
 def client_methods_propeties(resource_object):
     kwargs = []
-    for method in resource_object.iter_route_methods():
+    for method in resource_object.iter_route_methods(wrappers.Route):
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}
-            spec = func_spec.FuncSpec(method)
             kwargs.append(dict(
                 method_name=method_name,
                 method=method.method,
                 url=method.path,
-                args=[arg for arg in spec.args if arg not in method_defaults],
-                kwargs=spec.kwargs,
-                url_kw=[arg for arg in spec.args if "{{{}}}".format(arg) in method.path],
+                args=[arg for arg in method.spec.args if arg not in method_defaults],
+                kwargs=method.spec.kwargs,
+                url_kw=[arg for arg in method.spec.args if "{{{}}}".format(arg) in method.path],
                 defaults=method_defaults,
                 success_code=method.success_code,
                 response_type=method.response_content_type,
-                keywords=spec.keywords,
+                keywords=method.spec.keywords,
             ))
     return kwargs
 

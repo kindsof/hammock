@@ -13,17 +13,20 @@ def sink(path="", dest=None, pre_process=None, post_process=None, trim_prefix=Fa
             common.func_is_pass(func)
 
         @functools.wraps(func)
-        def _wrapper(self, request):
-            return passthrough.passthrough(
-                self,
-                request,
-                dest,
-                pre_process,
-                post_process,
-                trim_prefix,
-                func,
-                exception_handler,
-            )
+        def _wrapper(resource, request):
+            try:
+                return passthrough.passthrough(
+                    resource,
+                    request,
+                    dest,
+                    pre_process,
+                    post_process,
+                    trim_prefix,
+                    func,
+                )
+            except Exception as exc:  # pylint: disable=broad-except
+                resource.handle_exception(exc, exception_handler)
+
         func.responder = _wrapper
         return func
     return _decorator

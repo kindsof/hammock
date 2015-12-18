@@ -3,7 +3,8 @@ import collections
 import functools
 import hammock.exceptions as exceptions
 import hammock.common as common
-import hammock.route as route
+import hammock.wrappers.wrapper as route_base
+import hammock.wrappers as _routes
 
 
 class Resource(object):
@@ -29,7 +30,7 @@ class Resource(object):
         routes = collections.defaultdict(dict)
         for route_method in self.iter_route_methods():
             method = route_method.method.upper()
-            routes[common.url_join(self.name(), route_method.path)][method] = route_method.responder
+            routes[common.url_join(self.name(), route_method.path)][method] = route_method
         return routes
 
     @property
@@ -48,10 +49,10 @@ class Resource(object):
         return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
 
     @classmethod
-    def iter_route_methods(cls):
+    def iter_route_methods(cls, reoute_class=route_base.Wrapper):
         return (
             getattr(cls, attr) for attr in dir(cls)
-            if getattr(getattr(cls, attr), 'is_route', False)
+            if isinstance(getattr(cls, attr), reoute_class)
         )
 
     @classmethod
@@ -67,17 +68,17 @@ class Resource(object):
 
 # XXX: will be removed. HERE FOR COMPATIBILITY
 
-def get(path="", **kwargs):
-    return route.route(path, "GET", **kwargs)
+def get(path='', **kwargs):
+    return _routes.route(path, 'GET', **kwargs)
 
 
-def head(path="", **kwargs):
-    return route.route(path, "HEAD", **kwargs)
+def head(path='', **kwargs):
+    return _routes.route(path, 'HEAD', **kwargs)
 
 
-def post(path="", **kwargs):
-    return route.route(path, "POST", **kwargs)
+def post(path='', **kwargs):
+    return _routes.route(path, 'POST', **kwargs)
 
 
-def put(path="", **kwargs):
-    return route.route(path, "PUT", **kwargs)
+def put(path='', **kwargs):
+    return _routes.route(path, 'PUT', **kwargs)
