@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import decorator
 import logging
 import abc
 from hammock import exceptions
@@ -31,7 +30,7 @@ class Wrapper(object):
         :param func: a function to decorate
         :return: a decorator
         """
-        decorator.decorate(func, self)
+        # decorator.decorate(func, self)
         self.spec = func_spec.FuncSpec(func)
         self._func = func
         self.__name__ = self._func.__name__
