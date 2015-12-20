@@ -8,7 +8,7 @@ import hammock.wrappers as _routes
 
 
 class Resource(object):
-    def __init__(self):
+    def __init__(self, api=None, base_path=None):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
         self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)
 
     @classmethod
