@@ -1,6 +1,20 @@
 from __future__ import absolute_import
 import json
 
+BAD_REQUEST = 400
+UNAUTHORIZED = 401
+FORBIDDEN = 403
+NOT_FOUND = 404
+BAD_METHOD = 405
+CONFLICT = 409
+OVER_LIMIT = 413
+BAD_MEDIA_TYPE = 415
+BAD_DATA = 415
+INTERNAL_SERVER_ERROR = 500
+RESOURCE_NOT_IMPLEMENTED = 501
+SERVICE_UNAVAILABLE = 503
+MALFORMED_JSON = 753
+
 
 class HttpError(Exception):
     def __init__(self, status=500, title='InternalServerError', description=''):
@@ -26,26 +40,25 @@ class HttpError(Exception):
 
 
 def class_factory(status, title, description=''):
-
     def init(self, description=description):
         HttpError.__init__(self, status, title, description)
 
     return type(title, (HttpError,), {'__init__': init})
 
+
 # pylint: disable=invalid-name
-BadRequest = class_factory(400, 'Bad Request')
-Unauthorized = class_factory(401, 'Unauthorized')
-Forbidden = class_factory(403, 'Forbidden')
-NotFound = class_factory(404, 'Not Found')
-BadMethod = class_factory(405, 'Bad Method')
-Conflict = class_factory(409, 'Conflict')
-OverLimit = class_factory(413, 'Over Limit')
-BadMediaType = class_factory(415, 'Bad Media Type')
-BadData = class_factory(415, 'Bad Data')
-InternalServerError = class_factory(500, 'Internal Server Error')
-ResourceNotImplemented = class_factory(501, 'Not Implemented')
-ServiceUnavailable = class_factory(503, 'Service Unavailable')
-MalformedJson = class_factory(
-    753, 'Malformed JSON',
-    'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.')
+BadRequest = class_factory(BAD_REQUEST, 'Bad Request')
+Unauthorized = class_factory(UNAUTHORIZED, 'Unauthorized')
+Forbidden = class_factory(FORBIDDEN, 'Forbidden')
+NotFound = class_factory(NOT_FOUND, 'Not Found')
+BadMethod = class_factory(BAD_METHOD, 'Bad Method')
+Conflict = class_factory(CONFLICT, 'Conflict')
+OverLimit = class_factory(OVER_LIMIT, 'Over Limit')
+BadMediaType = class_factory(BAD_MEDIA_TYPE, 'Bad Media Type')
+BadData = class_factory(BAD_DATA, 'Bad Data')
+InternalServerError = class_factory(INTERNAL_SERVER_ERROR, 'Internal Server Error')
+ResourceNotImplemented = class_factory(RESOURCE_NOT_IMPLEMENTED, 'Not Implemented')
+ServiceUnavailable = class_factory(SERVICE_UNAVAILABLE, 'Service Unavailable')
+MalformedJson = class_factory(MALFORMED_JSON, 'Malformed JSON',
+                              'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.')
 # pylint: enable=invalid-name
