@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import six
-import functools
 import re
 import logging
 import hammock.common as common
@@ -12,32 +11,33 @@ LOG = logging.getLogger(__name__)
 
 class Falcon(backend.Backend):
 
-    def add_route_methods(self, resource, base_path):
-        for route_path, methods in six.iteritems(resource.routes):
-            methods = {
-                'on_' + method.lower(): self._responder(resource, responder)
-                for method, responder in six.iteritems(methods)
-            }
-            self._add_route(base_path, route_path, methods)
+    def add_route(self, path, methods_map):
+        methods = {
+            'on_' + method.lower(): staticmethod(self._responder(responder))
+            for method, responder in six.iteritems(methods_map)
+        }
+        new_route_class = self._get_route_class(path, methods)
+        self._api.add_route(path, new_route_class())
+        for method in six.iterkeys(methods_map):
+            LOG.debug('Added route %s %s', method, path)
 
-    def add_sink_methods(self, resource, base_path):
-        for sink_path, responder in resource.sinks:
-            full_path = '/' + common.url_join(base_path, sink_path)
-            pattern = re.compile(common.CONVERT_PATH_VARIABLES(full_path))
-            self._api.add_sink(self._responder(resource, responder), pattern)
-            LOG.debug('Added sink %s', full_path)
+    def add_sink(self, path, responder):
+        pattern = re.compile(common.CONVERT_PATH_VARIABLES(path))
+        self._api.add_sink(self._responder(responder), pattern)
+        LOG.debug('Added sink %s', path)
 
     def add_error_handler(self, exc_class, api):
         api.add_error_handler(exc_class, self._handle_http_error)
 
-    def _responder(self, resource, route_method):
+    def _responder(self, responder):
         # This is how falcon calls a resource method,
         # Here we call the inner hammock 'route_method' and update the falcon response.
-        def falcon_method(_resource, backend_req, backend_resp, **url_params):
+        def falcon_method(backend_req, backend_resp, **url_params):
             req = self._req_from_backend(backend_req, url_params)
-            resp = route_method(_resource, req)
+            resp = responder(req)
             self._update_backend_response(resp, backend_resp)
-        return functools.partial(falcon_method, resource)
+
+        return falcon_method
 
     @staticmethod
     def _req_from_backend(backend_req, url_params):
@@ -54,25 +54,14 @@ class Falcon(backend.Backend):
         else:
             backend_resp.body = resp.content
 
-    def _add_route(self, base_path, route_path, methods):
-        new_route_class = self._get_route_class(base_path, route_path, methods)
-        full_path = '/' + common.url_join(base_path, route_path)
-        self._api.add_route(full_path, new_route_class())
-        LOG.debug('Added route %s', full_path)
+    @staticmethod
+    def _get_route_class(path, methods):
+        return type(Falcon._falcon_class_name(path), (), methods)
 
     @staticmethod
-    def _get_route_class(base_path, route_path, methods):
-        return type(
-            Falcon._falcon_class_name(base_path, route_path),
-            (),
-            methods
-        )
-
-    @staticmethod
-    def _falcon_class_name(base_path, route_path):
+    def _falcon_class_name(path):
         return ''.join(
-            part.capitalize()
-            for part in ['Resource', common.PATH_TO_NAME(base_path), common.PATH_TO_NAME(route_path)]
+            ['Resource'] + [common.PATH_TO_NAME(part).capitalize() for part in path.split('/')]
         )
 
     @staticmethod

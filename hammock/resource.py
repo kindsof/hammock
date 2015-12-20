@@ -30,7 +30,7 @@ class Resource(object):
         routes = collections.defaultdict(dict)
         for route_method in self.iter_route_methods():
             method = route_method.method.upper()
-            routes[common.url_join(self.name(), route_method.path)][method] = route_method
+            routes[common.url_join(self.name(), route_method.path)][method] = functools.partial(route_method, self)
         return routes
 
     @property
@@ -40,7 +40,7 @@ class Resource(object):
             The list is sorted by url size, largest first.
         """
         return [
-            (common.url_join(self.name(), sink.path), sink.responder)
+            (common.url_join(self.name(), sink.path), functools.partial(sink.responder, self))
             for sink in self.iter_sink_methods()
             ]
 
