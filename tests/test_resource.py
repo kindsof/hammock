@@ -174,3 +174,10 @@ class TestResource(testing.TestBase):
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes'))
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes-io'))
         self.assertListEqual([1, 2, 3], self._simulate('GET', '/responses/list'))
+
+    def test_patterns(self):
+        url = "/patterns"
+        self.assertEqual(self._simulate("GET", url), "base")
+        self.assertEqual(self._simulate("GET", url + "/123"), "id-123")
+        self.assertEqual(self._simulate("GET", url + "/123/extra"), "extra-123")
+        self.assertEqual(self._simulate("GET", url + "/123/extra/specific"), "extra-specific-123")

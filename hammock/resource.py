@@ -62,7 +62,7 @@ class Resource(object):
                 getattr(cls, attr) for attr in dir(cls)
                 if getattr(getattr(cls, attr), 'is_sink', False)
             ),
-            key=functools.cmp_to_key(lambda p1, p2: len(p1.pattern) - len(p2.pattern))
+            key=functools.cmp_to_key(lambda p1, p2: len(p1.path) - len(p2.path))
         )
 
 

@@ -25,7 +25,7 @@ class Falcon(backend.Backend):
             full_path = '/' + common.url_join(base_path, sink_path)
             pattern = re.compile(common.CONVERT_PATH_VARIABLES(full_path))
             self._api.add_sink(self._responder(resource, responder), pattern)
-            LOG.debug('Added sink %s for %s', pattern.pattern, repr(responder))
+            LOG.debug('Added sink %s', full_path)
 
     def add_error_handler(self, exc_class, api):
         api.add_error_handler(exc_class, self._handle_http_error)

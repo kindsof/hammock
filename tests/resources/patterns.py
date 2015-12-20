@@ -22,3 +22,11 @@ class Patterns(hammock.Resource):
             status=200,
             headers={common.CONTENT_TYPE: common.TYPE_JSON},
         )
+
+    @hammock.sink("{my_id}/extra/specific")
+    def get_id_metadata_specific(self, request, my_id):  # pylint: disable=unused-argument
+        return types.Response(
+            stream=six.BytesIO(six.b(json.dumps('extra-specific-%s') % my_id)),
+            status=200,
+            headers={common.CONTENT_TYPE: common.TYPE_JSON},
+        )
