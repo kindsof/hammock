@@ -52,7 +52,7 @@ class Resource(object):
     def iter_route_methods(cls, reoute_class=route_base.Wrapper):
         return (
             getattr(cls, attr) for attr in dir(cls)
-            if isinstance(getattr(cls, attr), reoute_class)
+            if isinstance(getattr(cls, attr, None), reoute_class)
         )
 
     @classmethod
@@ -60,7 +60,7 @@ class Resource(object):
         return sorted(
             (
                 getattr(cls, attr) for attr in dir(cls)
-                if getattr(getattr(cls, attr), 'is_sink', False)
+                if getattr(getattr(cls, attr, None), 'is_sink', False)
             ),
             key=functools.cmp_to_key(lambda p1, p2: len(p1.path) - len(p2.path))
         )
