@@ -82,3 +82,7 @@ def post(path='', **kwargs):
 
 def put(path='', **kwargs):
     return _routes.route(path, 'PUT', **kwargs)
+
+
+def delete(path='', **kwargs):
+    return _routes.route(path, 'DELETE', **kwargs)
