@@ -1,11 +1,11 @@
 from __future__ import absolute_import
-import hammock.resource_node as resource_node
 import hammock.backends as backends
-import hammock.sink as sink_module
+import hammock.resource_node as resource_node
 import hammock.wrappers as wrappers
-from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
-from hammock.common import TYPE_JSON, TYPE_OCTET_STREAM, TOKEN_ENTRY, KW_HEADERS   # noqa  # pylint: disable=unused-import
+import hammock.wrappers.sink as _sink
 from hammock.common import CONTENT_TYPE, CONTENT_LENGTH   # noqa  # pylint: disable=unused-import
+from hammock.common import TYPE_JSON, TYPE_OCTET_STREAM, TOKEN_ENTRY, KW_HEADERS   # noqa  # pylint: disable=unused-import
+from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
 
 
 class Hammock(resource_node.ResourceNode):
@@ -56,4 +56,4 @@ def delete_passthrough(dest, path='', **kwargs):
 
 
 def sink(path='', **kwargs):
-    return sink_module.sink(path=path, **kwargs)
+    return _sink.sink(path=path, **kwargs)
