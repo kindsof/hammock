@@ -51,6 +51,10 @@ class Request(object):
     def relative_uri(self):
         return self._url.path + (('?' + self._url.query) if self._url.query else '')
 
+    def get_header(self, key):
+        warnings.warn('This method is deprecated, please use req.headers.get instead', DeprecationWarning)
+        return self.headers.get(key)
+
     @property
     def _cached_headers(self):  # XXX: backward compatibility, should be removed
         warnings.warn('_cached_headers is deprecated, use headers', DeprecationWarning)
