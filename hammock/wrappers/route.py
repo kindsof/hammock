@@ -63,8 +63,13 @@ class Route(wrapper.Wrapper):
         return kwargs
 
     @staticmethod
-    def _get_success_code(code):
-        if isinstance(code, int):
-            return code
+    def get_status_code(status):
+        """
+        Return http status code as int, even if status is of the form "201 Created" for example.
+        :param status: http status code, int or string.
+        :return: code as int
+        """
+        if isinstance(status, int):
+            return status
         else:
-            return int(code.split(' ')[0])
+            return int(status.split(' ')[0])

@@ -25,7 +25,7 @@ def route(path, method, success_code=200, client_methods=None, exception_handler
             method=method.upper(),
             exception_handler=exception_handler,
             client_methods=client_methods,
-            success_code=success_code,
+            success_code=Route.get_status_code(success_code),
             response_content_type=response_content_type,  # XXX: This should be removed.
         ),
     )
