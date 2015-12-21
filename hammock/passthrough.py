@@ -46,6 +46,6 @@ def send_to(req, dest):
         if req.headers.get('TRANSFER-ENCODING'):
             del prepared.headers['TRANSFER-ENCODING']
         inner_response = session.send(prepared, stream=True)
-        return response.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
+        return response.Response(inner_response.content, inner_response.headers, inner_response.status_code)
     finally:
         session.close()

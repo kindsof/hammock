@@ -1,27 +1,40 @@
 from __future__ import absolute_import
+import os
 import collections
-import falcon
-import falcon.testing as testing
 import json
 import six
 import importlib
 import hammock
 import hammock.common as common
 import hammock.types as types
+import hammock.exceptions as exceptions
 
 
 def default_404(req, res):  # pylint: disable=unused-argument
-    raise falcon.HTTPError(falcon.HTTP_404, "404")
+    raise exceptions.NotFound()
 
 
-class TestBase(testing.TestBase):
+if os.environ.get('BACKEND') == 'falcon':
+    import falcon.testing as testing
+    base = testing.TestBase
+elif os.environ.get('BACKEND') == 'aiohttp':
+    if not six.PY3:
+        raise RuntimeError('For aiohttp, must use python >= 3.5')
+    from . import aweb
+    base = aweb.AWebTest
+else:
+    raise RuntimeError('Must specify backend library')
+
+
+class TestBase(base):
 
     RESOURCES = 'tests.resources'
+    hammock = None
 
-    def before(self):
-        self.api.add_sink(default_404)
+    def before(self, **kwargs):
+        # self.api.add_sink(default_404)
         resources = importlib.import_module(self.RESOURCES)
-        hammock.Hammock(self.api, resources)
+        self.hammock = hammock.Hammock(self.api, resources, **kwargs)
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None, binary_response=False):
         kwargs = {}
@@ -33,7 +46,10 @@ class TestBase(testing.TestBase):
             kwargs["body"] = json.dumps(body) if content_type == common.TYPE_JSON else body
             headers.update({common.CONTENT_TYPE: content_type})
         kwargs["headers"] = headers
+
+        # Run backend depended simulate request method
         response = self.simulate_request(url, method=method, **kwargs)
+
         if isinstance(response, collections.Iterable):
             result = six.b('').join(response)
         else:

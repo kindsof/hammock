@@ -9,10 +9,9 @@ from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
 
 
 class Hammock(resource_node.ResourceNode):
-    def __init__(self, api, resource_package):
-        self._api = api
-        self._backend = backends.get(api)
-        self._backend.add_resources(self, resource_package)
+    def __init__(self, api, resource_package, **backend_kwargs):
+        self.backend = backends.get(api, **backend_kwargs)
+        self.backend.add_resources(self, resource_package)
 
 
 def get(path='', **kwargs):

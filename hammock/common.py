@@ -15,6 +15,7 @@ KW_HEADERS = '_headers'
 KW_FILE = '_file'
 KW_LIST = '_list'
 KW_STATUS = '_status'
+KW_TAIL = 'url_suffix_for_sink_methods'
 CONTENT_TYPE = 'CONTENT-TYPE'
 CONTENT_LENGTH = 'CONTENT-LENGTH'
 TYPE_JSON = 'application/json'
@@ -48,20 +49,6 @@ def func_is_pass(func):
 
 def uid(length=8):
     return ''.join(random.sample(ID_LETTERS, length))
-
-
-def get_stream_length(stream):
-    if hasattr(stream, 'len'):
-        return stream.len
-    if hasattr(stream, '__len__'):
-        return len(stream)
-    elif isinstance(stream, (six.BytesIO, six.moves.StringIO)):
-        try:
-            stream.seek(0, six.io.SEEK_END)
-            return stream.tell()
-        finally:
-            stream.seek(0)
-    return None
 
 
 def to_bytes(source):

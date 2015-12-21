@@ -68,3 +68,6 @@ test_gunicorn:
 
 test_uwsgi:
 	python -m tests.app
+
+test_aiohttp:
+	python -m tests.aiohttp

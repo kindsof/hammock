@@ -16,10 +16,12 @@ except ImportError:
     aweb = None
 
 
-def get(api):
+def get(api, **kwargs):
     if falcon and isinstance(api, falcon.API):
         return _falcon.Falcon(api)
-    elif aweb and isinstance(api, aweb.Application):
-        return _aweb.AWeb(api)
+    elif falcon and api == 'flacon':
+        return _falcon.Falcon(falcon.API())
+    elif aweb and api == 'aiohttp':
+        return _aweb.AWeb()
     else:
         raise RuntimeError('Invalid API given, or api library not available.')

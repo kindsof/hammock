@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import six
+import os
 import subprocess
 import unittest
 import logging
@@ -13,6 +14,10 @@ import tests.resources.exceptions as exceptions_resouce
 import tests.test_client as test_client
 
 
+@unittest.skipIf(
+    os.environ['BACKEND'] == 'aiohttp',
+    reason='aiohttp does not yet run under uwsgi'
+)
 class TestWhiteboxUWSGI(unittest.TestCase):
     PORT = 7001
     TOKEN = "token"

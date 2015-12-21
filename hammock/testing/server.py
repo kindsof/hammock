@@ -95,7 +95,7 @@ class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(content)
         else:
-            content = six.b(body)
+            content = six.b(body) if isinstance(body, six.string_types) else body
             self.send_header(common.CONTENT_LENGTH, len(content))
             self.send_header(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)
             self.end_headers()

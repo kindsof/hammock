@@ -6,8 +6,10 @@ import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions
 from . import url as url_module
-from . import headers as headers_module
-from . import file as file_module
+from . import headers as _headers
+from . import file as _file
+from . import stream as _stream
+
 
 LOG = logging.getLogger(__name__)
 
@@ -17,9 +19,13 @@ class Request(object):
         self.method = method.upper()
         self._collected_data = None
         self._url = url_module.Url(url)
-        self.headers = headers_module.Headers(headers)
-        self.stream = stream
+        self.headers = _headers.Headers(headers)
+        self.stream = _stream.Stream(stream) if stream else None
         self.url_params = url_params
+        if common.KW_TAIL in url_params:
+            del url_params[common.KW_TAIL]
+        if self.stream and common.CONTENT_LENGTH not in self.headers:
+            self.headers[common.CONTENT_LENGTH] = self.stream.content_length
         self.uid = common.uid()
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
 
@@ -56,6 +62,14 @@ class Request(object):
         return self.headers.get(key)
 
     @property
+    def content_type(self):
+        return self.headers.get(common.CONTENT_TYPE)
+
+    @property
+    def content_length(self):
+        return self.headers.get(common.CONTENT_LENGTH)
+
+    @property
     def _cached_headers(self):  # XXX: backward compatibility, should be removed
         warnings.warn('_cached_headers is deprecated, use headers', DeprecationWarning)
         return self.headers
@@ -90,19 +104,22 @@ class Request(object):
         self.headers[common.CONTENT_LENGTH] = len(content)
 
     def _collect_body(self):
-        content_type = self.headers.get(common.CONTENT_TYPE)
-        if content_type == common.TYPE_JSON:
+        if self.content_type == common.TYPE_JSON:
             try:
                 body = json.load(self.stream)
-                if type(body) == dict:
-                    return body
-                elif type(body) == list:
-                    return {common.KW_LIST: body}
-                elif body is None:
-                    return None
-                else:
-                    return {common.KW_CONTENT: body}
+                return self._json_to_req_dict(body)
             except (ValueError, UnicodeDecodeError):
                 raise exceptions.MalformedJson()
-        elif content_type == common.TYPE_OCTET_STREAM:
-            return {common.KW_FILE: file_module.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}
+        elif self.content_type == common.TYPE_OCTET_STREAM:
+            return {common.KW_FILE: _file.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}
+
+    @staticmethod
+    def _json_to_req_dict(data):
+        if type(data) == dict:
+            return data
+        elif type(data) == list:
+            return {common.KW_LIST: data}
+        elif data is None:
+            return None
+        else:
+            return {common.KW_CONTENT: data}

@@ -3,7 +3,8 @@ import simplejson as json
 import six
 import warnings
 import hammock.common as common
-from . import headers as headers_module
+from . import headers as _headers
+from . import stream as stream
 
 
 class Response(object):
@@ -11,7 +12,7 @@ class Response(object):
     def __init__(self, content, headers, status):
         self._json = None
         self.content = content
-        self.headers = headers_module.Headers(headers)
+        self.headers = _headers.Headers(headers)
         self.status = str(status)
 
     @classmethod
@@ -27,16 +28,16 @@ class Response(object):
         """
         result = cls._convert_result_to_dict(result)
 
-        response_headers = headers_module.Headers(result.pop(common.KW_HEADERS, {}))
+        response_headers = _headers.Headers(result.pop(common.KW_HEADERS, {}))
         content_stream = result.pop(common.KW_FILE, None)
         response_status = result.pop(common.KW_STATUS, status)
 
         if content_stream:
+            content_stream = stream.Stream(content_stream)
             content = common.to_bytes(content_stream)
             response_headers[common.CONTENT_TYPE] = common.TYPE_OCTET_STREAM
-            length = common.get_stream_length(content)
-            if length:
-                response_headers[common.CONTENT_LENGTH] = length
+            if content_stream.content_length:
+                response_headers[common.CONTENT_LENGTH] = content_stream.content_length
             response_headers.update(result)
         else:
             if common.KW_CONTENT in result:

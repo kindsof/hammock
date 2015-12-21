@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import logging
 import collections
 import functools
 import hammock.exceptions as exceptions
@@ -7,7 +8,11 @@ import hammock.wrappers.wrapper as route_base
 import hammock.wrappers as _routes
 
 
+LOG = logging.getLogger(__name__)
+
+
 class Resource(object):
+
     def __init__(self, api=None, base_path=None):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
         self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)
 
@@ -42,27 +47,28 @@ class Resource(object):
         return [
             (common.url_join(self.name(), sink.path), functools.partial(sink.responder, self))
             for sink in self.iter_sink_methods()
-            ]
+        ]
 
     @staticmethod
     def _to_internal_server_error(exc):
-        return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
+        if isinstance(exc, exceptions.HttpError):
+            return exc
+        else:
+            LOG.exception('Internal server Error')
+            return exceptions.InternalServerError(str(exc))
 
     @classmethod
-    def iter_route_methods(cls, reoute_class=route_base.Wrapper):
+    def iter_route_methods(cls, route_class=route_base.Wrapper):
         return (
             getattr(cls, attr) for attr in dir(cls)
-            if isinstance(getattr(cls, attr, None), reoute_class)
+            if isinstance(getattr(cls, attr, None), route_class)
         )
 
     @classmethod
     def iter_sink_methods(cls):
-        return sorted(
-            (
-                getattr(cls, attr) for attr in dir(cls)
-                if getattr(getattr(cls, attr, None), 'is_sink', False)
-            ),
-            key=functools.cmp_to_key(lambda p1, p2: len(p1.path) - len(p2.path))
+        return (
+            getattr(cls, attr) for attr in dir(cls)
+            if getattr(getattr(cls, attr, None), 'is_sink', False)
         )
 
 

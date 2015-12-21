@@ -11,20 +11,22 @@ LOG = logging.getLogger(__name__)
 
 class Falcon(backend.Backend):
 
+    LONGEST_SINK_FIRST = False
+
     def add_route(self, path, methods_map):
         methods = {
             'on_' + method.lower(): staticmethod(self._responder(responder))
             for method, responder in six.iteritems(methods_map)
         }
         new_route_class = self._get_route_class(path, methods)
-        self._api.add_route(path, new_route_class())
+        self.api.add_route(path, new_route_class())
         for method in six.iterkeys(methods_map):
-            LOG.debug('Added route %s %s', method, path)
+            LOG.debug('Added route %-6s %s', method, path)
 
     def add_sink(self, path, responder):
         pattern = re.compile(common.CONVERT_PATH_VARIABLES(path))
-        self._api.add_sink(self._responder(responder), pattern)
-        LOG.debug('Added sink %s', path)
+        self.api.add_sink(self._responder(responder), pattern)
+        LOG.debug('Added sink         %s', path)
 
     def add_error_handler(self, exc_class, api):
         api.add_error_handler(exc_class, self._handle_http_error)

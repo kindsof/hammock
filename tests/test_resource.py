@@ -63,7 +63,10 @@ class TestResource(testing.TestBase):
             os.path.join(path, "check_size"),
             query_string="size_mb={:d}".format(mb_to_test),
             body=body,
-            headers={common.CONTENT_TYPE: common.TYPE_OCTET_STREAM},
+            headers={
+                common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
+                common.CONTENT_LENGTH: str(len(body)),
+            },
         )
         self.assertEqual(response, "OK")
 
@@ -115,32 +118,20 @@ class TestResource(testing.TestBase):
         expected_no_default["default"] = keywords.Keywords.DEFAULT
 
         logging.info("Testing keywords with GET")
-        get = self._simulate(
-            "GET", url,
-            query_string="arg=1&default=2&c=3&d=4",
-        )
+        get = self._simulate("GET", url, query_string="arg=1&default=2&c=3&d=4")
         self.assertDictEqual({k: int(v) for k, v in six.iteritems(get)}, expected)
 
         logging.info("Testing keywords with GET and no default")
-        get = self._simulate(
-            "GET", url,
-            query_string="arg=1&c=3&d=4",
-        )
+        get = self._simulate("GET", url, query_string="arg=1&c=3&d=4")
         self.assertDictEqual({k: int(v) for k, v in six.iteritems(get)}, expected_no_default)
 
         for method in ("POST", "PUT"):
             logging.info("Testing keywords with %s", method)
-            ret = self._simulate(
-                method, url,
-                body=expected,
-            )
+            ret = self._simulate(method, url, body=expected)
             self.assertDictEqual(ret, expected)
             no_default = expected.copy()
             del no_default["default"]
-            ret = self._simulate(
-                method, url,
-                body=no_default,
-            )
+            ret = self._simulate(method, url, body=no_default)
             self.assertDictEqual(ret, expected_no_default)
         logging.info("Testing keywords with GET and headers")
         response = self._simulate(
@@ -158,7 +149,7 @@ class TestResource(testing.TestBase):
         response = self._simulate('GET', '/lists/3', query_string='argument=1&argument=2')
         self.assertListEqual(response['argument'], [1, 2])
         self.assertEqual(response['path'], 3)
-        response = self._simulate('POST', 'lists/3', body=[1, 2])
+        response = self._simulate('POST', '/lists/3', body=[1, 2])
         self.assertListEqual(response, [1, 2, 3])
 
     def test_invalid_json_body(self):

@@ -7,6 +7,7 @@ import hammock.common as common
 
 
 class TestRedirect(testing.TestBase):
+    _server = None
 
     @classmethod
     def setUpClass(cls):
@@ -37,13 +38,6 @@ class TestRedirect(testing.TestBase):
         }
         self._exec_request(redirect_path, method, body, headers)
 
-    @staticmethod
-    def _get_stream_size(stream):
-        stream.seek(0, os.SEEK_END)
-        body_length = stream.tell()
-        stream.seek(0, os.SEEK_SET)
-        return body_length
-
     def test_redirect_post_request_with_binary_body(self):  # pylint: disable=invalid-name
         method = "POST"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
@@ -60,17 +54,15 @@ class TestRedirect(testing.TestBase):
     def test_redirect_post_request_with_large_binary_body(self):  # pylint: disable=invalid-name
         method = "POST"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
-        body_stream = six.moves.StringIO()
+        body_stream = six.BytesIO()
         with open(__file__, 'rb') as file_object:
             for _ in range(100):
                 content = file_object.read()
-                if not isinstance(content, six.string_types):
-                    content = content.decode()
                 body_stream.write(content)
 
         headers = {
             common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
-            common.CONTENT_LENGTH: str(TestRedirect._get_stream_size(body_stream)),
+            common.CONTENT_LENGTH: str(self._get_stream_size(body_stream)),
             "host": "localhost",
         }
         self._exec_request(redirect_path, method, body_stream.getvalue(), headers, binary_response=True)
@@ -111,3 +103,10 @@ class TestRedirect(testing.TestBase):
         self._simulate('POST', '/redirect/post-passthrough', body={'some_data': 'a'})
         self._simulate('POST', '/redirect/post-passthrough-with-body', body={'some_data': 'a'})
         self._simulate('GET', '/redirect/manipulate-path')
+
+    @staticmethod
+    def _get_stream_size(stream):
+        stream.seek(0, os.SEEK_END)
+        body_length = stream.tell()
+        stream.seek(0, os.SEEK_SET)
+        return body_length

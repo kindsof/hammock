@@ -3,6 +3,7 @@ from __future__ import absolute_import
 # flake8: noqa
 # pylint: disable=unused-import
 from . import response as response
+from . import request as request
 from .headers import Headers
 from .request import Request
 from .file import File
