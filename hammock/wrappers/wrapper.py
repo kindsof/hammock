@@ -32,9 +32,9 @@ class Wrapper(object):
         """
         # decorator.decorate(func, self)
         self.spec = func_spec.FuncSpec(func)
-        self._func = func
-        self.__name__ = self._func.__name__
-        self.__doc__ = self._func.__doc__
+        self.func = func
+        self.__name__ = self.func.__name__
+        self.__doc__ = self.func.__doc__
 
     def __call__(self, resource, req):
         """

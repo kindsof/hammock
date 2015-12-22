@@ -19,5 +19,5 @@ class Passthrough(wrapper.Wrapper):
             pre_process=self.__class__.pre_process,
             post_process=self.__class__.post_process,
             trim_prefix=self.trim_prefix,
-            func=self._func,
+            func=self.func,
         )

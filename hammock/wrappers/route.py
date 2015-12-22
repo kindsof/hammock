@@ -22,14 +22,14 @@ class Route(wrapper.Wrapper):
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.
         """
-        kwargs = self._extract_kwargs(req)
-        result = self._func(resource, **kwargs)
+        kwargs = self._extract_kwargs(req, req.collected_data)
+        result = self.func(resource, **kwargs)
         resp = response.Response.from_result(result, self.success_code)
         return resp
 
-    def _extract_kwargs(self, req):
+    def _extract_kwargs(self, req, collected_data):
         try:
-            kwargs = self._convert_to_kwargs(req)
+            kwargs = self._convert_to_kwargs(req, collected_data)
             logging.debug('[kwargs %s] %s', req.uid, kwargs)
             return kwargs
         except exceptions.HttpError:
@@ -38,9 +38,9 @@ class Route(wrapper.Wrapper):
             logging.warning('[Error parsing request kwargs %s] %s', req.uid, exc)
             raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
 
-    def _convert_to_kwargs(self, req):
+    def _convert_to_kwargs(self, req, collected_data):
         args = self.spec.args[:]
-        kwargs = req.collected_data
+        kwargs = collected_data
         kwargs.update({
             keyword: kwargs.get(keyword, default)
             for keyword, default in six.iteritems(self.spec.kwargs)
