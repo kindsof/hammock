@@ -44,11 +44,12 @@ class Response(object):
                 response_headers.update(result)
             else:
                 content = result
-            content = json.dumps(content)
-            response_headers.update({
-                common.CONTENT_LENGTH: len(content),
-                common.CONTENT_TYPE: common.TYPE_JSON,
-            })
+            if content is not None:
+                content = json.dumps(content)
+                response_headers.update({
+                    common.CONTENT_LENGTH: len(content),
+                    common.CONTENT_TYPE: common.TYPE_JSON,
+                })
         return cls(content, response_headers, response_status)
 
     def set_header(self, key, value):

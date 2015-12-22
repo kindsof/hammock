@@ -168,7 +168,7 @@ class TestResource(testing.TestBase):
         )
 
     def test_return_values(self):
-        self.assertEqual(None, self._simulate('GET', '/responses/none'))
+        self.assertEqual('', self._simulate('GET', '/responses/none'))
         self.assertEqual('string', self._simulate('GET', '/responses/string'))
         self.assertEqual('string', self._simulate('GET', '/responses/string-io'))
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes'))

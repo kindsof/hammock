@@ -41,7 +41,7 @@ class TestBase(testing.TestBase):
         if not binary_response:
             result = result.decode(common.ENCODING)
         headers = types.Headers(dict(self.srmock.headers))
-        if not binary_response and common.TYPE_JSON in headers.get(common.CONTENT_TYPE, common.TYPE_JSON):
+        if not binary_response and common.TYPE_JSON in headers.get(common.CONTENT_TYPE, ''):
             result = json.loads(result)
         return result
 
