@@ -2,20 +2,22 @@ from __future__ import absolute_import
 import abc
 import six
 import functools
-import hammock.packages as packages
-import hammock.exceptions as exceptions
-import hammock.common as common
+from . import exceptions
+from . import packages
+from . import resource_node
+from . import common
 
 
-class Backend(object):
+class Hammock(resource_node.ResourceNode):
 
     LONGEST_SINK_FIRST = True
 
-    def __init__(self, api):
+    def __init__(self, api, resource_package):
         self.api = api
+        self.add_resources(resource_package)
         self.add_error_handler(exceptions.HttpError, self.api)
 
-    def add_resources(self, base_node, resource_package):
+    def add_resources(self, resource_package):
         """
         Add route and sinks methods to the api,
         Iterate over the resources of the resource package,
@@ -27,7 +29,7 @@ class Backend(object):
         sinks = {}  # A mapping of sinks, {path: responder}
         for resource_class, parents in packages.iter_resource_classes(resource_package):
             prefix = '/'.join(parents)
-            node = base_node.get_node(parents)
+            node = self.get_node(parents)
             node.add(resource_class.name(), resource_class)
             resource = resource_class()
             self._add_route_methods(resource, prefix)
@@ -56,7 +58,7 @@ class Backend(object):
         return {
             '/' + common.url_join(base_path, sink_path): responder
             for sink_path, responder in resource.sinks
-        }
+            }
 
     def _add_all_sink_methods(self, sinks):
         """

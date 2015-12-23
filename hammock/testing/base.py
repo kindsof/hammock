@@ -16,17 +16,17 @@ def default_404(req, res):  # pylint: disable=unused-argument
 
 if os.environ.get('BACKEND') == 'falcon':
     import falcon.testing as testing
-    base = testing.TestBase
+    Base = testing.TestBase
 elif os.environ.get('BACKEND') == 'aiohttp':
     if not six.PY3:
         raise RuntimeError('For aiohttp, must use python >= 3.5')
     from . import aweb
-    base = aweb.AWebTest
+    Base = aweb.AWebTest
 else:
     raise RuntimeError('Must specify backend library')
 
 
-class TestBase(base):
+class TestBase(Base):
 
     RESOURCES = 'tests.resources'
     hammock = None
@@ -34,7 +34,8 @@ class TestBase(base):
     def before(self, **kwargs):
         # self.api.add_sink(default_404)
         resources = importlib.import_module(self.RESOURCES)
-        self.hammock = hammock.Hammock(self.api, resources, **kwargs)
+        self.hammock = hammock.Hammock(os.environ.get('BACKEND'), resources, **kwargs)
+        self.api = self.hammock.api
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None, binary_response=False):
         kwargs = {}

@@ -32,4 +32,3 @@ class FuncSpec(object):
                 self.args.append(param.name)
             else:
                 self.kwargs[param.name] = param.default
-        # pylint: enable=no-member

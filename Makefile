@@ -3,6 +3,9 @@ all: tox packages rename
 ifndef TESTS
  TESTS := discover tests -p "test_*.py"
 endif
+ifndef BACKEND
+ BACKEND := aiohttp
+endif
 
 # TODO: remove this paragraph, python3.5 is not yet installed on the slaves...
 ifndef TOXENV
@@ -31,7 +34,7 @@ coverage:
 	coverage html
 
 unittest:
-	python -m unittest $(TESTS)
+	BACKEND=$(BACKEND) python -m unittest $(TESTS)
 
 install:$ requirements setup.py hammock/*
 	python setup.py install

@@ -2,25 +2,26 @@ from __future__ import absolute_import
 import io
 import six
 import logging
-import hammock.types.request as request
-import hammock.exceptions as exceptions
-import hammock.common as common
-from . import backend
-import aiohttp.web as aweb  # pylint: disable=import-error
+from hammock import api as _api
+from hammock import types as types
+from hammock import exceptions as exceptions
+from hammock import common as common
+try:
+    import aiohttp.web as aweb
+except ImportError:
+    import os
+    if os.environ['BACKEND'] == 'aiohttp':
+        raise
 
 
 LOG = logging.getLogger(__name__)
 
 
-class AWeb(backend.Backend):
+class AWeb(_api.Hammock):
 
-    def __init__(self, api=None, **kwargs):
-        if api is None:
-            api = aweb.Application(
-                middlewares=[middleware_factory],
-                **kwargs
-            )
-        super(AWeb, self).__init__(api)
+    def __init__(self, resource_package, **kwargs):
+        api = aweb.Application(middlewares=[middleware_factory], **kwargs)
+        super(AWeb, self).__init__(api, resource_package)
 
     def add_route(self, path, methods_map):
         for method, responder in six.iteritems(methods_map):
@@ -48,7 +49,7 @@ class AWeb(backend.Backend):
 
     @staticmethod
     def _from_backend_req(backend_req):
-        return request.Request(
+        return types.Request(
             method=backend_req.method,
             url=AWeb._backend_url(backend_req),
             headers=backend_req.headers,
@@ -88,16 +89,17 @@ class AWeb(backend.Backend):
                 kwargs['body'] = resp.content
             return aweb.Response(**kwargs)
 
-    @staticmethod
-    def _handle_http_error(req):
-        req.release()  # Eat unread part of HTTP BODY if present
 
-
-async def _not_found(request):  # noqa  # pylint: disable=unused-argument
-    request.transport.write(b"HTTP/1.1 404 Not Found\r\n\r\n")
+# flake8: noqa
+# python 3 from here on
+async def _not_found(req):
+    # pylint: disable=undefined-variable
+    req.release()  # Eat unread part of HTTP BODY if present
+    req.transport.write(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
 
 async def middleware_factory(app, handler):
+    # pylint: disable=undefined-variable
     async def cache_exception_handler(req):
         """
         Handler exceptions thrown in handler, convert them into an http response
@@ -105,6 +107,7 @@ async def middleware_factory(app, handler):
         try:
             return await handler(req)
         except exceptions.HttpError as exc:
+            req.release()  # Eat unread part of HTTP BODY if present
             return aweb.json_response(status=str(exc.status), data=exc.to_dict)
 
     return cache_exception_handler

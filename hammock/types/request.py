@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import six
 import copy
 import logging
 import simplejson as json
@@ -24,9 +25,9 @@ class Request(object):
         self.url_params = url_params
         if common.KW_TAIL in url_params:
             del url_params[common.KW_TAIL]
-        if self.stream and common.CONTENT_LENGTH not in self.headers:
-            self.headers[common.CONTENT_LENGTH] = self.stream.content_length
-        self.uid = common.uid()
+
+        self._update_content_length_and_stream()
+
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
 
     @property
@@ -106,7 +107,10 @@ class Request(object):
     def _collect_body(self):
         if self.content_type == common.TYPE_JSON:
             try:
-                body = json.load(self.stream)
+                data = self.stream.read()
+                if not isinstance(data, six.string_types):
+                    data = data.decode(common.ENCODING)
+                body = json.loads(data)
                 return self._json_to_req_dict(body)
             except (ValueError, UnicodeDecodeError):
                 raise exceptions.MalformedJson()
@@ -123,3 +127,13 @@ class Request(object):
             return None
         else:
             return {common.KW_CONTENT: data}
+
+    def _update_content_length_and_stream(self):
+        if self.method not in common.URL_PARAMS_METHODS:
+            if self.stream and common.CONTENT_LENGTH not in self.headers:
+                self.headers[common.CONTENT_LENGTH] = self.stream.content_length
+        else:
+            self.stream = None
+            if common.CONTENT_LENGTH in self.headers:
+                del self.headers[common.CONTENT_LENGTH]
+        self.uid = common.uid()

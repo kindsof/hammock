@@ -1,13 +1,12 @@
 #! /user/bin/env python
 from __future__ import absolute_import
-import falcon
 import hammock
 import sys
 import subprocess
 import tests.resources as resources
+import os
 
-application = falcon.API()  # pylint: disable=invalid-name
-hammock.Hammock(application, resources)
+hammock.Hammock(os.environ['BACKEND'], resources)
 
 
 def command(listen_port):

@@ -2,16 +2,28 @@ from __future__ import absolute_import
 import six
 import re
 import logging
-import hammock.common as common
-import hammock.types.request as request
-from . import backend
+from hammock import common as common
+from hammock import types as types
+from hammock import api as _api
+try:
+    import falcon
+except ImportError:
+    import os
+    if os.environ['BACKEND'] == 'falcon':
+        raise
+    falcon = None
+
 
 LOG = logging.getLogger(__name__)
 
 
-class Falcon(backend.Backend):
+class Falcon(_api.Hammock):
 
     LONGEST_SINK_FIRST = False
+
+    def __init__(self, resource_package, **kwargs):
+        api = falcon.API(**kwargs)
+        super(Falcon, self).__init__(api, resource_package)
 
     def add_route(self, path, methods_map):
         methods = {
@@ -43,7 +55,7 @@ class Falcon(backend.Backend):
 
     @staticmethod
     def _req_from_backend(backend_req, url_params):
-        return request.Request(
+        return types.Request(
             backend_req.method, backend_req.url, backend_req.headers, backend_req.stream, url_params)
 
     @staticmethod

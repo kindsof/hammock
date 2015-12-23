@@ -2,13 +2,7 @@ from __future__ import absolute_import
 
 # flake8: noqa
 # pylint: disable=unused-import
-from . import response as response
-from . import request as request
 from .headers import Headers
 from .request import Request
+from .response import Response
 from .file import File
-
-
-# XXX: temporary workaround, until dependencies will convert stream to content
-def Response(stream, headers, status):  # pylint: disable=invalid-name
-    return response.Response(stream, headers, status)

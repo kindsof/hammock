@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 
 class Resource(object):
 
-    def __init__(self, api=None, base_path=None):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
+    def __init__(self):
         self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)
 
     @classmethod
@@ -70,25 +70,3 @@ class Resource(object):
             getattr(cls, attr) for attr in dir(cls)
             if getattr(getattr(cls, attr, None), 'is_sink', False)
         )
-
-
-# XXX: will be removed. HERE FOR COMPATIBILITY
-
-def get(path='', **kwargs):
-    return _routes.route(path, 'GET', **kwargs)
-
-
-def head(path='', **kwargs):
-    return _routes.route(path, 'HEAD', **kwargs)
-
-
-def post(path='', **kwargs):
-    return _routes.route(path, 'POST', **kwargs)
-
-
-def put(path='', **kwargs):
-    return _routes.route(path, 'PUT', **kwargs)
-
-
-def delete(path='', **kwargs):
-    return _routes.route(path, 'DELETE', **kwargs)

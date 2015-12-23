@@ -43,7 +43,7 @@ class AWebTest(unittest.TestCase):
 
     def simulate_request(self, url, method, query_string=None, body=None, headers=None):
         assert url.startswith('/'), "path must start with '/'"
-        handler_factory = self.hammock.backend.api.make_handler()
+        handler_factory = self.hammock.api.make_handler()
         loop = asyncio.get_event_loop()
         path = url + (('?' + query_string) if query_string else '')
         transport = Transport()

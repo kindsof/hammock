@@ -4,7 +4,7 @@ try:
     import asyncio
 except ImportError:
     import munch
-    asyncio = munch.Munch(StreamReader=None)
+    asyncio = munch.Munch(StreamReader=type('StreamReader', (type(object), ), {}))
 
 
 class Stream(object):

@@ -1,17 +1,34 @@
 from __future__ import absolute_import
-import hammock.backends as backends
-import hammock.resource_node as resource_node
-import hammock.wrappers as wrappers
-import hammock.wrappers.sink as _sink
-from hammock.common import CONTENT_TYPE, CONTENT_LENGTH   # noqa  # pylint: disable=unused-import
-from hammock.common import TYPE_JSON, TYPE_OCTET_STREAM, TOKEN_ENTRY, KW_HEADERS   # noqa  # pylint: disable=unused-import
+
+from hammock.backends import _falcon as falcon
+from hammock.common import *   # noqa  # pylint: disable=unused-import
 from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
+from hammock.wrappers import sink as _sink
+
+try:
+    from hammock.backends import aweb
+except SyntaxError:
+    import munch
+    aweb = munch.Munch(aweb=None)
+from . import wrappers as wrappers
 
 
-class Hammock(resource_node.ResourceNode):
-    def __init__(self, api, resource_package, **backend_kwargs):
-        self.backend = backends.get(api, **backend_kwargs)
-        self.backend.add_resources(self, resource_package)
+def Hammock(backend, resource_package, **kwargs):  # noqa  # pylint: disable=invalid-name
+    """
+    Get an Hammock instance
+    :param backend: which api to use, falcon or aiohttp
+    :param kwargs: kwargs to pass to the initiation of the api
+    :return: an Hammock instance.
+    """
+
+    if not backend or backend not in {'falcon', 'aiohttp'}:
+        raise RuntimeError("Invalid Backend given, '{}'".format(backend))
+    if falcon.falcon and backend == 'falcon':
+        return falcon.Falcon(resource_package, **kwargs)
+    elif aweb.aweb and backend == 'aiohttp':
+        return aweb.AWeb(resource_package, **kwargs)
+    else:
+        raise RuntimeError("Requested backend library '{}' not available.".format(backend))
 
 
 def get(path='', **kwargs):
@@ -56,3 +73,15 @@ def delete_passthrough(dest, path='', **kwargs):
 
 def sink(path='', **kwargs):
     return _sink.sink(path=path, **kwargs)
+
+# __all__ = (
+#     'Hammock',
+#     'Resource',
+#     'get', 'get_passthrough',
+#     'post', 'post_passthrough',
+#     'put', 'put_passthrough',
+#     'delete', 'delete_passthrough',
+#     'head',
+#     'sink',
+#     'CONTENT_TYPE', 'CONTENT_LENGTH', 'TYPE_JSON', 'TYPE_OCTET_STREAM', 'TOKEN_ENTRY', 'KW_HEADERS',
+# )
