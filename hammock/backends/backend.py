@@ -23,7 +23,7 @@ class Backend(object):
             prefix = '/'.join(parents)
             node = base_node.get_node(parents)
             node.add(resource_class.name(), resource_class)
-            resource = resource_class(None, None)  # XXX: temporary None, None, remove them when sagittarius is fixed
+            resource = resource_class()
             self._add_route_methods(resource, prefix)
             self._add_sink_methods(resource, prefix)
 
