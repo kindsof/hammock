@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import hammock.exceptions as exceptions
+import hammock.common as common
 import hammock.testing as testing
 import tests.resources.exceptions as exceptions_resource
 import json
@@ -7,6 +8,7 @@ import logging
 
 
 class TestExceptions(testing.TestBase):
+
     def test_init_and_methods(self):
         internal_server_error = exceptions.InternalServerError('description0')
         self.assertEqual(internal_server_error.status, 500)
@@ -32,4 +34,27 @@ class TestExceptions(testing.TestBase):
         response = self.assert_status(404, 'GET', '/exceptions/not_found')
         self.assertEqual(404, response['status'])
         self.assertEqual('Not Found', response['title'])
+        self.assertEqual(exceptions_resource.DESCRIPTION, response['description'])
+
+    def test_exception_with_stream(self):
+        """
+        When sending stream, a response must be send only when stream is read completely.
+        Otherwise, a connection aborted will be raised.
+        This test check if the server reads all the stream before returning an http-error response.
+        :return:
+        """
+        logging.info("Testing for exception raising while sending stream")
+        content = bytearray(100)
+        response = self.assert_status(
+            400,
+            'POST',
+            '/exceptions/raise-with-stream',
+            body=content,
+            headers={
+                common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
+                common.CONTENT_LENGTH: str(len(content)),
+            },
+        )
+        self.assertEqual(400, response['status'])
+        self.assertEqual('Bad Request', response['title'])
         self.assertEqual(exceptions_resource.DESCRIPTION, response['description'])

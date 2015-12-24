@@ -13,10 +13,6 @@ class Responses(hammock.Resource):
     def string(self):
         return 'string'
 
-    @hammock.get(path='string-io')
-    def string_io(self):
-        return six.moves.StringIO('string')
-
     @hammock.get(path='bytes')
     def bytes(self):
         return b'bytes'
@@ -28,3 +24,7 @@ class Responses(hammock.Resource):
     @hammock.get(path='list')
     def list(self):
         return [1, 2, 3]
+
+    @hammock.get(path='binary-file')
+    def binary_file(self):
+        return open(__file__, 'rb')

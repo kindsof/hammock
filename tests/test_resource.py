@@ -161,10 +161,13 @@ class TestResource(testing.TestBase):
     def test_return_values(self):
         self.assertEqual('', self._simulate('GET', '/responses/none'))
         self.assertEqual('string', self._simulate('GET', '/responses/string'))
-        self.assertEqual('string', self._simulate('GET', '/responses/string-io'))
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes'))
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes-io'))
         self.assertListEqual([1, 2, 3], self._simulate('GET', '/responses/list'))
+        response = self._simulate('GET', '/responses/binary-file', binary_response=True)
+        import tests.resources.responses as responses
+        with open(responses.__file__, 'rb') as response_file:
+            self.assertEqual(response_file.read(), response)
 
     def test_patterns(self):
         url = "/patterns"

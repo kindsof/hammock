@@ -1,12 +1,14 @@
 #! /user/bin/env python
 from __future__ import absolute_import
+from __future__ import print_function
 import hammock
 import sys
 import subprocess
 import tests.resources as resources
 import os
 
-hammock.Hammock(os.environ['BACKEND'], resources)
+HAMMOCK = hammock.Hammock(os.environ['BACKEND'], resources)
+API = HAMMOCK.api
 
 
 def command(listen_port):
@@ -14,6 +16,7 @@ def command(listen_port):
         'uwsgi',
         '--http', ':{:d}'.format(listen_port),
         '--wsgi-file', __file__.replace('.pyc', '.py'),
+        '--callable', 'API',
         '--need-app',
         '--procname', 'hammock-test',
     ]
@@ -24,5 +27,7 @@ COMMAND_LINE_ARGS = [
 ]
 
 if __name__ == '__main__':
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000  # pylint: disable=invalid-name
-    subprocess.check_output(command(port) + COMMAND_LINE_ARGS)
+    PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+    ARGS = command(PORT) + COMMAND_LINE_ARGS
+    print(' '.join(ARGS))
+    subprocess.check_output(ARGS)

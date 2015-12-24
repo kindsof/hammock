@@ -11,11 +11,7 @@ import logging
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
-# flake8: noqa
-# python3.5 syntax from here
-
 async def init(loop, port):
-    # pylint: disable=undefined-variable
     _hammock = hammock.Hammock('aiohttp', resources, loop=loop, debug=True)
     srv = await loop.create_server(_hammock.api.make_handler(), 'localhost', port)
     print('Server started at http://localhost:{}'.format(port))

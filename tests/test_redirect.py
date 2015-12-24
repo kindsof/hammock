@@ -24,7 +24,7 @@ class TestRedirect(testing.TestBase):
         """
         method = "GET"
         redirect_path = "/redirect/v3/users?key1=val1&key2=val2"
-        headers = {"host": "localhost", common.CONTENT_LENGTH: "0"}
+        headers = {"host": "localhost"}
         body = None
         self._exec_request(redirect_path, method, body, headers)
 
