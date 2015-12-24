@@ -95,15 +95,18 @@ class AWeb(_api.Hammock):
 
 
 async def _not_found(req):
+    # pylint: disable=undefined-variable
     req.release()  # Eat unread part of HTTP BODY if present
     req.transport.write(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
 
 async def middleware_factory(app, handler):
+    # pylint: disable=undefined-variable
     async def cache_exception_handler(req):
         """
         Handler exceptions thrown in handler, convert them into an http response
         """
+        # pylint: disable=undefined-variable
         try:
             return await handler(req)
         except exceptions.HttpError as exc:
