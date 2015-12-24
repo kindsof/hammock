@@ -26,7 +26,7 @@ class Request(object):
         if common.KW_TAIL in url_params:
             del url_params[common.KW_TAIL]
 
-        self._update_content_length_and_stream()
+        self._update_length_and_stream()
 
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
 
@@ -128,7 +128,7 @@ class Request(object):
         else:
             return {common.KW_CONTENT: data}
 
-    def _update_content_length_and_stream(self):
+    def _update_length_and_stream(self):
         if self.method not in common.URL_PARAMS_METHODS:
             if self.stream and common.CONTENT_LENGTH not in self.headers:
                 self.headers[common.CONTENT_LENGTH] = self.stream.content_length

@@ -72,9 +72,18 @@ class Response(object):
         return hasattr(self.content, 'read')
 
     @property
+    def data(self):
+        if self.is_stream:
+            self.content = self.content.read()
+        return self.content
+
+    @property
     def json(self):
         if not self._json:
-            self._json = json.load(self.content) if self.is_stream else json.loads(self.content)
+            data = self.data
+            if isinstance(data, six.binary_type):
+                data = data.decode(common.ENCODING)
+            self._json = json.loads(data)
         return self._json
 
     @classmethod

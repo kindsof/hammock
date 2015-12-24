@@ -18,6 +18,10 @@ class Stream(object):
         if hasattr(self._stream, 'tell'):
             self.tell = self._stream.tell
 
+    def close(self):
+        if hasattr(self._stream, 'close'):
+            self._stream.close()
+
     def _get_sync_read_method(self):
         """
         :return: a synchronous read method of a stream

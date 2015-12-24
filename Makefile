@@ -3,19 +3,20 @@ all: tox packages rename
 ifndef TESTS
  TESTS := discover tests -p "test_*.py"
 endif
+$(info Tesing $(TESTS))
 ifndef BACKEND
- BACKEND := aiohttp
+ BACKEND := falcon
 endif
+$(info Using backend $(BACKEND))
 
 # TODO: remove this paragraph, python3.5 is not yet installed on the slaves...
 ifndef TOXENV
- TOXENV := py27
+ TOXENV := py27-falcon
 endif
-ENV := TOXENV=$(TOXENV)
+$(info Tox environment: $(TOXENV))
 
-.PHONY: tox
 tox:
-	$(ENV) tox
+	TOXENV=$(TOXENV) tox
 
 clean:
 	find -name *.pyc -delete
@@ -30,8 +31,12 @@ pylint:
 
 coverage:
 	coverage erase
-	coverage run --omit="*__init__*" --omit="*.j2" --include="hammock/*" -m unittest $(TESTS)
+	BACKEND=$(BACKEND) coverage run --omit="*__init__*" --omit="*.j2" --include="hammock/*" -m unittest $(TESTS)
 	coverage html
+
+unittest_all:
+	BACKEND=falcon $(MAKE) unittest
+	BACKEND=aiohttp $(MAKE) unittest
 
 unittest:
 	BACKEND=$(BACKEND) python -m unittest $(TESTS)

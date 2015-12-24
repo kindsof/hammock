@@ -5,7 +5,6 @@ import functools
 import hammock.exceptions as exceptions
 import hammock.common as common
 import hammock.wrappers.wrapper as route_base
-import hammock.wrappers as _routes
 
 
 LOG = logging.getLogger(__name__)

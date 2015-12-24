@@ -10,7 +10,7 @@ try:
     import aiohttp.web as aweb
 except ImportError:
     import os
-    if os.environ['BACKEND'] == 'aiohttp':
+    if os.environ.get('BACKEND') == 'aiohttp':
         raise
 
 
@@ -72,14 +72,18 @@ class AWeb(_api.Hammock):
             # Send headers back to client
             backend_resp.start(backend_req)  # .start is the synchronous version of .prepare
             # Send the stream in buffers
-            resp.stream.seek(0, io.SEEK_END)
-            length = resp.stream.tell()
-            resp.stream.seek(0)
-            while resp.stream.tell() < length:
-                data = resp.stream.read(io.DEFAULT_BUFFER_SIZE)
-                if isinstance(data, six.string_types):
-                    data = data.encode(common.ENCODING)
-                backend_resp.write(data)
+            try:
+                resp.stream.seek(0, io.SEEK_END)
+                length = resp.stream.tell()
+                resp.stream.seek(0)
+                while resp.stream.tell() < length:
+                    data = resp.stream.read(io.DEFAULT_BUFFER_SIZE)
+                    if isinstance(data, six.string_types):
+                        data = data.encode(common.ENCODING)
+                    backend_resp.write(data)
+            finally:
+                resp.stream.close()
+
             return backend_resp
         else:
             kwargs = dict(status=resp.status, headers=resp.headers)
@@ -90,16 +94,12 @@ class AWeb(_api.Hammock):
             return aweb.Response(**kwargs)
 
 
-# flake8: noqa
-# python 3 from here on
 async def _not_found(req):
-    # pylint: disable=undefined-variable
     req.release()  # Eat unread part of HTTP BODY if present
     req.transport.write(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
 
 async def middleware_factory(app, handler):
-    # pylint: disable=undefined-variable
     async def cache_exception_handler(req):
         """
         Handler exceptions thrown in handler, convert them into an http response

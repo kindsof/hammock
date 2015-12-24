@@ -56,5 +56,6 @@ def to_bytes(source):
         return codecs.encode(source, ENCODING)
     elif isinstance(source, six.moves.StringIO):
         # XXX: maybe more efficient way then reading StringIO data.
+        logging.exception('Should not pass StringIO as a response, use BytesIO')
         return codecs.encode(source.getvalue(), ENCODING)
     return source

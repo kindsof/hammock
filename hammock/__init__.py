@@ -6,10 +6,10 @@ from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
 from hammock.wrappers import sink as _sink
 
 try:
-    from hammock.backends import aweb
+    from hammock.backends import aweb  # pylint: disable=no-name-in-module
 except SyntaxError:
     import munch
-    aweb = munch.Munch(aweb=None)
+    aweb = munch.Munch(aweb=None)  # pylint: disable=invalid-name
 from . import wrappers as wrappers
 
 
