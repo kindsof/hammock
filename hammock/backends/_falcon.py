@@ -24,6 +24,7 @@ class Falcon(_api.Hammock):
     def __init__(self, resource_package, **kwargs):
         api = falcon.API(**kwargs)
         super(Falcon, self).__init__(api, resource_package)
+        # TODO: should add a middleware to close file stream if still open after response finished
 
     def add_route(self, path, methods_map):
         methods = {
@@ -47,6 +48,11 @@ class Falcon(_api.Hammock):
         # This is how falcon calls a resource method,
         # Here we call the inner hammock 'route_method' and update the falcon response.
         def falcon_method(backend_req, backend_resp, **url_params):
+            # if six.PY3 and 'wsgi.file_wrapper' in backend_req.env:
+            #     # Disable wsgi file wrapper
+            #     # Due to a bug in uwsgi with BytesIO under python 3,
+            #     # https://github.com/unbit/uwsgi/issues/1126
+            #     del backend_req.env['wsgi.file_wrapper']
             req = self._req_from_backend(backend_req, url_params)
             resp = responder(req)
             self._update_backend_response(resp, backend_resp)
@@ -80,6 +86,7 @@ class Falcon(_api.Hammock):
 
     @staticmethod
     def _handle_http_error(exc, backend_req, backend_resp, url_params):  # pylint: disable=unused-argument
+        backend_req.stream.read()  # Read all request content before returning response
         backend_resp.status = str(exc.status)
         backend_resp.body = exc.to_json
         backend_resp.content_type = common.TYPE_JSON
