@@ -27,3 +27,10 @@ class Text(hammock.Resource):
     @hammock.get("raise_exception")
     def raise_exception(self):  # pylint: disable=unused-argument
         raise Exception("This exeption is intentional")
+
+    @hammock.get("replace2/{text}")
+    def replace2(self, text, old, new):  # pylint: disable=unused-argument
+        """
+        This method calls another method in a resource.
+        """
+        return self.replace(text, old, new)

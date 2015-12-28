@@ -11,9 +11,9 @@ class Passthrough(wrapper.Wrapper):
     trim_prefix = False
     exception_handler = None
 
-    def _wrapper(self, resource, req):
+    def _wrapper(self, req):
         return passthrough_module.passthrough(
-            resource=resource,
+            resource=self._resource,
             req=req,
             dest=self.dest,
             pre_process=self.__class__.pre_process,

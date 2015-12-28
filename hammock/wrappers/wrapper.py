@@ -26,17 +26,24 @@ class Wrapper(object):
 
     def __init__(self, func):
         """
-        Create a decorator
+        Create a decorator of a method in a resource class
         :param func: a function to decorate
         :return: a decorator
         """
         # decorator.decorate(func, self)
         self.spec = func_spec.FuncSpec(func)
         self.func = func
-        self.__name__ = self.func.__name__
-        self.__doc__ = self.func.__doc__
+        self._resource = None  # Can be determined only after resource class instantiation.
+        self.__name__ = func.__name__
+        self.__doc__ = func.__doc__
 
-    def __call__(self, resource, req):
+    def set_resource(self, resource):
+        self._resource = resource
+
+    def __call__(self, *args, **kwargs):
+        return self.func(self._resource, *args, **kwargs)
+
+    def call(self, req):
         """
         Calls self.func with resource and req parameters.
         Wraps it with error handling.
@@ -44,7 +51,7 @@ class Wrapper(object):
         :return: response as hammock.types.response.Response object.
         """
         try:
-            resp = self._wrapper(resource, req)
+            resp = self._wrapper(req)
         except exceptions.HttpError:
             raise
         # XXX: temporary, until all dependencies will transfer to hammock exceptions
@@ -53,13 +60,13 @@ class Wrapper(object):
         # XXX
         except Exception as exc:  # pylint: disable=broad-except
             common.log_exception(exc, req.uid)
-            resource.handle_exception(exc, self.exception_handler)
+            self._resource.handle_exception(exc, self.exception_handler)
         else:
             LOG.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
             return resp
 
     @abc.abstractmethod
-    def _wrapper(self, resource, req):
+    def _wrapper(self, req):
         """
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.

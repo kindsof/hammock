@@ -29,8 +29,9 @@ class Resource(object):
         """
         routes = collections.defaultdict(dict)
         for route_method in self.iter_route_methods():
+            route_method.set_resource(self)
             method = route_method.method.upper()
-            routes[common.url_join(self.name(), route_method.path)][method] = functools.partial(route_method, self)
+            routes[common.url_join(self.name(), route_method.path)][method] = route_method.call
         return routes
 
     @property
@@ -42,7 +43,7 @@ class Resource(object):
         return [
             (common.url_join(self.name(), sink.path), functools.partial(sink.responder, self))
             for sink in self.iter_sink_methods()
-            ]
+        ]
 
     @staticmethod
     def _to_internal_server_error(exc):

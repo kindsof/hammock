@@ -16,14 +16,14 @@ class Route(wrapper.Wrapper):
     response_content_type = common.TYPE_JSON,  # XXX: This should be removed.
     client_methods = None
 
-    def _wrapper(self, resource, req):
+    def _wrapper(self, req):
         """
         Wraps the decorated func (self._func)
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.
         """
         kwargs = self._extract_kwargs(req, req.collected_data)
-        result = self.func(resource, **kwargs)
+        result = self(**kwargs)
         resp = response.Response.from_result(result, self.success_code)
         return resp
 

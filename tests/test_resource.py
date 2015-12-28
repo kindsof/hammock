@@ -27,6 +27,7 @@ class TestResource(testing.TestBase):
         self.assert_status(404, "PUT", dict_url("a"), body={"value": "1"})
         self.assertEqual("HELLO", self._simulate("GET", "/text/upper/hello"))
         self.assertEqual("helly", self._simulate("GET", "/text/replace/hello", query_string="old=o&new=y"))
+        self.assertEqual("helly", self._simulate("GET", "/text/replace2/hello", query_string="old=o&new=y"))
         self.assertEqual("hallo", self._simulate("PUT", "/text/replace/hello", body={"old": "e", "new": "a"}))
         self.assertEqual("hallo", self._simulate("POST", "/text/replace/hello", body={"old": "e", "new": "a"}))
         self.assertEqual("helly", self._simulate("DELETE", "/text/replace/hello", query_string="old=o&new=y"))
