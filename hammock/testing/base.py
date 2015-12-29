@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import collections
 import falcon
 import falcon.testing as testing
-import json
+import ujson as json
 import six
 import importlib
 import hammock

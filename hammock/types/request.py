@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import copy
 import logging
-import simplejson as json
+import ujson as json
 import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions

@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-import json
+import ujson as json
 
 BAD_REQUEST = 400
 UNAUTHORIZED = 401

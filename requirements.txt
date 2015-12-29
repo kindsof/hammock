@@ -1,6 +1,6 @@
 decorator
 falcon==0.3.0
 requests==2.7.0
-simplejson==3.8.0
+ujson==1.34
 six==1.9.0
 munch==2.0.3

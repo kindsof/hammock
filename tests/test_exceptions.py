@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import hammock.exceptions as exceptions
 import hammock.testing as testing
 import tests.resources.exceptions as exceptions_resource
-import json
+import ujson as json
 import logging
 
 

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import codecs
-import json
+import ujson as json
 import hammock
 from hammock import common
 from hammock import types

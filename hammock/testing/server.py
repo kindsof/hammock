@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import six
 import threading
 import logging
-import json
+import ujson as json
 import socket
 import hammock.common as common
 

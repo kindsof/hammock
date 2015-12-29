@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import six
-import simplejson as json
+import ujson as json
 import hammock
 import hammock.types as types
 import hammock.common as common

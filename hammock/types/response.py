@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-import simplejson as json
+import ujson as json
 import six
 import warnings
 import hammock.common as common

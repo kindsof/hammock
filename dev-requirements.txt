@@ -6,4 +6,4 @@ rpdb
 nose
 waiting==1.3.0
 Jinja2==2.7.3
-git+https://github.com/Stratoscale/strato-pylint.git@yogev/add-setup-file
+git+https://github.com/Stratoscale/strato-pylint.git@master
