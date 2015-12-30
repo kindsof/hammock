@@ -48,20 +48,23 @@ class {{ class_name }}(object):
         else:
             _kwargs["params"] = json
         LOG.debug("Sending %s request: %s %s", method, url, json)
-        response = getattr(self._client, method.lower())(url, **_kwargs)
-        result = None
-        if response_type == '{{ type_json }}':
-            result = self.jsonify(response)
-            LOG.debug("Got response status %s, body: %s", response.status_code, result)
-        elif response_type == '{{ type_octet_stream }}':
-            result = response.raw
-        if response.status_code != success_code:
-            LOG.warning(
-                "Response status %d does not match expected success status %d",
-                response.status_code, success_code
-            )
-        response.raise_for_status()
-        return result
+        try:
+            response = getattr(self._client, method.lower())(url, **_kwargs)
+            result = None
+            if response_type == '{{ type_json }}':
+                result = self.jsonify(response)
+                LOG.debug("Got response status %s, body: %s", response.status_code, result)
+            elif response_type == '{{ type_octet_stream }}':
+                result = response.raw
+            if response.status_code != success_code:
+                LOG.warning(
+                    "Response status %d does not match expected success status %d",
+                    response.status_code, success_code
+                )
+            response.raise_for_status()
+            return result
+        finally:
+            self.close()
 
     def set_token(self, token):
         if token:
