@@ -117,7 +117,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         method=method,
         url=url,
         args=args,
-        kwargs=kwargs,
+        kwargs={k: (v if not isinstance(v, six.string_types) else '"{}"'.format(v)) for k, v in six.iteritems(kwargs)},
         url_kw=url_kw,
         params_kw=params_kw,
         defaults=defaults,
