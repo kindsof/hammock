@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
+import importlib
 import inspect
 import jinja2
 import re
@@ -152,7 +153,7 @@ def client_methods_propeties(resource_object):
 
 
 def main(class_name, package_name):
-    print(ClientGenerator(class_name, __import__(package_name)).code)
+    print(ClientGenerator(class_name, importlib.import_module(package_name)).code)
 
 
 if __name__ == '__main__':
