@@ -26,7 +26,7 @@ class HttpError(Exception):
 
     @property
     def to_json(self):
-        return json.dumps(self.to_dict, indent=4, sort_keys=True)
+        return json.dumps(self.to_dict, indent=4)
 
     @property
     def to_dict(self):
