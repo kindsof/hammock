@@ -20,4 +20,12 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
     long_description=read('README.md'),
     include_package_data=True,
+    install_requires=[
+        'falcon==0.3.0',
+        'requests==2.7.0',
+        'ujson==1.34',
+        'six==1.9.0',
+        'munch==2.0.3',
+        'decorator==4.0.6',
+    ]
 )
