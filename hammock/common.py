@@ -32,7 +32,7 @@ def url_join(*parts):
 
 def log_exception(exc, request_uuid):
     if isinstance(exc, exceptions.HttpError):
-        logging.warning("[Http %s Exception %s] %s", exc.status, request_uuid, exc.title)
+        logging.warning("[Http %s Exception %s] %s - %s", exc.status, request_uuid, exc.title, exc.description)
     else:
         logging.exception("[Internal server error %s]", request_uuid)
 
