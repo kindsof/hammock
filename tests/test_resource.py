@@ -95,7 +95,9 @@ class TestResource(testing.TestBase):
         self.assertEqual("sub-in-nested-in-sub", self._simulate("GET", "/sub_resource/nested/sub"))
 
     def test_internal_server_error(self):
-        self.assertRaises(Exception, self._simulate, "GET", "/text/raise_exception")
+        logging.info("Testing for exception raising")
+        self.simulate_request('/exceptions/internal', method='GET')
+        self.assertIn('500', self.srmock.status)
 
     def test_headers(self):
         headers = {"key1": "value1", "key2": "value2"}

@@ -2,6 +2,7 @@ import hammock.resource_node as resource_node
 import hammock.resource as resource
 import pkgutil
 import inspect
+import falcon
 
 
 class Hammock(resource_node.ResourceNode):
@@ -9,6 +10,7 @@ class Hammock(resource_node.ResourceNode):
     def __init__(self, api, resource_package):
         self._api = api
         iter_modules(resource_package, self._add_resource)
+        self._api.add_error_handler(Exception, self._handle_exception)
 
     def _add_resource(self, package, module_name, parents):
         prefix = "/".join(parents)
@@ -21,6 +23,12 @@ class Hammock(resource_node.ResourceNode):
             node = node.add(parent)
         for _resource in resources:
             node.add(_resource.name(), _resource)
+
+    def _handle_exception(self, exc, req, resp, params):  # pylint: disable=unused-argument
+        if isinstance(exc, falcon.HTTPError):
+            raise exc
+        else:
+            raise falcon.HTTPError(falcon.HTTP_500, title='Internal server error', description=str(exc))
 
 
 def iter_modules(package, callback, parents=None):
