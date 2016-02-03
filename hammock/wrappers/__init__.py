@@ -12,6 +12,7 @@ def wrapper(
     path, method,
     success_code=200,
     dest=None,
+    rule_name=None,
     pre_process=None,
     post_process=None,
     trim_prefix=False,
@@ -33,12 +34,14 @@ def wrapper(
     :param trim_prefix: a prefix to trim from the path.
     :param response_content_type: content type of response.
     :param exception_handler: a specific handler for exceptions.
+    :param rule_name: a rule from policy.json
     :return: a decorator for a route method.
     """
     name = ''.join(part.capitalize() for part in [method.upper(), common.PATH_TO_NAME(path)])
     overrides = dict(
         path=path,
         dest=dest,
+        rule_name=rule_name,
         pre_process=staticmethod(pre_process),
         post_process=staticmethod(post_process),
         trim_prefix=trim_prefix,

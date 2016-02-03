@@ -10,7 +10,8 @@ import warnings
 
 
 class Resource(object):
-    def __init__(self, api=None, base_path=None, **resource_params):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
+    def __init__(self, api, base_path=None, **resource_params):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
+        self.api = api
         self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)
 
     @classmethod

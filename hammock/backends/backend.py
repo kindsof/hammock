@@ -14,16 +14,16 @@ class Backend(object):
         self._api = api
         self.add_error_handler(exceptions.HttpError, self._api)
 
-    def add_resources(self, base_node, resource_package, **resource_params):
+    def add_resources(self, api, resource_package, **resource_params):
         """
-        :param base_node: a resource node to add package resources to
+        :param api: a resource node to add package resources to
         :param resource_package: resources package
         """
         for resource_class, parents in packages.iter_resource_classes(resource_package):
             prefix = '/'.join(parents)
-            node = base_node.get_node(parents)
+            node = api.get_node(parents)
             node.add(resource_class.name(), resource_class)
-            resource = resource_class(None, None, **resource_params)  # XXX: temporary None, None, remove them when sagittarius is fixed
+            resource = resource_class(api, None, **resource_params)  # XXX: temporary None, None, remove them when sagittarius is fixed
             self._add_route_methods(resource, prefix)
             self._add_sink_methods(resource, prefix)
 

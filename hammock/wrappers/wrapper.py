@@ -24,6 +24,7 @@ class Wrapper(object):
     method = None
     exception_handler = None
     dest = None
+    rule_name = 'default'
     pre_process = None
     post_process = None
     trim_prefix = False

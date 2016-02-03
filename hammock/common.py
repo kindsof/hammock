@@ -26,6 +26,11 @@ ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.
 ENCODING = 'utf-8'
 
 
+HEADER_USER = 'x-auth-user'
+HEADER_PROJECT_ID = 'x-auth-project-id'
+HEADER_ROLE = 'x-auth-role'
+
+
 def url_join(*parts):
     return '/'.join(arg.strip('/') for arg in parts if arg)
 

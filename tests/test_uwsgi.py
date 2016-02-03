@@ -1,37 +1,14 @@
 from __future__ import absolute_import
 import six
-import subprocess
 import unittest
 import logging
-import waiting
-import functools
 import requests
 import hammock.types.file as file_module
-import hammock.testing as testing
-import tests.app as app
 import tests.resources.exceptions as exceptions_resouce
-import tests.test_client as test_client
+import tests.uwsgi_base as uwsgi_base
 
 
-class TestWhiteboxUWSGI(unittest.TestCase):
-    PORT = 7001
-    TOKEN = "token"
-
-    @classmethod
-    def setUpClass(cls):
-        subprocess.call(["pkill", "-9", "uwsgi"])
-        cls._server = subprocess.Popen(app.command(cls.PORT))
-        waiting.wait(
-            functools.partial(testing.test_connection, ("localhost", cls.PORT)),
-            timeout_seconds=10,
-            waiting_for="server to start listening",
-        )
-        cls._client = test_client.get_client("localhost", cls.PORT, token=cls.TOKEN)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._client.close()
-        cls._server.terminate()
+class TestUwsgi(uwsgi_base.UwsgiBase):
 
     @unittest.skipIf(
         six.PY3,

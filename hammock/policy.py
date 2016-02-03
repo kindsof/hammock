@@ -1,0 +1,70 @@
+from __future__ import absolute_import
+import logging
+import os
+from oslo_policy import policy
+from oslo_policy import opts
+import oslo_config.cfg as cfg
+
+import hammock.exceptions as exceptions
+import hammock.types.credentials as _credentials
+
+
+LOG = logging.getLogger(__name__)
+
+
+class Policy(object):
+    """
+    Define routing policies using a policy json file.
+    A policy rule is according to oslo.policy.
+    A rule has a name and a boolean expression that is evaluated using the
+    headers and target resource parameters.
+    - The headers are converted to a credentials dict, by default using hammock.types.Credentials,
+      but can be customized using credentials_class parameter.
+    - The request is converted to a dict using hammock engine, and passed to oslo.policy as
+      the target field.
+    - Evaluating the expression:
+      The expression is key:value tuple, The key might be:
+      * rule: then the target is reference to another rule.
+      * role: then the value is looked up in a list stored in a key 'roles' in the credentials dict.
+      * other: the key is searched in the credentials rules, and then the value is compared after
+        evaluating the python expression: value % target
+        Example:
+        rule is 'credentials_entry:%(target_entry)s', then
+        if credentials are {'credentials_entry': 'x'} and target is {'target_entry': 'x'},
+        then the rule is evaluated to True.
+    - The expression might have and/or parentheses.
+    """
+
+    def __init__(self, policy_file=None, credentials_class=None):
+        """
+        :param policy_file: path to a policy json file
+        :param credentials_class: a custom credentials class
+        """
+        self._policy_file = policy_file
+        self._credentials_class = credentials_class or _credentials.Credentials
+        conf = self._get_conf()
+        self._enforcer = policy.Enforcer(conf, use_conf=policy_file is not None)
+        LOG.info('Policy is loaded with rules: %s', self._enforcer.rules)
+
+    def check(self, rule, target, headers):
+        # Default behavior, when no policy file was loaded or no rules were set,
+        # is to approve all checks.
+        if self._policy_file is None and not self._enforcer.rules:
+            return
+
+        # If any policy was set, the default behavior for undefined rule, is to reject.
+        credentials = self._credentials_class(headers)
+        LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, headers)
+        self._enforcer.enforce(rule, target, credentials, do_raise=True, exc=exceptions.Forbidden)
+
+    def set(self, rules_dict):
+        LOG.info('Adding rules to policy: %s', rules_dict)
+        self._enforcer.set_rules(policy.Rules.from_dict(rules_dict), overwrite=False)
+
+    def _get_conf(self):
+        conf = cfg.CONF
+        opts.set_defaults(conf, policy_file=self._policy_file)
+        if self._policy_file:
+            LOG.info('Using policy config file: %s', self._policy_file)
+            conf(args=['--config-dir', os.path.dirname(self._policy_file)])
+        return conf
