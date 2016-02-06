@@ -16,15 +16,15 @@ A resource defined by its url prefix.
 A resource is a class with name of its module, capitalized, and inherits from the resource.Resource class:
 Lets create an helloworld resource, in resources/helloworld.py:
 ```python
-from hammock import resource
+import hammock
 
-class Helloworld(resource.Resource):
-  @resource.get()
+class Helloworld(hammock.Resource):
+  @hammock.get()
   def say(self):
     return "hello world"
 ```
 
-This class definition will add a resource in the url `/helloworld`. The `resource.get` decorator
+This class definition will add a resource in the url `/helloworld`. The `hammock.get` decorator
 defines the say method as a rest method for `GET /helloworld`.
 
 ## Adding resources package to falcon api
@@ -75,7 +75,7 @@ you can add to the package `__init__.py` file: `PATH = "some-other-name". This w
 name with `some-other-name` in the url.
 - For classes: adding PATH class member
 ```python
-class SomeResource(resource.Resource):
+class SomeResource(hammock.Resource):
   PATH = "some-other-name"
 ```
 

@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import six
 import logging
+import hammock.proxy as proxy
 import hammock.common as common
 import hammock.exceptions as exceptions
 import hammock.types.response as response
@@ -22,9 +23,13 @@ class Route(wrapper.Wrapper):
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.
         """
-        kwargs = self._extract_kwargs(req, req.collected_data)
-        result = self(**kwargs)
-        resp = response.Response.from_result(result, self.success_code)
+        if self.dest is None:
+            kwargs = self._extract_kwargs(req, req.collected_data)
+            result = self(**kwargs)  # pylint: disable=not-callable
+            resp = response.Response.from_result(result, self.success_code)
+        else:
+            resp = proxy.proxy(req, self.dest)
+
         return resp
 
     def _extract_kwargs(self, req, collected_data):

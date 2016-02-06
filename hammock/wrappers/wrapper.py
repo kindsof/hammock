@@ -23,6 +23,10 @@ class Wrapper(object):
     path = None
     method = None
     exception_handler = None
+    dest = None
+    pre_process = None
+    post_process = None
+    trim_prefix = False
 
     def __init__(self, func):
         """
@@ -36,6 +40,10 @@ class Wrapper(object):
         self._resource = None  # Can be determined only after resource class instantiation.
         self.__name__ = func.__name__
         self.__doc__ = func.__doc__
+
+        # If it is a proxy, make sure function doesn't do anything.
+        if self.dest is not None:
+            common.func_is_pass(func)
 
     def set_resource(self, resource):
         self._resource = resource
@@ -54,8 +62,18 @@ class Wrapper(object):
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.
         """
+        context = {}
         try:
+            if self.trim_prefix:
+                req.trim_prefix(self.trim_prefix)
+            if self.__class__.pre_process:
+                self.__class__.pre_process(req, context, **req.url_params)  # pylint: disable=not-callable
+
             resp = self._wrapper(req)
+
+            if self.__class__.post_process:
+                resp = self.__class__.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
+
         except exceptions.HttpError as exc:
             self._exc_log_and_handle(exc, req)
         # XXX: temporary, until all dependencies will transfer to hammock exceptions

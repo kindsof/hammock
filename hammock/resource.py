@@ -3,8 +3,10 @@ import collections
 import functools
 import hammock.exceptions as exceptions
 import hammock.common as common
-import hammock.wrappers.wrapper as route_base
-import hammock.wrappers as _routes
+import hammock.wrappers as wrappers
+import hammock.wrappers.route as route
+import hammock.wrappers.sink as sink
+import warnings
 
 
 class Resource(object):
@@ -40,17 +42,18 @@ class Resource(object):
         :return: A list representing sinks in a resource: ( url, responder )
             The list is sorted by url size, largest first.
         """
-        return [
-            (common.url_join(self.name(), sink.path), functools.partial(sink.responder, self))
-            for sink in self.iter_sink_methods()
-        ]
+        sinks = []
+        for sink_method in self.iter_sink_methods():
+            sink_method.set_resource(self)
+            sinks.append((common.url_join(self.name(), sink_method.path), sink_method.call))
+        return sinks
 
     @staticmethod
     def _to_internal_server_error(exc):
         return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
 
     @classmethod
-    def iter_route_methods(cls, reoute_class=route_base.Wrapper):
+    def iter_route_methods(cls, reoute_class=route.Route):
         return (
             getattr(cls, attr) for attr in dir(cls)
             if isinstance(getattr(cls, attr, None), reoute_class)
@@ -61,29 +64,34 @@ class Resource(object):
         return sorted(
             (
                 getattr(cls, attr) for attr in dir(cls)
-                if getattr(getattr(cls, attr, None), 'is_sink', False)
+                if isinstance(getattr(cls, attr, None), sink.Sink)
             ),
             key=functools.cmp_to_key(lambda p1, p2: len(p1.path) - len(p2.path))
         )
 
 
-# XXX: will be removed. HERE FOR COMPATIBILITY
+# XXX: deprecated, those methods will be removed
 
 def get(path='', **kwargs):
-    return _routes.route(path, 'GET', **kwargs)
+    warnings.warn('resource.get is deprecated, use hammock.get instead', UserWarning)
+    return wrappers.wrapper(path, 'GET', **kwargs)
 
 
 def head(path='', **kwargs):
-    return _routes.route(path, 'HEAD', **kwargs)
+    warnings.warn('resource.head is deprecated, use hammock.head instead', UserWarning)
+    return wrappers.wrapper(path, 'HEAD', **kwargs)
 
 
 def post(path='', **kwargs):
-    return _routes.route(path, 'POST', **kwargs)
+    warnings.warn('resource.post is deprecated, use hammock.post instead', UserWarning)
+    return wrappers.wrapper(path, 'POST', **kwargs)
 
 
 def put(path='', **kwargs):
-    return _routes.route(path, 'PUT', **kwargs)
+    warnings.warn('resource.put is deprecated, use hammock.put instead', UserWarning)
+    return wrappers.wrapper(path, 'PUT', **kwargs)
 
 
 def delete(path='', **kwargs):
-    return _routes.route(path, 'DELETE', **kwargs)
+    warnings.warn('resource.delete is deprecated, use hammock.delete instead', UserWarning)
+    return wrappers.wrapper(path, 'DELETE', **kwargs)
