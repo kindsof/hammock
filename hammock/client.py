@@ -112,6 +112,11 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         "Can only have {} or {} in method args".format(common.KW_FILE, common.KW_LIST)
     if method_name in ("login", "logout", "refresh",):
         method_name = "_%s" % method_name
+
+    if doc_string is not None:
+        # Fix doc string indentation.
+        doc_string = '\n    '.join(doc_string.split('\n'))
+
     return METHOD_TEMPLATE.render(  # pylint: disable=no-member
         method_name=method_name,
         method=method,

@@ -10,9 +10,8 @@ def {{ method_name }}(self
         {%- if keywords %}, **{{ keywords }}{% endif -%}
         ):
         {%- if doc_string %}
-    '''
-    {{ doc_string }}
-    '''
+    """{{ doc_string }}
+    """
         {%- endif %}
     return self._client.fetch(
         method='{{ method }}',
