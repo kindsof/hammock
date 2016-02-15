@@ -1,5 +1,6 @@
 #! /user/bin/env python
 from __future__ import absolute_import
+import os
 import falcon
 import hammock
 import sys
@@ -7,7 +8,10 @@ import subprocess
 import tests.resources as resources
 
 application = falcon.API()  # pylint: disable=invalid-name
-hammock.Hammock(application, resources)
+hammock.Hammock(
+    application, resources,
+    policy_file=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'policy.json')
+)
 
 
 def command(listen_port):

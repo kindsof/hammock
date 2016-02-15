@@ -39,6 +39,8 @@ def post_manipulate_path(response, _):
 
 class Redirect(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.sink(dest=DEST, trim_prefix="redirect")
     def passthrough(self):
         pass

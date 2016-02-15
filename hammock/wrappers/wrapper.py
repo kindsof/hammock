@@ -48,6 +48,16 @@ class Wrapper(object):
 
     def set_resource(self, resource):
         self._resource = resource
+        if resource.POLICY_GROUP_NAME is False or resource.api.policy.is_disabled:
+            self.rule_name = None
+        else:
+            group_name = self._resource.POLICY_GROUP_NAME or self._resource.name().lower()
+            rule_name = self.rule_name or self.func.__name__
+            self.rule_name = '{}:{}'.format(group_name, rule_name)
+            if self.rule_name not in resource.api.policy.rules:
+                raise RuntimeError('Policy rule {} of method {} in resource class {} does not exist in policy file'.format(
+                    self.rule_name, self.func.__name__, resource.__class__.__name__
+                ))
 
     def __call__(self, *args, **kwargs):
         return self.func(self._resource, *args, **kwargs)

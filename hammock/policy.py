@@ -49,7 +49,7 @@ class Policy(object):
     def check(self, rule, target, headers):
         # Default behavior, when no policy file was loaded or no rules were set,
         # is to approve all checks.
-        if self._policy_file is None and not self._enforcer.rules:
+        if self.is_disabled:
             return
 
         # If any policy was set, the default behavior for undefined rule, is to reject.
@@ -60,6 +60,15 @@ class Policy(object):
     def set(self, rules_dict):
         LOG.info('Adding rules to policy: %s', rules_dict)
         self._enforcer.set_rules(policy.Rules.from_dict(rules_dict), overwrite=False)
+
+    @property
+    def is_disabled(self):
+        return self._policy_file is None and not self._enforcer.rules
+
+    @property
+    def rules(self):
+        self._enforcer.load_rules()
+        return self._enforcer.rules
 
     def _get_conf(self):
         conf = cfg.CONF

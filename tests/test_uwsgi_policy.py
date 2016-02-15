@@ -2,12 +2,9 @@ from __future__ import absolute_import
 import requests
 import hammock.common as common
 import tests.uwsgi_base as uwsgi_base
-import tests.app_policy as app_policy
 
 
 class TestUwsgiPolicy(uwsgi_base.UwsgiBase):
-
-    app_module = app_policy
 
     def test_policy_no_auth_details(self):
         self.assert_not_authorized(self._client.policy.project_admin)

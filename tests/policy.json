@@ -1,4 +1,4 @@
 {
-  "project-admin": "role:admin or (project_id:%(project_id)s and role:project_admin)",
-  "admin": "role:admin"
+  "policy-override:project-admin": "role:admin or (project_id:%(project_id)s and role:project_admin)",
+  "policy-override:admin": "role:admin"
 }

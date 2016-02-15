@@ -10,6 +10,8 @@ class KeyNotFound(exceptions.NotFound):
 
 class Dict(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     def __init__(self, *args):
         super(Dict, self).__init__(*args)
         self._dict = {}

@@ -6,6 +6,8 @@ import falcon
 
 class Files(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.post(response_content_type=hammock.TYPE_OCTET_STREAM)
     def echo(self, _file):
         data = _file.stream.read()

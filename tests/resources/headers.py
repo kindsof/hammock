@@ -5,6 +5,8 @@ import hammock.common as common
 
 class Headers(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.get("{key}")
     def request_headers(self, key, value, _headers):
         return _headers(key) == value

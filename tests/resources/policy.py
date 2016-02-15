@@ -8,6 +8,8 @@ class Policy(hammock.Resource):
     the rule_name are listed in tests/policy.json
     """
 
+    POLICY_GROUP_NAME = 'policy-override'
+
     @hammock.get('project_admin', rule_name='project-admin')
     def project_admin(self, project_id=None):  # pylint: disable=unused-argument
         return True

@@ -4,6 +4,8 @@ import hammock
 
 class Lists(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.get('{path}')
     def get(self, path, argument):
         return {

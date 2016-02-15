@@ -7,6 +7,8 @@ DESCRIPTION = 'This exception is intentional'
 
 class Exceptions(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.get('internal')
     def internal(self):
         raise Exception(DESCRIPTION)

@@ -5,6 +5,8 @@ import six
 
 class Responses(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.get(path='none')
     def none(self):
         return None

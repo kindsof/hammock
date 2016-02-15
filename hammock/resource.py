@@ -10,6 +10,14 @@ import warnings
 
 
 class Resource(object):
+
+    # POLICY_GROUP_NAME:
+    # define a policy group wich is the prefix for the rule name,
+    # together with the route's rule_name attribute the whole rule will be 'group:rule_name'
+    # if set to False, policy check will be disabled for the entire resource.
+    # if set to None, the group name is set to the class name, lowercase.
+    POLICY_GROUP_NAME = None
+
     def __init__(self, api, base_path=None, **resource_params):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
         self.api = api
         self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)

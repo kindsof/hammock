@@ -4,6 +4,7 @@ import hammock
 
 class Sub(hammock.Resource):
     PATH = "different_sub"
+    POLICY_GROUP_NAME = False
 
     @hammock.get()
     def test_headers(self):

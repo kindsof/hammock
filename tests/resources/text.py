@@ -4,6 +4,8 @@ import hammock
 
 class Text(hammock.Resource):
 
+    POLICY_GROUP_NAME = False
+
     @hammock.get("upper/{text}")
     def upper(self, text):  # pylint: disable=unused-argument
         return text.upper()

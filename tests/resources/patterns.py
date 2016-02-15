@@ -7,6 +7,9 @@ import hammock.common as common
 
 
 class Patterns(hammock.Resource):
+
+    POLICY_GROUP_NAME = False
+
     @hammock.get()
     def get(self):
         return "base"

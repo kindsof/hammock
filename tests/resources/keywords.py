@@ -5,6 +5,7 @@ import hammock
 class Keywords(hammock.Resource):
 
     DEFAULT = 10
+    POLICY_GROUP_NAME = False
 
     @hammock.get()
     def get(self, arg, default=DEFAULT, **kwargs):
