@@ -30,12 +30,10 @@ defines the say method as a rest method for `GET /helloworld`.
 ## Adding resources package to falcon api
 Simply use this code:
 ```python
-import python
 import hammock
 from somewhere.inn.your.project import resources
 
-api = falcon.API()
-hammock.Hammock(api, resources)
+hammock.Hammock('falcon', resources)
 ```
 
 ## rest methods.
@@ -56,12 +54,11 @@ in case that no error was raised.
 
 ### Special arguments.
 Naming the method's argument in a special way, might result in a different behaviour:
-- `_headers`: the argument that will be passed to the method is the _headers of the request. 
-Notice! This object is a *method* and not a dict. To get the X-Auth-Token from the headers, use:
-`_headers("x-auth-token")`.
+- `_headers`: the argument that will be passed to the method is the _headers of the request.
 - `_file`: This method expects "application/octet-stream" as content-type of the request, and the stream 
 will be delivered to the `_file` argument. Notice that this method must be "PUT" or "POST". 
 Other arguments will be passed through the url query parameters.
+- `_list`: when json body is a list (and not a dict) the body will go to this variable.
 
 ## url:
 The url of your resource is created using the python packages and class name. 
@@ -79,5 +76,41 @@ class SomeResource(hammock.Resource):
   PATH = "some-other-name"
 ```
 
+## Policy
+
+Define routing policies using a policy json file.
+A policy rule is according to [oslo.policy](http://docs.openstack.org/developer/oslo.policy).
+To use the policy file, instantiate the Hammock instance with
+the policy_file keyword argument.
+A rule has a name and a boolean expression that is evaluated
+using the headers and target resource parameters.
+- The rule name is combined of rule-group and rule-name, 
+  - The rule group is by default the resource class name, lowercase, 
+    and can be override using the `POLICY_GROUP_NAME` class member. setting this
+    member to `False` will result in no policy enforcement on the class.
+  - The rule name is the route method name, and can be override using the
+    `rule_name` keyword argument in the route decorator.
+  - The full name is `{rule-group}:{rule-name}`
+- The headers are converted to a credentials dict, 
+  by default using [Credentials](./hammock/types/credentials.py) class.
+  but can be customized using credentials_class parameter.
+- The request is converted to a dict using hammock engine, and passed to oslo.policy as
+  the target field.
+- Evaluating the expression:
+  The expression is key:value tuple, The key might be:
+  * rule: then the target is reference to another rule.
+  * role: then the value is looked up in a list stored in a key 'roles' in the credentials dict.
+  * project_id/user_id/domain_id: the credential's project_id/user_id/domain_id.
+  * other: the key is searched in the credentials rules, and then the value is compared after
+    evaluating the python expression: value % target
+  * [reference](http://docs.openstack.org/developer/oslo.policy/api/oslo_policy.html#policy-rule-expressions).
+  * Example:
+    rule is 'credentials_entry:%(target_entry)s', then
+    if credentials are {'credentials_entry': 'x'} and target is {'target_entry': 'x'},
+    then the rule is evaluated to True.
+- The expression might have and/or parentheses.
+
 ## Examples:
-Look at the resources test package in `tests.resources package`.
+
+* Look at the resources test [package](./tests/resources).
+* Look at the example [project](./examples/phoenix)
