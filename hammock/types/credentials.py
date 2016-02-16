@@ -9,7 +9,13 @@ class Credentials(dict):
     """
     def __init__(self, headers):
         super(Credentials, self).__init__(
-            user=headers.get(common.HEADER_USER, None),
+            user_name=headers.get(common.HEADER_USER_NAME, None),
+            user_id=headers.get(common.HEADER_USER_ID, None),
+            project_name=headers.get(common.HEADER_PROJECT_NAME, None),
             project_id=headers.get(common.HEADER_PROJECT_ID, None),
-            roles=headers.get(common.HEADER_ROLE, '').split(';'),
+            user_domain_name=headers.get(common.HEADER_USER_DOMAIN_NAME, None),
+            user_domain_id=headers.get(common.HEADER_USER_DOMAIN_ID, None),
+            project_domain_name=headers.get(common.HEADER_PROJECT_DOMAIN_ID, None),
+            project_domain_id=headers.get(common.HEADER_PROJECT_DOMAIN_ID, None),
+            roles=headers.get(common.HEADER_ROLES, '').split(';'),
         )

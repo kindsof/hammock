@@ -1,7 +1,7 @@
 {
   "project-admin": "role:admin or (project_id:%(project_id)s and role:project_admin)",
   "project-admin-list": [["role:admin"], ["project_id:%(project_id)s", "role:project_admin"]],
-  "user-moshe": "user:moshe",
+  "user-moshe": "user_name:moshe",
   "user-moshe-reference": "rule:user-moshe",
   "target-attribute": "cred_attr:%(target_attr)s",
   "allow-all": "@",

@@ -19,41 +19,41 @@ class TestPolicy(unittest.TestCase):
             policy,
             'project-admin', True,
             {'project_id': 'project-id-1'},
-            {common.HEADER_ROLE: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
+            {common.HEADER_ROLES: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
         )
         self._test_policy(
             policy,
             'project-admin', True,
             {'project_id': 'project-id-2'},
-            {common.HEADER_ROLE: 'admin', common.HEADER_PROJECT_ID: 'project-id-1'}
+            {common.HEADER_ROLES: 'admin', common.HEADER_PROJECT_ID: 'project-id-1'}
         )
         self._test_policy(
             policy,
             'project-admin', False,
             {'project_id': 'project-id-2'},
-            {common.HEADER_ROLE: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
+            {common.HEADER_ROLES: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
         )
         self._test_policy(
             policy,
             'project-admin-list', True,
             {'project_id': 'project-id-1'},
-            {common.HEADER_ROLE: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
+            {common.HEADER_ROLES: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
         )
         self._test_policy(
             policy,
             'project-admin-list', True,
             {'project_id': 'project-id-2'},
-            {common.HEADER_ROLE: 'admin', common.HEADER_PROJECT_ID: 'project-id-1'}
+            {common.HEADER_ROLES: 'admin', common.HEADER_PROJECT_ID: 'project-id-1'}
         )
         self._test_policy(
             policy,
             'project-admin-list', False,
             {'project_id': 'project-id-2'},
-            {common.HEADER_ROLE: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
+            {common.HEADER_ROLES: 'project_admin', common.HEADER_PROJECT_ID: 'project-id-1'}
         )
 
-        self._test_policy(policy, 'user-moshe-reference', True, {}, {common.HEADER_USER: 'moshe'})
-        self._test_policy(policy, 'user-moshe-reference', False, {}, {common.HEADER_USER: 'haim'})
+        self._test_policy(policy, 'user-moshe-reference', True, {}, {common.HEADER_USER_NAME: 'moshe'})
+        self._test_policy(policy, 'user-moshe-reference', False, {}, {common.HEADER_USER_NAME: 'haim'})
 
         self._test_policy(policy, 'allow-all', True, {}, {})
         self._test_policy(policy, 'deny-all', False, {}, {})
@@ -72,33 +72,33 @@ class TestPolicy(unittest.TestCase):
     def test_add_rule(self):
         policy = _policy.Policy(POLICY_FILE)
 
-        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER: 'moshe'})
-        self._test_policy(policy, 'user-haim', False, {}, {common.HEADER_USER: 'haim'})
+        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER_NAME: 'moshe'})
+        self._test_policy(policy, 'user-haim', False, {}, {common.HEADER_USER_NAME: 'haim'})
 
-        policy.set({'user-haim': 'user:haim'})
+        policy.set({'user-haim': 'user_name:haim'})
 
-        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER: 'moshe'})
-        self._test_policy(policy, 'user-haim', True, {}, {common.HEADER_USER: 'haim'})
+        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER_NAME: 'moshe'})
+        self._test_policy(policy, 'user-haim', True, {}, {common.HEADER_USER_NAME: 'haim'})
 
     def test_override_rule(self):
         policy = _policy.Policy(POLICY_FILE)
 
-        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER: 'moshe'})
-        self._test_policy(policy, 'user-moshe', False, {}, {common.HEADER_USER: 'haim'})
+        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER_NAME: 'moshe'})
+        self._test_policy(policy, 'user-moshe', False, {}, {common.HEADER_USER_NAME: 'haim'})
 
-        policy.set({'user-moshe': 'user:haim'})
+        policy.set({'user-moshe': 'user_name:haim'})
 
-        self._test_policy(policy, 'user-moshe', False, {}, {common.HEADER_USER: 'moshe'})
-        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER: 'haim'})
+        self._test_policy(policy, 'user-moshe', False, {}, {common.HEADER_USER_NAME: 'moshe'})
+        self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER_NAME: 'haim'})
 
     def test_policy_none(self):
         policy = _policy.Policy()
         self._test_policy(policy, 'user-haim', True, {}, {})
 
-        policy.set({'user-haim': 'user:haim'})
+        policy.set({'user-haim': 'user_name:haim'})
 
-        self._test_policy(policy, 'user-haim', True, {}, {common.HEADER_USER: 'haim'})
-        self._test_policy(policy, 'user-haim', False, {}, {common.HEADER_USER: 'moshe'})
+        self._test_policy(policy, 'user-haim', True, {}, {common.HEADER_USER_NAME: 'haim'})
+        self._test_policy(policy, 'user-haim', False, {}, {common.HEADER_USER_NAME: 'moshe'})
 
     def _test_policy(self, policy, rule, allowed, target, headers):
         msg = 'Failed rule {}: (allowed: {}) target: {}, headers: {}'.format(rule, allowed, target, headers)

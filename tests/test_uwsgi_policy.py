@@ -12,14 +12,14 @@ class TestUwsgiPolicy(uwsgi_base.UwsgiBase):
 
     def test_admin(self):
         admin = self.get_client(headers={
-            common.HEADER_ROLE: 'admin'
+            common.HEADER_ROLES: 'admin'
         })
         self.assertEqual(admin.policy.project_admin(), True)
         self.assertEqual(admin.policy.admin(), True)
 
     def test_project_admin(self):
         project_admin = self.get_client(headers={
-            common.HEADER_ROLE: 'project_admin',
+            common.HEADER_ROLES: 'project_admin',
             common.HEADER_PROJECT_ID: 'project-id-1'
         })
         self.assertEqual(project_admin.policy.project_admin(project_id='project-id-1'), True)
