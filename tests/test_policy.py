@@ -100,6 +100,11 @@ class TestPolicy(unittest.TestCase):
         self._test_policy(policy, 'user-haim', True, {}, {common.HEADER_USER_NAME: 'haim'})
         self._test_policy(policy, 'user-haim', False, {}, {common.HEADER_USER_NAME: 'moshe'})
 
+    def test_project_id_is_none(self):
+        policy = _policy.Policy(POLICY_FILE)
+        self._test_policy(policy, 'project-none', True, {'project_id': None}, {})
+        self._test_policy(policy, 'project-none', False, {'project_id': '1234'}, {})
+
     def _test_policy(self, policy, rule, allowed, target, headers):
         msg = 'Failed rule {}: (allowed: {}) target: {}, headers: {}'.format(rule, allowed, target, headers)
         try:
