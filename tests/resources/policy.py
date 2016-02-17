@@ -22,14 +22,6 @@ class Policy(hammock.Resource):
     def test_credentials_arg(self, username, _credentials):  # pylint: disable=unused-argument
         return username == _credentials['user_name']
 
-class vm_manager: pass
-import hammock.exceptions as exceptions
-
-class Vms(hammock.Resource):
-
-   @hammock.get()
-   def get(self, _credentials, vm_id):
-        vm = vm_manager.get(vm_id)
-        if vm['project_id'] != _credentials['project_id']:
-            raise exceptions.Unauthorized('Get vm {}'.format(vm_id))
-        return vm
+    @hammock.get('test-enforcer-arg')
+    def test_enforcer_arg(self, username, _enforcer):  # pylint: disable=unused-argument
+        return _enforcer({'username': username})

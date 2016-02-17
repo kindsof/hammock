@@ -13,6 +13,7 @@ URL_PARAMS_METHODS = {'GET', 'HEAD', 'DELETE'}
 KW_CONTENT = '_content'
 KW_HEADERS = '_headers'
 KW_CREDENTIALS = '_credentials'
+KW_ENFORCER = '_enforcer'
 KW_FILE = '_file'
 KW_LIST = '_list'
 KW_STATUS = '_status'

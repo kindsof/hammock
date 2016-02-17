@@ -17,11 +17,12 @@ def default_404(req, res):  # pylint: disable=unused-argument
 class TestBase(testing.TestBase):
 
     RESOURCES = 'tests.resources'
+    POLICY = None
 
     def before(self):
         self.api.add_sink(default_404)
         resources = importlib.import_module(self.RESOURCES)
-        hammock.Hammock(self.api, resources)
+        hammock.Hammock(self.api, resources, policy_file=self.POLICY)
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None, binary_response=False):
         kwargs = {}

@@ -8,7 +8,6 @@ import oslo_config.cfg as cfg
 import hammock.exceptions as exceptions
 import hammock.types.credentials as _credentials
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -55,8 +54,15 @@ class Policy(object):
         # If any policy was set, the default behavior for undefined rule, is to reject.
         credentials = self._credentials_class(headers)
         LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, headers)
-        self._enforcer.enforce(rule, target, credentials, do_raise=True, exc=exceptions.Forbidden)
-        return credentials
+
+        def enforce_func(target):
+            return self._enforcer.enforce(
+                rule=rule, creds=credentials, target=target,
+                do_raise=True, exc=exceptions.Forbidden
+            )
+
+        enforce_func(target)
+        return enforce_func, credentials
 
     def set(self, rules_dict):
         LOG.info('Adding rules to policy: %s', rules_dict)

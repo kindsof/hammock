@@ -8,6 +8,8 @@ import hammock.common as common
 
 class TestRedirect(testing.TestBase):
 
+    POLICY = os.path.join(os.path.dirname(__file__), 'policy.json')
+
     @classmethod
     def setUpClass(cls):
         cls._server = testing.Server(port=redirect.PORT)

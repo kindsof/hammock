@@ -91,15 +91,6 @@ class TestPolicy(unittest.TestCase):
         self._test_policy(policy, 'user-moshe', False, {}, {common.HEADER_USER_NAME: 'moshe'})
         self._test_policy(policy, 'user-moshe', True, {}, {common.HEADER_USER_NAME: 'haim'})
 
-    def test_policy_none(self):
-        policy = _policy.Policy()
-        self._test_policy(policy, 'user-haim', True, {}, {})
-
-        policy.set({'user-haim': 'user_name:haim'})
-
-        self._test_policy(policy, 'user-haim', True, {}, {common.HEADER_USER_NAME: 'haim'})
-        self._test_policy(policy, 'user-haim', False, {}, {common.HEADER_USER_NAME: 'moshe'})
-
     def test_project_id_is_none(self):
         policy = _policy.Policy(POLICY_FILE)
         self._test_policy(policy, 'project-none', True, {'project_id': None}, {})

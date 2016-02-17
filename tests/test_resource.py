@@ -10,6 +10,8 @@ import tests.resources.keywords as keywords
 
 class TestResource(testing.TestBase):
 
+    POLICY = os.path.join(os.path.dirname(__file__), 'policy.json')
+
     def test_resource(self):
         def dict_url(key):
             return "/dict/%s" % key

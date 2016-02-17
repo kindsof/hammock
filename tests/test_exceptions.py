@@ -4,9 +4,13 @@ import hammock.testing as testing
 import tests.resources.exceptions as exceptions_resource
 import ujson as json
 import logging
+import os
 
 
 class TestExceptions(testing.TestBase):
+
+    POLICY = os.path.join(os.path.dirname(__file__), 'policy.json')
+
     def test_init_and_methods(self):
         internal_server_error = exceptions.InternalServerError('description0')
         self.assertEqual(internal_server_error.status, 500)

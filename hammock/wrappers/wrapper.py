@@ -49,17 +49,32 @@ class Wrapper(object):
 
     def set_resource(self, resource):
         self._resource = resource
-        if resource.POLICY_GROUP_NAME is not False and not resource.api.policy.is_disabled:
-            group_name = self._resource.POLICY_GROUP_NAME or self._resource.name().lower()
-            rule_name = self.rule_name or self.func.__name__
-            self.full_policy_rule_name = '{}:{}'.format(group_name, rule_name)
-            if self.full_policy_rule_name not in resource.api.policy.rules:
-                raise RuntimeError('Policy rule {} of method {} in resource class {} does not exist in policy file'.format(
-                    self.full_policy_rule_name, self.func.__name__, resource.__class__.__name__
-                ))
+        if not self._is_policy_disabled:
+            self.full_policy_rule_name = self._generate_full_policy_rule_name()
+        else:
+            self.full_policy_rule_name = None
+            # check if a method that enforces policy, expects credentials or enforcer.
+            method_expects_policy_arguments = {common.KW_CREDENTIALS, common.KW_ENFORCER} & set(self.spec.args)
+            if method_expects_policy_arguments:
+                raise RuntimeError('Method {} in class {} expects {}, but is not enforced by policy'.format(
+                    self.__name__, self._resource.__class__.__name__, method_expects_policy_arguments))
 
     def __call__(self, *args, **kwargs):
         return self.func(self._resource, *args, **kwargs)
+
+    @property
+    def _is_policy_disabled(self):
+        return self._resource.POLICY_GROUP_NAME is False or self._resource.api.policy.is_disabled
+
+    def _generate_full_policy_rule_name(self):
+        group_name = self._resource.POLICY_GROUP_NAME or self._resource.name().lower()
+        rule_name = self.rule_name or self.func.__name__
+        full_policy_rule_name = '{}:{}'.format(group_name, rule_name)
+        if full_policy_rule_name not in self._resource.api.policy.rules:
+            raise RuntimeError('Policy rule {} of method {} in resource class {} does not exist in policy file'.format(
+                self.full_policy_rule_name, self.func.__name__, self._resource.__class__.__name__
+            ))
+        return full_policy_rule_name
 
     def _exc_log_and_handle(self, exc, req):
         self._resource.handle_exception(exc, self.exception_handler)

@@ -16,7 +16,7 @@ FILE_TEMPLATE = ENV.get_template('file.j2')
 METHOD_TEMPLATE = ENV.get_template('method.j2')
 RESOURCE_CLASS_TEMPLATE = ENV.get_template('resource_class.j2')
 AUTH_METHODS_CODE = ENV.get_template('auth_methods.j2')
-IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDENTIALS}
+IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDENTIALS, common.KW_ENFORCER}
 
 
 class ClientGenerator(object):
@@ -107,7 +107,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
     params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - IGNORE_KW
     url_kw = set(url_kw) - IGNORE_KW
     defaults = {k: v if type(v) is not str else "'%s'" % v for k, v in defaults.items()}
-    args = [arg for arg in args if arg not in {common.KW_HEADERS, common.KW_CREDENTIALS}]
+    args = [arg for arg in args if arg not in {common.KW_HEADERS, common.KW_CREDENTIALS, common.KW_ENFORCER}]
     assert not ((common.KW_FILE in args) and (common.KW_LIST in args)), \
         "Can only have {} or {} in method args".format(common.KW_FILE, common.KW_LIST)
     if method_name in ("login", "logout", "refresh",):
