@@ -26,7 +26,9 @@ class Route(wrapper.Wrapper):
         if self.dest is None:
             kwargs = self._extract_kwargs(req, req.collected_data)
             if self.full_policy_rule_name:
-                self._resource.api.policy.check(self.full_policy_rule_name, target=kwargs, headers=req.headers)
+                credentials = self._resource.api.policy.check(self.full_policy_rule_name, target=kwargs, headers=req.headers)
+                if common.KW_CREDENTIALS in self.spec.args:
+                    kwargs[common.KW_CREDENTIALS] = credentials
             result = self(**kwargs)  # pylint: disable=not-callable
             resp = response.Response.from_result(result, self.success_code)
         else:
@@ -53,6 +55,8 @@ class Route(wrapper.Wrapper):
         })
         if common.KW_HEADERS in self.spec.args:
             kwargs[common.KW_HEADERS] = req.headers
+        if common.KW_CREDENTIALS in self.spec.args:
+            kwargs[common.KW_CREDENTIALS] = {}
         for keyword, error_msg in (
             (common.KW_FILE, 'expected {} as {}'.format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
             (common.KW_LIST, 'expected {} {} as list'.format(common.CONTENT_TYPE, common.TYPE_JSON)),
@@ -62,7 +66,6 @@ class Route(wrapper.Wrapper):
                     kwargs[keyword] = req.collected_data[keyword]
                 except KeyError:
                     raise exceptions.BadData(error_msg)
-                args.remove(keyword)
         missing = set(args) - set(kwargs)
         if missing:
             raise exceptions.BadRequest('Missing parameters: {}'.format(', '.join(missing)))

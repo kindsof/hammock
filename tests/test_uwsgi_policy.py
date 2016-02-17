@@ -26,6 +26,12 @@ class TestUwsgiPolicy(uwsgi_base.UwsgiBase):
         self.assert_not_authorized(project_admin.policy.project_admin, project_id='project-id-2')
         self.assert_not_authorized(project_admin.policy.admin, project_id='project-id-1')
 
+    def test_credentials_arg(self):
+        username = 'mickmick'
+        user = self.get_client(headers={common.HEADER_USER_NAME: username})
+        self.assertTrue(user.policy.test_credentials_arg(username))
+        self.assertFalse(user.policy.test_credentials_arg('not-me'))
+
     def assert_not_authorized(self, func, *args, **kwargs):
         with self.assertRaises(requests.HTTPError) as exc:
             func(*args, **kwargs)

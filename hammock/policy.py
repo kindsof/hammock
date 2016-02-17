@@ -56,6 +56,7 @@ class Policy(object):
         credentials = self._credentials_class(headers)
         LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, headers)
         self._enforcer.enforce(rule, target, credentials, do_raise=True, exc=exceptions.Forbidden)
+        return credentials
 
     def set(self, rules_dict):
         LOG.info('Adding rules to policy: %s', rules_dict)

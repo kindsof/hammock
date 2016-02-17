@@ -1,4 +1,5 @@
 {
   "policy-override:project-admin": "role:admin or (project_id:%(project_id)s and role:project_admin)",
-  "policy-override:admin": "role:admin"
+  "policy-override:admin": "role:admin",
+  "policy-override:test_credentials_arg": "@"
 }

@@ -6,6 +6,7 @@ currently supports falcon.
 ## General.
 
 Your REST server might have resources.
+
 1. Make a resources package somewhere in your project (with __init__.py and so).
 2. Add your resources to that package (see below).
 3. Add the resources to the falcon API (see below).
@@ -109,6 +110,25 @@ using the headers and target resource parameters.
     if credentials are {'credentials_entry': 'x'} and target is {'target_entry': 'x'},
     then the rule is evaluated to True.
 - The expression might have and/or parentheses.
+
+### Enforcement in the route method context.
+
+Not all policy can be enforced in the route method entry level.
+The credentials dict might be injected to the route method, using
+the `_credentials` keyword argument. For example:
+
+```python
+import hammock
+import manager
+
+class MySecuredResource(hammock.Resource):
+    @hammock.get()
+    def get(self, _credentials, resource_id):
+        resource = manager.get(resource_id)
+        if resource['project_id'] != _credentials['project_id']:
+            raise exceptions.Unauthorized('Get secured resource {}'.format(resource_id))
+        return vm
+```
 
 ## Examples:
 

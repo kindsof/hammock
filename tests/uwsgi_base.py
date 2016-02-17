@@ -20,7 +20,7 @@ class UwsgiBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not os.path.exists('build/logs'):
-            os.mkdir('build/logs')
+            os.makedirs('build/logs')
         cls._server_log = open('build/logs/server-{}.log'.format(cls.__name__.lower()), 'w')
         subprocess.call(["pkill", "-9", "uwsgi"])
         cls._server = subprocess.Popen(
