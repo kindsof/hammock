@@ -56,8 +56,12 @@ class Policy(object):
         LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, headers)
 
         def enforce_func(target):
+            # Set None in project_id in case the target don't have one,
+            # For all the rules that check for project_id.
+            check_target = target.copy()
+            check_target.setdefault('project_id', None)
             return self._enforcer.enforce(
-                rule=rule, creds=credentials, target=target,
+                rule=rule, creds=credentials, target=check_target,
                 do_raise=True, exc=exceptions.Forbidden
             )
 
