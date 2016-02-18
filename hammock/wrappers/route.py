@@ -31,6 +31,8 @@ class Route(wrapper.Wrapper):
                     kwargs[common.KW_CREDENTIALS] = credentials
                 if common.KW_ENFORCER in self.spec.args:
                     kwargs[common.KW_ENFORCER] = enforcer
+            if common.KW_HEADERS in self.spec.args:
+                kwargs[common.KW_HEADERS] = req.headers
             result = self(**kwargs)  # pylint: disable=not-callable
             resp = response.Response.from_result(result, self.success_code)
         else:
@@ -49,14 +51,12 @@ class Route(wrapper.Wrapper):
             raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
 
     def _convert_to_kwargs(self, req, collected_data):
-        args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER})
+        args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS})
         kwargs = collected_data
         kwargs.update({
             keyword: kwargs.get(keyword, default)
             for keyword, default in six.iteritems(self.spec.kwargs)
         })
-        if common.KW_HEADERS in self.spec.args:
-            kwargs[common.KW_HEADERS] = req.headers
         for keyword, error_msg in (
             (common.KW_FILE, 'expected {} as {}'.format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
             (common.KW_LIST, 'expected {} {} as list'.format(common.CONTENT_TYPE, common.TYPE_JSON)),
