@@ -30,6 +30,12 @@ HEADER_USER = 'x-auth-user'
 HEADER_PROJECT_ID = 'x-auth-project-id'
 HEADER_ROLE = 'x-auth-role'
 
+# REST method names
+PUT = 'PUT'
+GET = 'GET'
+POST = 'POST'
+DELETE = 'DELETE'
+
 
 def url_join(*parts):
     return '/'.join(arg.strip('/') for arg in parts if arg)
