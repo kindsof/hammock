@@ -90,8 +90,8 @@ class Request(object):
         self.headers[common.CONTENT_LENGTH] = len(content)
 
     def _collect_body(self):
-        content_type = self.headers.get(common.CONTENT_TYPE)
-        if content_type == common.TYPE_JSON:
+        content_type = self.headers.get(common.CONTENT_TYPE, '')
+        if common.TYPE_JSON in content_type:
             try:
                 body = json.load(self.stream)
                 if type(body) == dict:
@@ -104,5 +104,5 @@ class Request(object):
                     return {common.KW_CONTENT: body}
             except (ValueError, UnicodeDecodeError):
                 raise exceptions.MalformedJson()
-        elif content_type == common.TYPE_OCTET_STREAM:
+        elif common.TYPE_OCTET_STREAM in content_type:
             return {common.KW_FILE: file_module.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}

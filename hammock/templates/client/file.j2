@@ -51,10 +51,10 @@ class {{ class_name }}(object):
         try:
             response = getattr(self._client, method.lower())(url, **_kwargs)
             result = None
-            if response_type == '{{ type_json }}':
+            if '{{ type_json }}' in response_type:
                 result = self.jsonify(response)
                 LOG.debug("Got response status %s, body: %s", response.status_code, result)
-            elif response_type == '{{ type_octet_stream }}':
+            elif '{{ type_octet_stream }}' in response_type:
                 result = response.raw
             if response.status_code != success_code:
                 LOG.warning(

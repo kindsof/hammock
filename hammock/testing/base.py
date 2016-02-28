@@ -30,7 +30,7 @@ class TestBase(testing.TestBase):
             kwargs["query_string"] = query_string
         if body:
             content_type = headers.get(common.CONTENT_TYPE, common.TYPE_JSON)
-            kwargs["body"] = json.dumps(body) if content_type == common.TYPE_JSON else body
+            kwargs["body"] = json.dumps(body) if common.TYPE_JSON in content_type else body
             headers.update({common.CONTENT_TYPE: content_type})
         kwargs["headers"] = headers
         response = self.simulate_request(url, method=method, **kwargs)
