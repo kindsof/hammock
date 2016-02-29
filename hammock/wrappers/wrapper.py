@@ -53,8 +53,8 @@ class Wrapper(object):
         return self.func(self._resource, *args, **kwargs)
 
     def _exc_log_and_handle(self, exc, req):
-        common.log_exception(exc, req.uid)
         self._resource.handle_exception(exc, self.exception_handler)
+        common.log_exception(exc, req.uid)
 
     def call(self, req):
         """
