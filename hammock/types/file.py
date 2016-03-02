@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import contextlib
 import os
 
 
@@ -14,6 +15,7 @@ class File(object):
         return self.content_length
 
 
+@contextlib.contextmanager
 def from_path(path):
     f = open(path, 'rb')
     old_file_position = f.tell()
