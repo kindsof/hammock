@@ -3,6 +3,7 @@ import six
 import unittest
 import logging
 import requests
+
 import hammock.types.file as file_module
 import tests.resources.exceptions as exceptions_resouce
 import tests.uwsgi_base as uwsgi_base
@@ -74,3 +75,14 @@ class TestUwsgi(uwsgi_base.UwsgiBase):
             )
         else:
             raise AssertionError('An exception should have been raised.')
+
+    def test_keyword_mapping(self):
+
+        self.assertEqual(self._client.keywordmap.post(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
+        self.assertEqual(self._client.keywordmap.post(valid1=None), {'valid1': None, 'valid2': None})
+
+        self.assertEqual(self._client.keywordmap.get(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
+        self.assertEqual(self._client.keywordmap.get(valid1='None'), {'valid1': None, 'valid2': None})
+
+        self.assertEqual(self._client.keywordmap.post(valid1='1'), {'valid1': '1', 'valid2': None})
+        self.assertEqual(self._client.keywordmap.get(valid1='1'), {'valid1': '1', 'valid2': None})

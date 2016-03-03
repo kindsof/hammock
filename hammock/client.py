@@ -103,9 +103,10 @@ def _tabify(text):
     ])
 
 
-def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, response_type, keywords, doc_string):
+def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, response_type, keywords, doc_string, keyword_map):
     params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - IGNORE_KW
     url_kw = set(url_kw) - IGNORE_KW
+
     defaults = {k: v if type(v) is not str else "'%s'" % v for k, v in defaults.items()}
     args = [arg for arg in args if arg not in {common.KW_HEADERS, common.KW_CREDENTIALS, common.KW_ENFORCER}]
     assert not ((common.KW_FILE in args) and (common.KW_LIST in args)), \
@@ -131,7 +132,8 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         kw_file=common.KW_FILE,
         kw_list=common.KW_LIST,
         keywords=keywords,
-        doc_string=doc_string
+        doc_string=doc_string,
+        keyword_map=keyword_map,
     )
 
 
@@ -152,7 +154,8 @@ def client_methods_propeties(resource_object):
                 success_code=method.success_code,
                 response_type=method.response_content_type,
                 keywords=method.spec.keywords,
-                doc_string=inspect.getdoc(method)
+                doc_string=inspect.getdoc(method),
+                keyword_map=method.keyword_map,
             ))
     return kwargs
 

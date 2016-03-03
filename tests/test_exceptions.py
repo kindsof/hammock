@@ -1,15 +1,12 @@
 from __future__ import absolute_import
 import hammock.exceptions as exceptions
-import hammock.testing as testing
+import tests.base as base
 import tests.resources.exceptions as exceptions_resource
 import ujson as json
 import logging
-import os
 
 
-class TestExceptions(testing.TestBase):
-
-    POLICY = os.path.join(os.path.dirname(__file__), 'policy.json')
+class TestExceptions(base.TestBase):
 
     def test_init_and_methods(self):
         internal_server_error = exceptions.InternalServerError('description0')

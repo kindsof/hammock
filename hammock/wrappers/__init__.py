@@ -15,6 +15,7 @@ def wrapper(
     rule_name=None,
     pre_process=None,
     post_process=None,
+    keyword_map=None,
     trim_prefix=False,
     client_methods=None,
     exception_handler=None,
@@ -32,6 +33,7 @@ def wrapper(
     :param pre_process: a method to invoke on the request before process.
     :param post_process:  a method to invoke on the request after process.
     :param trim_prefix: a prefix to trim from the path.
+    :param keyword_map: a mapping between request keywords to required method keywords.
     :param response_content_type: content type of response.
     :param exception_handler: a specific handler for exceptions.
     :param rule_name: a rule from policy.json
@@ -51,6 +53,10 @@ def wrapper(
         response_content_type=response_content_type,  # XXX: This should be removed.
     )
     if not is_sink(method):
-        overrides['method'] = method.upper()
+        overrides.update({
+            'method': method.upper(),
+            'keyword_map': keyword_map,
+        })
+
     wrapper_type = Route if not is_sink(method) else Sink
     return type(name, (wrapper_type, ), overrides)

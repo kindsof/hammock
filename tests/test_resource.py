@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-import hammock.testing as testing
+import tests.base as base
 import six
 import os
 import logging
@@ -8,9 +8,7 @@ import hammock.types as types
 import tests.resources.keywords as keywords
 
 
-class TestResource(testing.TestBase):
-
-    POLICY = os.path.join(os.path.dirname(__file__), 'policy.json')
+class TestResource(base.TestBase):
 
     def test_resource(self):
         def dict_url(key):

@@ -1,14 +1,13 @@
 from __future__ import absolute_import
 import hammock.testing as testing
+import tests.base as base
 import six
 import os
 import tests.resources.redirect as redirect
 import hammock.common as common
 
 
-class TestRedirect(testing.TestBase):
-
-    POLICY = os.path.join(os.path.dirname(__file__), 'policy.json')
+class TestRedirect(base.TestBase):
 
     @classmethod
     def setUpClass(cls):

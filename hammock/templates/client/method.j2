@@ -13,6 +13,20 @@ def {{ method_name }}(self
     """{{ doc_string }}
     """
         {%- endif %}
+    {%- if kw_list not in args %}
+    json = dict(
+        {%- for p in params_kw %}{{ p }}={{ p }}, {% endfor -%}
+        {%- for k, v in defaults.items() %}{{ k }}={{ v }}, {% endfor -%}
+        {%- for k in kwargs %}{{ k }}={{ k }}, {% endfor -%}
+        )
+    {% if keyword_map -%}
+    keyword_map = {{ keyword_map }}
+    for key in json.keys():
+        json[keyword_map[key]] = json.pop(key)
+    {% endif -%}
+    {%- else %}
+    json = {{ kw_list }}
+    {% endif -%}
     return self._client.fetch(
         method='{{ method }}',
         url=
@@ -28,16 +42,7 @@ def {{ method_name }}(self
                 )
             {%- endif -%}
         ,
-        json=
-            {%- if kw_list not in args -%}
-                dict(
-                {%- for p in params_kw %}{{ p }}={{ p }}, {% endfor -%}
-                {%- for k, v in defaults.items() %}{{ k }}={{ v }}, {% endfor -%}
-                {%- for k in kwargs %}{{ k }}={{ k }}, {% endfor -%}
-                ),
-            {%- else -%}
-                {{ kw_list }},
-            {% endif -%}
+        json=json,
         {%- if keywords %}
         kwargs={{ keywords }},
         {% endif -%}
