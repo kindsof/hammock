@@ -1,0 +1,18 @@
+uwsgi:
+  buffer-size: 65535
+  callable: API
+  enable-threads: true
+  http-timeout: 3600
+  lazy-apps: true
+  master: true
+  module: tests.cli.base
+  max-requests: 100
+  need-app: true
+  procname: melet-api
+  queue: 100
+  queue-blocksize: 20480
+  socket-timeout: 60
+  workers: 1
+  worker-reload-mercy: 86400
+  py-auto-reload: 1
+  honour-stdin: true

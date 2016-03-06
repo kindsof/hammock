@@ -2,10 +2,10 @@ from __future__ import absolute_import
 import hammock
 
 
-class Sub(hammock.Resource):
+class Sub2(hammock.Resource):
 
     POLICY_GROUP_NAME = False
 
     @hammock.get()
-    def test_headers(self):
-        return "sub-in-nested-in-sub"
+    def get(self):
+        return "sub2-in-sub1"

@@ -5,7 +5,7 @@ import logging
 import requests
 
 import hammock.types.file as file_module
-import tests.resources.exceptions as exceptions_resouce
+import tests.resources1.exceptions as exceptions_resouce
 import tests.uwsgi_base as uwsgi_base
 
 

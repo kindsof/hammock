@@ -4,14 +4,14 @@ import importlib
 import os
 import sys
 import hammock.client as client
-import tests.resources as resources
+import tests.resources1 as resources1
 
 
 def get_client(*args, **kwargs):
     if not os.path.exists('build'):
         os.mkdir('build')
     with open('build/hammock_client.py', 'w') as client_file:
-        client_file.write(client.ClientGenerator("HammockClient", resources).code + '\n')
+        client_file.write(client.ClientGenerator("HammockClient", resources1).code + '\n')
     sys.path.append('build')
     client_class = importlib.import_module("hammock_client").HammockClient
     return client_class(*args, **kwargs)
@@ -26,10 +26,10 @@ class TestClient(unittest.TestCase):
         self.assertTrue(hasattr(self._client, "dict"))
         self.assertTrue(hasattr(self._client, "text"))
         self.assertTrue(hasattr(self._client, "headers"))
-        self.assertTrue(hasattr(self._client.dict, "item_create"))
-        self.assertTrue(hasattr(self._client.dict, "item_get"))
-        self.assertTrue(hasattr(self._client.dict, "item_change"))
-        self.assertTrue(hasattr(self._client.dict, "item_delete"))
+        self.assertTrue(hasattr(self._client.dict, "insert"))
+        self.assertTrue(hasattr(self._client.dict, "get"))
+        self.assertTrue(hasattr(self._client.dict, "update"))
+        self.assertTrue(hasattr(self._client.dict, "remove"))
         self.assertTrue(hasattr(self._client.text, "upper"))
         self.assertTrue(hasattr(self._client.text, "replace"))
         self.assertTrue(hasattr(self._client.text, "replace_put"))

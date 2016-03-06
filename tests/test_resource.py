@@ -5,7 +5,7 @@ import os
 import logging
 import hammock.common as common
 import hammock.types as types
-import tests.resources.keywords as keywords
+import tests.resources1.keywords as keywords
 
 
 class TestResource(base.TestBase):
@@ -14,17 +14,18 @@ class TestResource(base.TestBase):
         def dict_url(key):
             return "/dict/%s" % key
 
-        self.assertDictEqual({"post": 1}, self._simulate("POST", dict_url("a"), body={"value": 1}))
-        self.assertDictEqual({"post": 2}, self._simulate("POST", dict_url("b"), body={"value": 2}))
-        self.assert_status(400, "POST", dict_url("a"), body={"value": 10})
-        self.assertDictEqual({"get": 1}, self._simulate("GET", dict_url("a")))
-        self.assertDictEqual({"get": 2}, self._simulate("GET", dict_url("b")))
-        self.assertDictEqual({"put": 10}, self._simulate("PUT", dict_url("a"), body={"value": 10}))
-        self.assertDictEqual({"get": 10}, self._simulate("GET", dict_url("a")))
-        self.assertDictEqual({"delete": 10}, self._simulate("DELETE", dict_url("a")))
-        self.assert_status(404, "DELETE", dict_url("a"))
-        self.assert_status(404, "GET", dict_url("a"))
-        self.assert_status(404, "PUT", dict_url("a"), body={"value": "1"})
+        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('POST', dict_url('a'), body={'value': 1}))
+        self.assertDictEqual({'key': 'b', 'value': 2}, self._simulate('POST', dict_url('b'), body={'value': 2}))
+        self.assert_status(400, 'POST', dict_url('a'), body={'value': 10})
+        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('GET', dict_url('a')))
+        self.assertDictEqual({'key': 'b', 'value': 2}, self._simulate('GET', dict_url('b')))
+        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('PUT', dict_url('a'), body={'value': 10}))
+        self.assertDictEqual({'key': 'a', 'value': 10}, self._simulate('GET', dict_url('a')))
+        self.assertDictEqual({'key': 'a', 'value': 10}, self._simulate('DELETE', dict_url('a')))
+        self.assert_status(404, 'DELETE', dict_url('a'))
+        self.assert_status(404, 'GET', dict_url('a'))
+        self.assert_status(404, 'PUT', dict_url('a'), body={'value': '1'})
+
         self.assertEqual("HELLO", self._simulate("GET", "/text/upper/hello"))
         self.assertEqual("helly", self._simulate("GET", "/text/replace/hello", query_string="old=o&new=y"))
         self.assertEqual("helly", self._simulate("GET", "/text/replace2/hello", query_string="old=o&new=y"))
