@@ -5,11 +5,11 @@ import falcon
 import hammock
 import sys
 import subprocess
-import tests.resources as resources
+import tests.resources1 as resources1
 
 application = falcon.API()  # pylint: disable=invalid-name
 hammock.Hammock(
-    application, resources,
+    application, resources1,
     policy_file=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'policy.json')
 )
 

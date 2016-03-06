@@ -3,7 +3,7 @@ import hammock.testing as testing
 import tests.base as base
 import six
 import os
-import tests.resources.redirect as redirect
+import tests.resources1.redirect as redirect
 import hammock.common as common
 
 

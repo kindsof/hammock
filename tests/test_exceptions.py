@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import hammock.exceptions as exceptions
 import tests.base as base
-import tests.resources.exceptions as exceptions_resource
+import tests.resources1.exceptions as exceptions_resource
 import ujson as json
 import logging
 

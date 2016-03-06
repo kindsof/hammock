@@ -7,5 +7,5 @@ class Sub(hammock.Resource):
     POLICY_GROUP_NAME = False
 
     @hammock.get()
-    def test_headers(self):
+    def get(self):
         return "modified-in-modified"
