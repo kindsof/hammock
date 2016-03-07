@@ -1,5 +1,7 @@
 class {% if name %}{{ name }}{% else %}Empty{% endif %}(object):
 
+    CLI_COMMAND_NAME = {{ cli_command_name }}
+
     def __init__(self, client, url):
         self._client = client
         self._url = url

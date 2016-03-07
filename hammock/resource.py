@@ -14,9 +14,16 @@ class Resource(object):
     # POLICY_GROUP_NAME:
     # define a policy group wich is the prefix for the rule name,
     # together with the route's rule_name attribute the whole rule will be 'group:rule_name'
-    # if set to False, policy check will be disabled for the entire resource.
-    # if set to None, the group name is set to the class name, lowercase.
+    #   if False, policy check will be disabled for the entire resource.
+    #   if None, the group name is set to the class name, lowercase.
     POLICY_GROUP_NAME = None
+
+    # CLI_COMMAND_NAME:
+    # change the cli command name,
+    #   if False, the Resource won't be added to the CLI.
+    #   if None, the class name will be converted to a command name,
+    #   otherwise, the value will be the command name.
+    CLI_COMMAND_NAME = None
 
     def __init__(self, api, base_path=None, **resource_params):  # XXX: remove once sagittarius is fixed  # noqa  # pylint: disable=unused-argument
         self.api = api
@@ -89,6 +96,12 @@ class Resource(object):
     @classmethod
     def client_class_name(cls):
         return common.to_class_name(cls.name())
+
+    @classmethod
+    def cli_command_name(cls):
+        if cls.CLI_COMMAND_NAME or cls.CLI_COMMAND_NAME is False:
+            return cls.CLI_COMMAND_NAME
+        return common.to_path(cls.name())
 
 
 # XXX: deprecated, those methods will be removed
