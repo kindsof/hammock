@@ -52,6 +52,7 @@ class TestCli(base.Base):
         for method_name, translated_name in six.iteritems(cli_names.NAMES):
             self.assertEqual(method_name + '\n', self.run_command('cli-names {}'.format(translated_name)))
         self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
+        self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))
 
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)

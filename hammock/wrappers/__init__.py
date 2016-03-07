@@ -20,6 +20,7 @@ def wrapper(
     client_methods=None,
     exception_handler=None,
     response_content_type=common.TYPE_JSON,
+    cli_command_name=None,
 ):
     """
     :param path: relative path for route
@@ -37,6 +38,9 @@ def wrapper(
     :param response_content_type: content type of response.
     :param exception_handler: a specific handler for exceptions.
     :param rule_name: a rule from policy.json
+    :param cli_command_name: override cli command name for a route
+        if None, the command name will not be overridden.
+        if False, the command will not be added to the cli.
     :return: a decorator for a route method.
     """
     name = ''.join(part.capitalize() for part in [method.upper(), common.PATH_TO_NAME(path)])
@@ -56,6 +60,7 @@ def wrapper(
         overrides.update({
             'method': method.upper(),
             'keyword_map': keyword_map,
+            'cli_command_name': cli_command_name,
         })
 
     wrapper_type = Route if not is_sink(method) else Sink

@@ -2,11 +2,10 @@ from __future__ import absolute_import
 import logging
 import cliff.commandmanager as commandmanager
 import hammock.cli.command as command
-import hammock.common as common
+
 
 LOG = logging.getLogger(__name__)
-
-RESOURCE_CLASS_IGNORES = {'CLI_COMMAND_NAME'}
+RESOURCE_CLASS_IGNORES = {'CLI_COMMAND_NAME', 'ROUTE_CLI_COMMAND_MAP'}
 CLIENT_CLASS_IGNORES = {'token'}
 
 
@@ -37,10 +36,7 @@ class CommandManager(commandmanager.CommandManager):
             self._add_resource(attribute)
 
     def _add_resource(self, resource, commands=None):
-        try:
-            command_name = resource.CLI_COMMAND_NAME
-        except Exception:
-            import pdb; pdb.set_trace()
+        command_name = resource.CLI_COMMAND_NAME
         if command_name is False:
             return
         commands = (commands or []) + [command_name]
@@ -49,17 +45,13 @@ class CommandManager(commandmanager.CommandManager):
             if isinstance(attribute, type) or name.startswith('_') or name in RESOURCE_CLASS_IGNORES:
                 continue
             if callable(attribute):
-                self._add_command(attribute, commands)
+                self._add_command(attribute, commands, resource.ROUTE_CLI_COMMAND_MAP[name])
             else:
                 self._add_resource(attribute, commands)
 
-    def _add_command(self, method, commands):
-        commands = commands + [self._fix_name(method.__name__)]
+    def _add_command(self, method, commands, command_name):
+        commands = commands + [command_name]
         command_type = command.factory(method, commands)
         command_name = ' '.join(commands)
         LOG.debug('Adding command: %s', command_name)
         self.add_command(command_name, command_type)
-
-    @staticmethod
-    def _fix_name(name):
-        return common.to_variable_name(name).replace('_', '-')

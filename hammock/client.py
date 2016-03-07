@@ -5,6 +5,7 @@ import inspect
 import jinja2
 import re
 import six
+import json
 import hammock.common as common
 import hammock.packages as packages
 import hammock
@@ -67,6 +68,7 @@ def _resource_class_code(_resource):
         resource=_resource,
         methods=methods,
         cli_command_name=_format_cli_command_name(_resource.cli_command_name()),
+        route_cli_commands_map=_format_route_cli_commands_map(_resource.route_cli_commands_map()),
     )
 
 
@@ -86,11 +88,16 @@ def _recursion_code(package, resource_hirarchy):
         sub_resources=sub_resources,
         sub_classes=_tabify("".join(sub_classes)),
         cli_command_name=_format_cli_command_name(package.cli_command_name),
+        route_cli_commands_map={},
     )
 
 
 def _format_cli_command_name(name):
     return '"{}"'.format(name) if name else name
+
+
+def _format_route_cli_commands_map(mapping):
+    return json.dumps(mapping)
 
 
 def _resource_tuple(resource_class):

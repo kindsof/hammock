@@ -17,6 +17,7 @@ class Route(wrapper.Wrapper):
     response_content_type = common.TYPE_JSON,  # XXX: This should be removed.
     keyword_map = None
     client_methods = None
+    cli_command_name = None
 
     def __init__(self, func):
         wrapper.Wrapper.__init__(self, func)
