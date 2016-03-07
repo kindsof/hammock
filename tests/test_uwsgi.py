@@ -78,11 +78,14 @@ class TestUwsgi(uwsgi_base.UwsgiBase):
 
     def test_keyword_mapping(self):
 
-        self.assertEqual(self._client.keywordmap.post(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
-        self.assertEqual(self._client.keywordmap.post(valid1=None), {'valid1': None, 'valid2': None})
+        self.assertEqual(self._client.keyword_map.post(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
+        self.assertEqual(self._client.keyword_map.post(valid1=None), {'valid1': None, 'valid2': None})
 
-        self.assertEqual(self._client.keywordmap.get(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
-        self.assertEqual(self._client.keywordmap.get(valid1='None'), {'valid1': None, 'valid2': None})
+        self.assertEqual(self._client.keyword_map.get(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
+        self.assertEqual(self._client.keyword_map.get(valid1='None'), {'valid1': None, 'valid2': None})
 
-        self.assertEqual(self._client.keywordmap.post(valid1='1'), {'valid1': '1', 'valid2': None})
-        self.assertEqual(self._client.keywordmap.get(valid1='1'), {'valid1': '1', 'valid2': None})
+        self.assertEqual(self._client.keyword_map.post(valid1='1'), {'valid1': '1', 'valid2': None})
+        self.assertEqual(self._client.keyword_map.get(valid1='1'), {'valid1': '1', 'valid2': None})
+
+    def test_classes_method_names(self):
+        self.assertEqual('modified-in-modified', self._client.different_path.different_sub.get())

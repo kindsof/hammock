@@ -24,7 +24,11 @@ class Resource(object):
 
     @classmethod
     def name(cls):
-        return getattr(cls, "PATH", cls.__name__.lower())
+        return getattr(cls, "PATH", cls.__name__)
+
+    @classmethod
+    def path(cls):
+        return getattr(cls, "PATH", common.to_path(cls.__name__))
 
     def handle_exception(self, exc, exception_handler):
         if exception_handler:
@@ -42,7 +46,7 @@ class Resource(object):
         for route_method in self.iter_route_methods():
             route_method.set_resource(self)
             method = route_method.method.upper()
-            routes[common.url_join(self.name(), route_method.path)][method] = route_method.call
+            routes[common.url_join(self.path(), route_method.path)][method] = route_method.call
         return routes
 
     @property
@@ -54,7 +58,7 @@ class Resource(object):
         sinks = []
         for sink_method in self.iter_sink_methods():
             sink_method.set_resource(self)
-            sinks.append((common.url_join(self.name(), sink_method.path), sink_method.call))
+            sinks.append((common.url_join(self.path(), sink_method.path), sink_method.call))
         return sinks
 
     @staticmethod
@@ -77,6 +81,14 @@ class Resource(object):
             ),
             key=functools.cmp_to_key(lambda p1, p2: len(p1.path) - len(p2.path))
         )
+
+    @classmethod
+    def client_variable_name(cls):
+        return common.to_variable_name(cls.name())
+
+    @classmethod
+    def client_class_name(cls):
+        return common.to_class_name(cls.name())
 
 
 # XXX: deprecated, those methods will be removed

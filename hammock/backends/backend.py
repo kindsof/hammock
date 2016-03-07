@@ -20,8 +20,8 @@ class Backend(object):
         :param resource_package: resources package
         """
         for resource_class, parents in packages.iter_resource_classes(resource_package):
-            prefix = '/'.join(parents)
-            node = api.get_node(parents)
+            prefix = '/'.join([parent.path for parent in parents])
+            node = api.get_node([parent.name for parent in parents])
             node.add(resource_class.name(), resource_class)
             resource = resource_class(api, None, **resource_params)  # XXX: temporary 2nd argument None, remove them when sagittarius is fixed
             self._add_route_methods(resource, prefix)

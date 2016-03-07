@@ -79,11 +79,11 @@ class TestResource(base.TestBase):
         self.assert_status(404, "DELETE", "/delete_something_wrong/with_query", query_string="a=b")
 
     def test_sub_resource(self):
-        self.assertEqual("sub-in-sub1", self._simulate("GET", "/sub_resource/sub"))
-        self.assertEqual("sub2-in-sub1", self._simulate("GET", "/sub_resource/sub2"))
-        self.assertEqual("sub-in-sub2", self._simulate("GET", "/sub_resource2/sub"))
+        self.assertEqual("sub-in-sub1", self._simulate("GET", "/sub-resource/sub"))
+        self.assertEqual("sub2-in-sub1", self._simulate("GET", "/sub-resource/sub-2"))
+        self.assertEqual("sub-in-sub2", self._simulate("GET", "/sub-resource-2/sub"))
         self.assertEqual("modified-in-modified", self._simulate("GET", "/different_path/different_sub"))
-        self.assertEqual("sub-in-nested-in-sub", self._simulate("GET", "/sub_resource/nested/sub"))
+        self.assertEqual("sub-in-nested-in-sub", self._simulate("GET", "/sub-resource/nested/sub"))
 
     def test_headers(self):
         headers = {"key1": "value1", "key2": "value2"}

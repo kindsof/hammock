@@ -28,12 +28,12 @@ class ClientGenerator(object):
             _tabify(_resource_class_code(_resource))
             for _resource in self._resources.get("", [])
         ]
-        resources_names = [_resource_tuple(r.name()) for r in self._resources.get("", [])]
-        for name, resource_hirarchy in six.iteritems(self._resources):
-            if name == "":
+        resources_names = [_resource_tuple(r) for r in self._resources.get("", [])]
+        for package, resource_hirarchy in six.iteritems(self._resources):
+            if package == "":
                 continue
-            resource_classes.append(_tabify(_recursion_code(name, resource_hirarchy)))
-            resources_names.append(_resource_tuple(name))
+            resource_classes.append(_tabify(_recursion_code(package, resource_hirarchy)))
+            resources_names.append(_package_tuple(package))
 
         code = FILE_TEMPLATE.render(  # pylint: disable=no-member
             class_name=class_name,
@@ -59,41 +59,43 @@ def _resource_class_code(_resource):
     methods = [
         _method_code(**kwargs)
         for kwargs in client_methods_propeties(_resource)
-        ]
+    ]
     if _resource.name() == "auth":
         methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
-        name=_class_name(common.PATH_TO_NAME(_resource.name())), resource=_resource, methods=methods)
+        name=common.to_class_name(_resource.name()), resource=_resource, methods=methods)
 
 
-def _recursion_code(name, resource_hirarchy):
+def _recursion_code(package, resource_hirarchy):
     sub_classes = [
         _resource_class_code(_resource)
         for _resource in resource_hirarchy.get("", [])
-        ]
-    sub_resources = [_resource_tuple(_resource.name()) for _resource in resource_hirarchy.get("", [])]
-    for key, value in six.iteritems(resource_hirarchy):
-        if key == "":
+    ]
+    sub_resources = [_resource_tuple(_resource) for _resource in resource_hirarchy.get("", [])]
+    for sub_package, value in six.iteritems(resource_hirarchy):
+        if sub_package == "":
             continue
-        sub_classes.append(_recursion_code(key, value))
-        sub_resources.append(_resource_tuple(key))
+        sub_classes.append(_recursion_code(sub_package, value))
+        sub_resources.append(_package_tuple(sub_package))
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
-        name=_class_name(common.PATH_TO_NAME(name)),
+        name=package.class_name,
         sub_resources=sub_resources,
         sub_classes=_tabify("".join(sub_classes))
     )
 
 
-def _resource_tuple(name):
-    return (
-        common.PATH_TO_NAME(name),
-        _class_name(common.PATH_TO_NAME(name)),
-        name,
-    )
+def _resource_tuple(resource_class):
+    """
+    :return: a tuple of <variable_name>, <class_name>, <path>
+    """
+    return resource_class.client_variable_name(), resource_class.client_class_name(), resource_class.path()
 
 
-def _class_name(name):
-    return ''.join(part.lower().capitalize() for part in name.split('_'))
+def _package_tuple(package):
+    """
+    :return: a tuple of <variable_name>, <class_name>, <path>
+    """
+    return common.to_variable_name(package.class_name), package.class_name, package.path
 
 
 def _tabify(text):
@@ -119,7 +121,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         doc_string = '\n    '.join(doc_string.split('\n'))
 
     return METHOD_TEMPLATE.render(  # pylint: disable=no-member
-        method_name=method_name,
+        method_name=common.to_variable_name(method_name),
         method=method,
         url=url,
         args=args,
