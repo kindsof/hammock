@@ -98,9 +98,9 @@ def to_variable_name(name):
 
 
 def to_path(name):
-    return to_variable_name(name).replace('_', '-')
+    return to_variable_name(PATH_TO_NAME(REMOVE_VARIABLES(name.replace('-', '_')))).replace('_', '-')
 
 
 def to_class_name(name):
     parts = PATH_TO_NAME(name).split('_')
-    return ''.join([part[0].capitalize() + part[1:] for part in parts])
+    return ''.join([(part[0].capitalize() + part[1:] if part else '') for part in parts])
