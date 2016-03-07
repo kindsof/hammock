@@ -130,6 +130,36 @@ class MySecuredResource(hammock.Resource):
         return vm
 ```
 
+## CLI
+
+A CLI for a hammock auto-generated client, can be initiated using The `hammock.cli.app.App` class.
+You can inherit it in your project, to override the prompt, description, version, proprties.
+You initiate it using a list of hammock client classes. Notice that it expects classes and not instances. All the clients are merged into a one CLI.
+
+### Command names
+
+The CLI is populated with commands, sub commands using the client Class.
+A Resource class in the client will be converted into a command, containing all it's routing methods, or resource nested classes as sub commands (recursivly). The name of the resource and routing methods will be conveted into a command name (no caps, dashes, etc...) automatically, but you can override this name as follows:
+
+For resources package, add `CLI_COMMAND_NAME` variable in the `__init__.py` file of the package, for a resource class: add a `CLI_COMMAND_NAME` attribute, for a route method, use the `cli_command_name` parameter when you define it. The effect will be as follows:
+
+- `None` will have no effect and the command name will be converted from the package/class/method name.
+- `False` will remove the package/class/method from the CLI (and all its nested dependencies).
+- any other string will be used as the command name.
+
+### Command arguments.
+
+- The arguments for a command are taken from the route method it represents.
+- `args` are converted to positional arguments. `kwargs` are converted to optional argumenst.
+- Type and documentation string are taken from the method doc string: if the doc string contains a line(s): `:param [<optional-param-type>] <param-name>: <param-help(multi-line)>`.
+- Return value of a method can be defined using the doc string line(s): `:return <return-type>: <return-help(multi-line)>`, The return value affects the command as follows:
+  * `dict`: means the return value is an item, the CLI will print a table with dict keys and values. The CLI will add option `-f` that can change the output format (json, yaml, etc...).
+  * `list`: means the return value is a list of items. The CLI will print a table of the values for each item, will add the `-f` flag that can define the format, `-c` to select specific columns and more. It is best practice to return a list of dicts, containing the same keys. If a list of other types is returned, the CLI will convert it to a list of dicts containing one key `value`.
+  * other type, will be printed to the stdout of the CLI.
+
+
+- The documentation string for the command is taken from the route method doc string.
+
 ## Examples:
 
 * Look at the resources test [package](./tests/resources).
