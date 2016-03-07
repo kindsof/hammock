@@ -1,6 +1,6 @@
 class {% if name %}{{ name }}{% else %}Empty{% endif %}(object):
 
-    CLI_COMMAND_NAME = {{ cli_command_name }}
+    CLI_COMMAND_NAME = {% if name %}{{ cli_command_name }}{% else %}''{% endif %}
     ROUTE_CLI_COMMAND_MAP = {{ route_cli_commands_map }}
 
     def __init__(self, client, url):
