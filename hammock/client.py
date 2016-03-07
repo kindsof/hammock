@@ -63,7 +63,11 @@ def _resource_class_code(_resource):
     if _resource.name() == "auth":
         methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
-        name=common.to_class_name(_resource.name()), resource=_resource, methods=methods)
+        name=common.to_class_name(_resource.name()),
+        resource=_resource,
+        methods=methods,
+        cli_command_name=_format_cli_command_name(_resource.cli_command_name()),
+    )
 
 
 def _recursion_code(package, resource_hirarchy):
@@ -80,8 +84,13 @@ def _recursion_code(package, resource_hirarchy):
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
         name=package.class_name,
         sub_resources=sub_resources,
-        sub_classes=_tabify("".join(sub_classes))
+        sub_classes=_tabify("".join(sub_classes)),
+        cli_command_name=_format_cli_command_name(package.cli_command_name),
     )
+
+
+def _format_cli_command_name(name):
+    return '"{}"'.format(name) if name else name
 
 
 def _resource_tuple(resource_class):

@@ -6,6 +6,9 @@ import hammock.common as common
 
 LOG = logging.getLogger(__name__)
 
+RESOURCE_CLASS_IGNORES = {'CLI_COMMAND_NAME'}
+CLIENT_CLASS_IGNORES = {'token'}
+
 
 class CommandManager(commandmanager.CommandManager):
 
@@ -29,15 +32,21 @@ class CommandManager(commandmanager.CommandManager):
         for name in dir(client):
             # Get all clients' resources:
             attribute = getattr(client, name)
-            if isinstance(attribute, type) or callable(attribute) or name.startswith('_'):
+            if isinstance(attribute, type) or callable(attribute) or name.startswith('_') or name in CLIENT_CLASS_IGNORES:
                 continue
             self._add_resource(attribute)
 
     def _add_resource(self, resource, commands=None):
-        commands = (commands or []) + [self._fix_name(resource.__class__.__name__)]
+        try:
+            command_name = resource.CLI_COMMAND_NAME
+        except Exception:
+            import pdb; pdb.set_trace()
+        if command_name is False:
+            return
+        commands = (commands or []) + [command_name]
         for name in dir(resource):
             attribute = getattr(resource, name)
-            if isinstance(attribute, type) or name.startswith('_'):
+            if isinstance(attribute, type) or name.startswith('_') or name in RESOURCE_CLASS_IGNORES:
                 continue
             if callable(attribute):
                 self._add_command(attribute, commands)
