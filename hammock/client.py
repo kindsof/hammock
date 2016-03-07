@@ -56,10 +56,11 @@ class ClientGenerator(object):
             cur.setdefault("", []).append(resource_class)
 
 
-def _resource_class_code(_resource):
+def _resource_class_code(_resource, paths=None):
+    paths = paths or []
     methods = [
         _method_code(**kwargs)
-        for kwargs in client_methods_propeties(_resource)
+        for kwargs in client_methods_propeties(_resource, paths)
     ]
     if _resource.name() == "auth":
         methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
@@ -72,16 +73,17 @@ def _resource_class_code(_resource):
     )
 
 
-def _recursion_code(package, resource_hirarchy):
+def _recursion_code(package, resource_hirarchy, paths=None):
+    paths = paths or []
     sub_classes = [
-        _resource_class_code(_resource)
+        _resource_class_code(_resource, paths)
         for _resource in resource_hirarchy.get("", [])
     ]
     sub_resources = [_resource_tuple(_resource) for _resource in resource_hirarchy.get("", [])]
     for sub_package, value in six.iteritems(resource_hirarchy):
         if sub_package == "":
             continue
-        sub_classes.append(_recursion_code(sub_package, value))
+        sub_classes.append(_recursion_code(sub_package, value, paths + [sub_package.path]))
         sub_resources.append(_package_tuple(sub_package))
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
         name=package.class_name,
@@ -155,19 +157,20 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
     )
 
 
-def client_methods_propeties(resource_object):
+def client_methods_propeties(resource_object, paths):
     kwargs = []
     for method in resource_object.iter_route_methods(wrappers.Route):
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}
+            url = '/'.join(paths + [resource_object.path(), method.path])
             kwargs.append(dict(
                 method_name=method_name,
                 method=method.method,
                 url=method.path,
                 args=[arg for arg in method.spec.args if arg not in method_defaults],
                 kwargs=method.spec.kwargs,
-                url_kw=[arg for arg in method.spec.args if "{{{}}}".format(arg) in method.path],
+                url_kw=[arg for arg in method.spec.args if "{{{}}}".format(arg) in url],
                 defaults=method_defaults,
                 success_code=method.success_code,
                 response_type=method.response_content_type,

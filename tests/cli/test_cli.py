@@ -53,6 +53,7 @@ class TestCli(base.Base):
             self.assertEqual(method_name + '\n', self.run_command('cli-names {}'.format(translated_name)))
         self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
         self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))
+        self.assertEqual('moshe\n', self.run_command('variable-in-url-variable-name get moshe'))
 
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)

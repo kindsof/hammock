@@ -14,11 +14,11 @@ def {{ method_name }}(self
     """
         {%- endif %}
     {%- if kw_list not in args %}
-    json = dict(
-        {%- for p in params_kw %}{{ p }}={{ p }}, {% endfor -%}
-        {%- for k, v in defaults.items() %}{{ k }}={{ v }}, {% endfor -%}
-        {%- for k in kwargs %}{{ k }}={{ k }}, {% endfor -%}
-        )
+    json = {
+        {%- for p in params_kw %}'{{ p }}': {{ p }}, {% endfor -%}
+        {%- for k, v in defaults.items() %}'{{ k }}': {{ v }}, {% endfor -%}
+        {%- for k in kwargs %}'{{ k }}': {{ k }}, {% endfor -%}
+        }
     {% if keyword_map -%}
     keyword_map = {{ keyword_map }}
     for key in json.keys():
@@ -33,13 +33,16 @@ def {{ method_name }}(self
             {%- if url %}url_join({% endif -%}
             self._url
             {%- if url -%}
-                , '{{ url }}'
-                {%- if url_kw -%}
-                    .format(
-                    {%- for name in url_kw %}{{ name }}={{ name }}, {% endfor -%}
-                    )
-                {%- endif -%}
-                )
+                , '{{ url }}')
+            {%- endif -%}
+        ,
+        url_kw=
+            {%- if url_kw -%}
+                {
+                {%- for name in url_kw %}'{{ name }}': {{ name }}, {% endfor -%}
+                }
+            {%- else -%}
+                {}
             {%- endif -%}
         ,
         json=json,
