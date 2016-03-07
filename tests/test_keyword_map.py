@@ -10,23 +10,23 @@ import tests.base as base
 class TestKeywordMapping(base.TestBase):
 
     def test_keyword_mapping(self):
-        response = self.assert_status(httplib.OK, common.POST, "/keywordmap", body={"in-valid1": "1", "in-valid2": "2"})
+        response = self.assert_status(httplib.OK, common.POST, "/keyword-map", body={"in-valid1": "1", "in-valid2": "2"})
         self.assertEqual(response, {"valid1": "1", "valid2": "2"})
 
-        response = self.assert_status(httplib.OK, common.GET, "/keywordmap", query_string="in-valid1=1&in-valid2=2")
+        response = self.assert_status(httplib.OK, common.GET, "/keyword-map", query_string="in-valid1=1&in-valid2=2")
         self.assertEqual(response, {"valid1": "1", "valid2": "2"})
 
-        response = self.assert_status(httplib.OK, common.POST, "/keywordmap", body={"in-valid1": "1"})
+        response = self.assert_status(httplib.OK, common.POST, "/keyword-map", body={"in-valid1": "1"})
         self.assertEqual(response, {"valid1": "1", "valid2": None})
 
-        response = self.assert_status(httplib.OK, common.GET, "/keywordmap", query_string="in-valid1=1")
+        response = self.assert_status(httplib.OK, common.GET, "/keyword-map", query_string="in-valid1=1")
         self.assertEqual(response, {"valid1": "1", "valid2": None})
 
     def test_keyword_mapping_negative(self):
-        self.assert_status(httplib.BAD_REQUEST, common.POST, "/keywordmap", body={"bad": "1", "in-valid2": "2"})
+        self.assert_status(httplib.BAD_REQUEST, common.POST, "/keyword-map", body={"bad": "1", "in-valid2": "2"})
 
         # Validate that using python valid arguments but api invalid fails.
-        self.assert_status(httplib.BAD_REQUEST, common.POST, "/keywordmap", body={"valid": "1", "valid2": "2"})
+        self.assert_status(httplib.BAD_REQUEST, common.POST, "/keyword-map", body={"valid": "1", "valid2": "2"})
 
     def test_keyword_mapping_validation(self):
         class TestResource(hammock.Resource):

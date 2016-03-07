@@ -26,6 +26,7 @@ PATH_TO_NAME = functools.partial(re.compile(r'[{}./-]').sub, '')
 CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
 ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.digits
 ENCODING = 'utf-8'
+RE_SPLIT_NAME = re.compile(r'[A-Z][a-z]+|[0-9]+')
 
 
 HEADER_USER_ID = 'x-auth-user-id'
@@ -90,3 +91,16 @@ def to_bytes(source):
         # XXX: maybe more efficient way then reading StringIO data.
         return codecs.encode(source.getvalue(), ENCODING)
     return source
+
+
+def to_variable_name(name):
+    return RE_SPLIT_NAME.sub(lambda match: '_' + match.group(0), name).strip('_').lower()
+
+
+def to_path(name):
+    return to_variable_name(name).replace('_', '-')
+
+
+def to_class_name(name):
+    parts = PATH_TO_NAME(name).split('_')
+    return ''.join([part[0].capitalize() + part[1:] for part in parts])

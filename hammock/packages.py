@@ -3,6 +3,11 @@ import importlib
 import pkgutil
 import inspect
 import hammock
+import collections
+import hammock.common as common
+
+
+Package = collections.namedtuple('Package', ['name', 'path', 'class_name'])
 
 
 def iter_resource_classes(package):
@@ -39,8 +44,9 @@ def _rec_iter_modules(package, parents=None):
             # name is package name
             package_parents = parents[:]
             son_package = importlib.import_module(".".join([package.__name__, name]), package.__name__)
-            name = getattr(son_package, "PATH", name)
-            package_parents.append(name)
+            class_name = common.to_class_name(getattr(son_package, "PATH", name))
+            path_name = getattr(son_package, "PATH", common.to_path(class_name))
+            package_parents.append(Package(name=name, path=path_name, class_name=class_name))
             modules.extend(_rec_iter_modules(son_package, package_parents))
         else:
             # name is module name
