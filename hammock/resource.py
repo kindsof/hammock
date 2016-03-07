@@ -73,10 +73,10 @@ class Resource(object):
         return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
 
     @classmethod
-    def iter_route_methods(cls, reoute_class=route.Route):
+    def iter_route_methods(cls, route_class=route.Route):
         return (
             getattr(cls, attr) for attr in dir(cls)
-            if isinstance(getattr(cls, attr, None), reoute_class)
+            if isinstance(getattr(cls, attr, None), route_class)
         )
 
     @classmethod
@@ -102,6 +102,16 @@ class Resource(object):
         if cls.CLI_COMMAND_NAME or cls.CLI_COMMAND_NAME is False:
             return cls.CLI_COMMAND_NAME
         return common.to_path(cls.name())
+
+    @classmethod
+    def route_cli_commands_map(cls):
+        mapping = {}
+        for route_method in cls.iter_route_methods():
+            command_name = route_method.cli_command_name
+            if command_name is None:
+                command_name = common.to_path(route_method.__name__)
+            mapping[common.to_variable_name(route_method.__name__)] = command_name
+        return mapping
 
 
 # XXX: deprecated, those methods will be removed

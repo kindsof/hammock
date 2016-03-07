@@ -9,3 +9,7 @@ class Sub(hammock.Resource):
     @hammock.get()
     def get(self):
         return "modified-in-modified"
+
+    @hammock.post(cli_command_name='post-modified')
+    def post(self):
+        return "modified-in-modified-in-modified"
