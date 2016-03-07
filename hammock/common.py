@@ -23,6 +23,7 @@ TYPE_JSON = 'application/json'
 TYPE_OCTET_STREAM = 'application/octet-stream'
 TOKEN_ENTRY = 'X-Auth-Token'
 PATH_TO_NAME = functools.partial(re.compile(r'[{}./-]').sub, '')
+REMOVE_VARIABLES = functools.partial(re.compile(r'{([^}]+)}').sub, lambda match: '_' + match.group(0))
 CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
 ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.digits
 ENCODING = 'utf-8'
@@ -94,6 +95,8 @@ def to_bytes(source):
 
 
 def to_variable_name(name):
+    name = REMOVE_VARIABLES(name)
+    name = PATH_TO_NAME(name.replace('-', '_'))
     return RE_SPLIT_NAME.sub(lambda match: '_' + match.group(0), name).strip('_').lower()
 
 
@@ -102,5 +105,6 @@ def to_path(name):
 
 
 def to_class_name(name):
-    parts = PATH_TO_NAME(name).split('_')
+    name = REMOVE_VARIABLES(name)
+    parts = PATH_TO_NAME(name.replace('-', '_')).split('_')
     return ''.join([(part[0].capitalize() + part[1:] if part else '') for part in parts])

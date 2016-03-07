@@ -35,8 +35,9 @@ class {{ class_name }}(object):
     def close(self):
         self._client.close()
 
-    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None):
-        url = url_join(self._url, url)
+    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None):
+        url_kw = url_kw or {}
+        url = url_join(self._url, url).format(**url_kw)
         if json:
             json.update(kwargs or {})
         _kwargs = {
