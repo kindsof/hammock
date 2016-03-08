@@ -2,6 +2,8 @@ from __future__ import absolute_import
 import requests
 import logging
 import munch
+import warnings
+
 
 LOG = logging.getLogger(__name__)
 
@@ -14,7 +16,7 @@ def url_join(*args):
 
 class {{ class_name }}(object):
 
-    def __init__(self, url, token=None, timeout=None, headers=None, retries=None, session=None):
+    def __init__(self, hostname=None, port=None, url=None, token=None, timeout=None, headers=None, retries=None, session=None):
         """
         :param url: url to connect to
         :param token: a token to be used for requests
@@ -24,6 +26,9 @@ class {{ class_name }}(object):
         :param requests.Session session: an external request session to use
         """
         self._url = url
+        if hostname and port:
+            warnings.warn('using arguments hostname and port in client.__init__ is deprecated, use url instead', UserWarning)
+            self._url = "http://%s:%d" % (hostname, port)
         self._client = requests.Session() if not session else session
         self._client.mount(self._url, requests.adapters.HTTPAdapter(max_retries=retries))
         self._timeout = timeout

@@ -50,7 +50,7 @@ class App(app.App):
         self.LOG.debug("options: %s", self.options)
         self.options.headers = [header.split(':') for header in self.options.headers.split(',') if ':' in header]
         self.session.headers.update(dict(self.options.headers))
-        clients = [client_class(self.options.url, session=self.session) for client_class in self.client_classes]
+        clients = [client_class(url=self.options.url, session=self.session) for client_class in self.client_classes]
         self.command_manager.load_commands(clients)
 
     def _interactive_app_factory(self, *args, **kwargs):
