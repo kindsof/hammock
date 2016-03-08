@@ -58,11 +58,15 @@ class ClientGenerator(object):
 
 def _resource_class_code(_resource, paths=None):
     paths = paths or []
-    methods = [
-        _method_code(**kwargs)
-        for kwargs in client_methods_propeties(_resource, paths)
-    ]
-    if _resource.name() == "auth":
+    is_auth_resource = _resource.name().lower() == common.AUTH_RESOURCE_NAME
+
+    methods = []
+    for kwargs in client_methods_propeties(_resource, paths):
+        if is_auth_resource and kwargs['method_name'] in common.AUTH_SPECIAL_METHODS_NAMES:
+            kwargs['method_name'] = '_' + kwargs['method_name']
+        methods.append(_method_code(**kwargs))
+
+    if is_auth_resource:
         methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
         name=common.to_class_name(_resource.name()),
@@ -131,8 +135,6 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
     args = [arg for arg in args if arg not in {common.KW_HEADERS, common.KW_CREDENTIALS, common.KW_ENFORCER}]
     assert not ((common.KW_FILE in args) and (common.KW_LIST in args)), \
         "Can only have {} or {} in method args".format(common.KW_FILE, common.KW_LIST)
-    if method_name in ("login", "logout", "refresh",):
-        method_name = "_%s" % method_name
 
     if doc_string is not None:
         # Fix doc string indentation.
