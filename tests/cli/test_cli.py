@@ -44,7 +44,7 @@ class TestCli(base.Base):
 
     def test_nested_resources(self):
         self.assertEqual('sub-in-sub1\n', self.run_command('sub-resource sub get'))
-        self.assertEqual('sub2-in-sub1\n', self.run_command('sub-resource sub-2 get'))
+        self.assertEqual('sub2-in-sub1\n', self.run_command('sub-resource sub2 get'))
         self.assertEqual('sub-in-nested-in-sub\n', self.run_command('sub-resource nested sub get'))
         self.assertEqual('sub-in-sub2\n', self.run_command('sub-resource-2-modified sub get'))
 

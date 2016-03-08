@@ -81,8 +81,8 @@ class TestResource(base.TestBase):
 
     def test_sub_resource(self):
         self.assertEqual("sub-in-sub1", self._simulate("GET", "/sub-resource/sub"))
-        self.assertEqual("sub2-in-sub1", self._simulate("GET", "/sub-resource/sub-2"))
-        self.assertEqual("sub-in-sub2", self._simulate("GET", "/sub-resource-2/sub"))
+        self.assertEqual("sub2-in-sub1", self._simulate("GET", "/sub-resource/sub2"))
+        self.assertEqual("sub-in-sub2", self._simulate("GET", "/sub-resource2/sub"))
         self.assertEqual("modified-in-modified", self._simulate("GET", "/different_path/different_sub"))
         self.assertEqual("sub-in-nested-in-sub", self._simulate("GET", "/sub-resource/nested/sub"))
 
