@@ -14,16 +14,17 @@ def url_join(*args):
 
 class {{ class_name }}(object):
 
-    def __init__(self, url, token=None, timeout=None, headers=None, retries=None):
+    def __init__(self, url, token=None, timeout=None, headers=None, retries=None, session=None):
         """
         :param url: url to connect to
         :param token: a token to be used for requests
         :param timeout: timeout for a request
         :param headers: custom headers to send with each request
         :param retries: max-retries as an int, or a urllib3.Retry object, 
+        :param requests.Session session: an external request session to use
         """
         self._url = url
-        self._client = requests.Session()
+        self._client = requests.Session() if not session else session
         self._client.mount(self._url, requests.adapters.HTTPAdapter(max_retries=retries))
         self._timeout = timeout
         self.set_token(token)
@@ -102,4 +103,7 @@ if __name__ == '__main__':
     import sys
     import hammock.cli.app as app
     app.App.prompt = '{} > '.format('{{ class_name }}')
+    {% if default_url %}
+    app.App.DEFAULT_URL = '{{ default_url }}'
+    {% endif %}
     app.App([{{ class_name }}]).run(sys.argv[1:])
