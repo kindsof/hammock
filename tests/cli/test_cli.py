@@ -59,3 +59,7 @@ class TestCli(base.Base):
         assert len(list1) == len(list2)
         for elem1, elem2 in zip(sorted(list1), sorted(list2)):
             self.assertDictEqual(elem1, elem2)
+
+    def test_headers(self):
+        self.assertEqual('True\n', self.run_command('--headers a:b headers request-headers a b'))
+        self.assertEqual('False\n', self.run_command('--headers a:b headers request-headers a c'))

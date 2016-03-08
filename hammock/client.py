@@ -21,7 +21,7 @@ IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDEN
 
 
 class ClientGenerator(object):
-    def __init__(self, class_name, resources_package):
+    def __init__(self, class_name, resources_package, default_url=''):
         self._resources = {}
 
         self._add_resources(resources_package)
@@ -45,6 +45,7 @@ class ClientGenerator(object):
             type_octet_stream=common.TYPE_OCTET_STREAM,
             url_params_methods=common.URL_PARAMS_METHODS,
             file_class=inspect.getsource(file_module.File),
+            default_url=default_url,
         )
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
@@ -183,8 +184,8 @@ def client_methods_propeties(resource_object, paths):
     return kwargs
 
 
-def main(class_name, package_name):
-    print(ClientGenerator(class_name, importlib.import_module(package_name)).code)
+def main(class_name, package_name, default_url=''):
+    print(ClientGenerator(class_name, importlib.import_module(package_name), default_url).code)
 
 
 if __name__ == '__main__':
