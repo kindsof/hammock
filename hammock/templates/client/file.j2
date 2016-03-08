@@ -98,3 +98,8 @@ class {{ class_name }}(object):
                 LOG.warning("Could not parse json from '%s'", response.text)
 
 {{ resource_classes|join("") }}
+if __name__ == '__main__':
+    import sys
+    import hammock.cli.app as app
+    app.App.prompt = '{} > '.format('{{ class_name }}')
+    app.App([{{ class_name }}]).run(sys.argv[1:])
