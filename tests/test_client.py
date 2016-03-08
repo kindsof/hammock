@@ -20,7 +20,7 @@ def get_client(*args, **kwargs):
 class TestClient(unittest.TestCase):
 
     def setUp(self):
-        self._client = get_client("http://example.com:8080")
+        self._client = get_client(url="http://example.com:8080")
 
     def test_client(self):
         self.assertTrue(hasattr(self._client, "dict"))

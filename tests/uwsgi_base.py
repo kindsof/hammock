@@ -39,10 +39,10 @@ class UwsgiBase(unittest.TestCase):
         cls._server_log.close()
 
     def setUp(self):
-        self._client = test_client.get_client("http://localhost:{}".format(self.PORT), token=self.TOKEN)
+        self._client = test_client.get_client(url="http://localhost:{}".format(self.PORT), token=self.TOKEN)
 
     def get_client(self, **kwargs):
-        return test_client.get_client("http://localhost:{}".format(self.PORT), **kwargs)
+        return test_client.get_client(url="http://localhost:{}".format(self.PORT), **kwargs)
 
     def tearDown(self):
         self._client.close()
