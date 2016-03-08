@@ -27,7 +27,7 @@ REMOVE_VARIABLES = functools.partial(re.compile(r'{([^}]+)}').sub, lambda match:
 CONVERT_PATH_VARIABLES = functools.partial(re.compile(r'{([a-zA-Z][a-zA-Z_]*)}').sub, r'(?P<\1>[^/]+)')
 ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.digits
 ENCODING = 'utf-8'
-RE_SPLIT_NAME = re.compile(r'[A-Z][a-z]+|[0-9]+')
+RE_SPLIT_NAME = re.compile(r'[A-Z][a-z]+')
 
 
 HEADER_USER_ID = 'x-auth-user-id'
