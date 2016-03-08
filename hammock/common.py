@@ -46,6 +46,9 @@ GET = 'GET'
 POST = 'POST'
 DELETE = 'DELETE'
 
+AUTH_RESOURCE_NAME = 'auth'
+AUTH_SPECIAL_METHODS_NAMES = {'login', 'logout', 'refresh'}
+
 
 def url_join(*parts):
     return '/'.join(arg.strip('/') for arg in parts if arg)
@@ -95,9 +98,13 @@ def to_bytes(source):
 
 
 def to_variable_name(name):
+    starts_with_underscore = name.startswith('_')
     name = REMOVE_VARIABLES(name)
     name = PATH_TO_NAME(name.replace('-', '_'))
-    return RE_SPLIT_NAME.sub(lambda match: '_' + match.group(0), name).strip('_').lower()
+    name = RE_SPLIT_NAME.sub(lambda match: '_' + match.group(0), name).strip('_').lower()
+    if starts_with_underscore:
+        name = '_' + name
+    return name
 
 
 def to_path(name):

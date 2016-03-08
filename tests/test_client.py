@@ -44,3 +44,11 @@ class TestClient(unittest.TestCase):
         self.assertTrue(hasattr(self._client, "sub_resource_2"))
         self.assertTrue(hasattr(self._client.sub_resource_2, "sub"))
         self.assertTrue(hasattr(self._client, "different_path"))
+
+    def test_auth_specials(self):
+        self.assertTrue(hasattr(self._client, "auth"))
+        for method_name in ('login', 'logout', 'refresh'):
+            self.assertTrue(hasattr(self._client.auth, method_name))
+            self.assertTrue(hasattr(self._client.auth, '_' + method_name))
+        self.assertTrue(hasattr(self._client.auth, 'status'))
+        self.assertFalse(hasattr(self._client.auth, '_status'))
