@@ -51,6 +51,13 @@ class TestCli(base.Base):
     def test_method_name(self):
         for method_name, translated_name in six.iteritems(cli_names.NAMES):
             self.assertEqual(method_name + '\n', self.run_command('cli-names {}'.format(translated_name)))
+        self.assertEqual('moshe\n', self.run_command('cli-names optional-variable-with-underscores --optional-variable moshe'))
+        self.assertEqual('', self.run_command('cli-names optional-variable-with-underscores'))
+        self.assertEqual('True\n', self.run_command('cli-names set-false'))
+        self.assertEqual('False\n', self.run_command('cli-names set-false --set-false'))
+        self.assertEqual('False\n', self.run_command('cli-names set-true'))
+        self.assertEqual('True\n', self.run_command('cli-names set-true --set-true'))
+
         self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
         self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))
         self.assertEqual('moshe\n', self.run_command('variable-in-url-variable-name get moshe'))

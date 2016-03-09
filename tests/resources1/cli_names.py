@@ -12,6 +12,23 @@ NAMES = {
 class CLINames(hammock.Resource):
     POLICY_GROUP_NAME = False
 
+    @hammock.post('optional-variable-with-underscore')
+    def optional_variable_with_underscores(self, optional_variable=None):
+        """
+        Returns an optional variable
+        :param optional_variable: an optional variable
+        :return: the optional variable
+        """
+        return optional_variable
+
+    @hammock.post('set-true')
+    def set_true(self, set_true=False):
+        return set_true
+
+    @hammock.post('set-false')
+    def set_false(self, set_false=True):
+        return set_false
+
 
 def _get_func(func_name):
     @hammock.get(func_name)

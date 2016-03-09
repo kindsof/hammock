@@ -24,11 +24,11 @@ class FuncSpec(object):
         info = self._args_info.get(arg)
         if not info:
             if arg in self.args:
-                info = args.Arg(arg, None, None)
+                info = args.PositionalArg(arg, None, None)
             elif arg in self.kwargs:
-                info = args.DefaultArg(arg, None, None, self.kwargs[arg])
+                info = args.OptionalArg(arg, None, None, self.kwargs[arg])
             elif arg == self.keywords:
-                info = args.KeywordsArg(self.keywords)
+                info = args.KeywordArg(self.keywords)
             else:
                 raise AttributeError('No such argument {} in method {}'.format(arg, self._func.__name__))
         return info
@@ -99,8 +99,8 @@ class FuncSpec(object):
         if 'name' not in arg:
             return args.ReturnArg(arg['type'], doc)
         if arg['name'] in self.args:
-            return args.Arg(arg['name'], arg['type'], doc)
+            return args.PositionalArg(arg['name'], arg['type'], doc)
         elif arg['name'] in self.kwargs:
-            return args.DefaultArg(arg['name'], arg['type'], doc, default=self.kwargs[arg['name']])
+            return args.OptionalArg(arg['name'], arg['type'], doc, default=self.kwargs[arg['name']])
         elif arg['name'] == self.keywords:
-            return args.KeywordsArg(arg['name'], doc)
+            return args.KeywordArg(arg['name'], doc)

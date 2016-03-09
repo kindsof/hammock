@@ -1,7 +1,8 @@
 from __future__ import absolute_import
+import hammock.names as names
 
 
-class Arg(object):
+class PositionalArg(object):
     """Represent a function argument"""
 
     PARSER_TYPE_MAP = {dict: str, list: str}
@@ -23,13 +24,9 @@ class Arg(object):
         self.default = default
 
     def add_to_parser(self, parser):
-        parser.add_argument(
-            self._parser_name,
-            type=self._parser_type,
-            default=self._parser_default,
-            help=self.doc,
-            action=self._action,
-        )
+        kwargs = {'type': self._parser_type, 'help': self.doc}
+        self._parser_update_kwargs(kwargs)
+        parser.add_argument(self._parser_name, **kwargs)
 
     def _get_type(self, type_string):
         if type_string and type_string not in self.ALLOWED_ARG_TYPES:
@@ -46,46 +43,47 @@ class Arg(object):
 
     @property
     def _parser_name(self):
+        # Can't convert name with names.to_command, no option to add a 'dest' keyword
+        # when using a positional argument.
         return self.name
 
-    @property
-    def _parser_default(self):
-        return self.default
-
-    @property
-    def _action(self):
-        return None
+    def _parser_update_kwargs(self, kwargs):
+        pass
 
 
-class DefaultArg(Arg):
+class OptionalArg(PositionalArg):
     """Represent a function argument with default value"""
 
     @property
     def _parser_name(self):
-        return '--{}'.format(self.name)
+        return '--{}'.format(names.to_command(self.name))
 
-    @property
-    def _action(self):
+    def _parser_update_kwargs(self, kwargs):
+        # dest keyword can be added only if the argument is optional,
+        kwargs['dest'] = self.name
         if self.default is True:
-            return 'store_false'
+            kwargs['action'] = 'store_false'
+            kwargs.pop('type', None)
         elif self.default is False:
-            return 'store_true'
-        return None
+            kwargs['action'] = 'store_true'
+            kwargs.pop('type', None)
+        else:
+            kwargs['default'] = self.default
 
 
-class KeywordsArg(Arg):
+class KeywordArg(PositionalArg):
     """Represent a function keywords argument"""
 
     def __init__(self, name, doc=None):
         doc = doc or 'Extra arguments, a comma separated key=value literals.'
-        super(KeywordsArg, self).__init__(name, 'dict', doc)
+        super(KeywordArg, self).__init__(name, 'dict', doc)
 
     @property
     def _parser_name(self):
         return '--extras',
 
 
-class ReturnArg(Arg):
+class ReturnArg(PositionalArg):
 
     def __init__(self, type, doc):  # pylint: disable=redefined-builtin
         super(ReturnArg, self).__init__(None, type, doc)
