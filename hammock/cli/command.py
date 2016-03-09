@@ -28,7 +28,7 @@ def factory(func, commands):
         for one in list_result:
             # In case The user returns a simple list:
             if not isinstance(one, dict):
-                return ('value', ), list_result
+                return ('value', ), [(value, ) for value in list_result]
             names = names | set(one)
         return names, [
             [one.get(name) for name in names]

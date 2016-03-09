@@ -23,7 +23,13 @@ class Arg(object):
         self.default = default
 
     def add_to_parser(self, parser):
-        parser.add_argument(self._parser_name, type=self._parser_type, default=self._parser_default, help=self.doc)
+        parser.add_argument(
+            self._parser_name,
+            type=self._parser_type,
+            default=self._parser_default,
+            help=self.doc,
+            action=self._action,
+        )
 
     def _get_type(self, type_string):
         if type_string and type_string not in self.ALLOWED_ARG_TYPES:
@@ -46,6 +52,10 @@ class Arg(object):
     def _parser_default(self):
         return self.default
 
+    @property
+    def _action(self):
+        return None
+
 
 class DefaultArg(Arg):
     """Represent a function argument with default value"""
@@ -53,6 +63,14 @@ class DefaultArg(Arg):
     @property
     def _parser_name(self):
         return '--{}'.format(self.name)
+
+    @property
+    def _action(self):
+        if self.default is True:
+            return 'store_false'
+        elif self.default is False:
+            return 'store_true'
+        return None
 
 
 class KeywordsArg(Arg):
