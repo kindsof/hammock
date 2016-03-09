@@ -4,7 +4,7 @@ import pkgutil
 import inspect
 import hammock
 import collections
-import hammock.common as common
+import hammock.names as names
 
 
 Package = collections.namedtuple('Package', ['name', 'path', 'class_name', 'cli_command_name'])
@@ -44,9 +44,10 @@ def _rec_iter_modules(package, parents=None):
             # name is package name
             package_parents = parents[:]
             son_package = importlib.import_module(".".join([package.__name__, name]), package.__name__)
-            class_name = common.to_class_name(getattr(son_package, "PATH", name))
-            path_name = getattr(son_package, "PATH", common.to_path(class_name))
-            cli_command_name = getattr(son_package, "CLI_COMMAND_NAME", common.to_path(path_name))
+            path = getattr(son_package, "PATH", name)
+            class_name = names.to_class_name(path)
+            path_name = getattr(son_package, "PATH", names.to_path(path))
+            cli_command_name = getattr(son_package, "CLI_COMMAND_NAME", names.to_command(path))
             package_parents.append(Package(name=name, path=path_name, class_name=class_name, cli_command_name=cli_command_name))
             modules.extend(_rec_iter_modules(son_package, package_parents))
         else:

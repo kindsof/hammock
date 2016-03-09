@@ -5,6 +5,7 @@ NAMES = {
     'name_with_underscores': 'name-with-underscores',
     'NameWithCamelCase': 'name-with-camel-case',
     'MULTICaps': 'multi-caps',
+    'CapsMULTI': 'caps-multi',
 }
 
 
