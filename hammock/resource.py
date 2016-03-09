@@ -3,6 +3,7 @@ import collections
 import functools
 import hammock.exceptions as exceptions
 import hammock.common as common
+import hammock.names as names
 import hammock.wrappers as wrappers
 import hammock.wrappers.route as route
 import hammock.wrappers.sink as sink
@@ -35,7 +36,7 @@ class Resource(object):
 
     @classmethod
     def path(cls):
-        return getattr(cls, "PATH", common.to_path(cls.__name__))
+        return getattr(cls, "PATH", names.to_path(cls.__name__))
 
     def handle_exception(self, exc, exception_handler):
         if exception_handler:
@@ -91,17 +92,17 @@ class Resource(object):
 
     @classmethod
     def client_variable_name(cls):
-        return common.to_variable_name(cls.name())
+        return names.to_variable_name(cls.name())
 
     @classmethod
     def client_class_name(cls):
-        return common.to_class_name(cls.name())
+        return names.to_class_name(cls.name())
 
     @classmethod
     def cli_command_name(cls):
         if cls.CLI_COMMAND_NAME or cls.CLI_COMMAND_NAME is False:
             return cls.CLI_COMMAND_NAME
-        return common.to_path(cls.name())
+        return names.to_command(cls.name())
 
     @classmethod
     def route_cli_commands_map(cls):
@@ -109,8 +110,8 @@ class Resource(object):
         for route_method in cls.iter_route_methods():
             command_name = route_method.cli_command_name
             if command_name is None:
-                command_name = common.to_path(route_method.__name__)
-            mapping[common.to_variable_name(route_method.__name__)] = command_name
+                command_name = names.to_command(route_method.__name__)
+            mapping[names.to_variable_name(route_method.__name__)] = command_name
         return mapping
 
 

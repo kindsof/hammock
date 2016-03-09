@@ -46,7 +46,7 @@ class TestCli(base.Base):
         self.assertEqual('sub-in-sub1\n', self.run_command('sub-resource sub get'))
         self.assertEqual('sub2-in-sub1\n', self.run_command('sub-resource sub2 get'))
         self.assertEqual('sub-in-nested-in-sub\n', self.run_command('sub-resource nested sub get'))
-        self.assertEqual('sub-in-sub2\n', self.run_command('sub-resource-2-modified sub get'))
+        self.assertEqual('sub-in-sub2\n', self.run_command('sub-resource2-modified sub get'))
 
     def test_method_name(self):
         for method_name, translated_name in six.iteritems(cli_names.NAMES):
@@ -54,7 +54,7 @@ class TestCli(base.Base):
         self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
         self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))
         self.assertEqual('moshe\n', self.run_command('variable-in-url-variable-name get moshe'))
-        self.assertEqual('moshe\n', self.run_command('-variable-name-variable-in-url get moshe'))
+        self.assertEqual('moshe\n', self.run_command('variable-name-variable-in-url get moshe'))
 
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)

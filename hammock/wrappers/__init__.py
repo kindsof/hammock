@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from .route import Route
 from .sink import Sink
 import hammock.common as common
+import hammock.names as names
 
 
 def is_sink(method):
@@ -43,7 +44,7 @@ def wrapper(
         if False, the command will not be added to the cli.
     :return: a decorator for a route method.
     """
-    name = ''.join(part.capitalize() for part in [method.upper(), common.PATH_TO_NAME(path)])
+    name = names.to_class_name(path)
     overrides = dict(
         path=path,
         dest=dest,

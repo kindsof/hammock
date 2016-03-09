@@ -7,6 +7,7 @@ import re
 import six
 import json
 import hammock.common as common
+import hammock.names as names
 import hammock.packages as packages
 import hammock
 import hammock.types.file as file_module
@@ -70,7 +71,7 @@ def _resource_class_code(_resource, paths=None):
     if is_auth_resource:
         methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
-        name=common.to_class_name(_resource.name()),
+        name=_resource.client_class_name(),
         resource=_resource,
         methods=methods,
         cli_command_name=_format_cli_command_name(_resource.cli_command_name()),
@@ -118,7 +119,7 @@ def _package_tuple(package):
     """
     :return: a tuple of <variable_name>, <class_name>, <path>
     """
-    return common.to_variable_name(package.class_name), package.class_name, package.path
+    return names.to_variable_name(package.class_name), package.class_name, package.path
 
 
 def _tabify(text):
@@ -142,7 +143,7 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         doc_string = '\n    '.join(doc_string.split('\n'))
 
     return METHOD_TEMPLATE.render(  # pylint: disable=no-member
-        method_name=common.to_variable_name(method_name),
+        method_name=names.to_variable_name(method_name),
         method=method,
         url=url,
         args=args,

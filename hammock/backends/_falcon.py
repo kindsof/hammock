@@ -3,6 +3,7 @@ import six
 import re
 import logging
 import hammock.common as common
+import hammock.names as names
 import hammock.types.request as request
 from . import backend
 
@@ -22,7 +23,7 @@ class Falcon(backend.Backend):
             LOG.debug('Added route %s %s', method, path)
 
     def add_sink(self, path, responder):
-        pattern = re.compile(common.CONVERT_PATH_VARIABLES(path))
+        pattern = re.compile(names.CONVERT_PATH_VARIABLES(path))
         self._api.add_sink(self._responder(responder), pattern)
         LOG.debug('Added sink %s', path)
 
@@ -60,9 +61,7 @@ class Falcon(backend.Backend):
 
     @staticmethod
     def _falcon_class_name(path):
-        return ''.join(
-            ['Resource'] + [common.PATH_TO_NAME(part).capitalize() for part in path.split('/')]
-        )
+        return 'Resource' + names.to_class_name(path)
 
     @staticmethod
     def _handle_http_error(exc, backend_req, backend_resp, url_params):  # pylint: disable=unused-argument
