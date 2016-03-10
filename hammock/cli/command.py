@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import argparse
 import cliff.command as command
 import cliff.show as show
 import cliff.lister as lister
@@ -52,6 +53,7 @@ def factory(func, commands):
 
     def get_parser(inner_self, prog_name):
         parser = super_class.get_parser(inner_self, prog_name)
+        parser.formatter_class = argparse.RawTextHelpFormatter
 
         # add all method arguments to parser
         for name in spec.kwargs.keys() + spec.args:
@@ -73,16 +75,14 @@ def factory(func, commands):
 
 def _get_doc(spec):
     doc = spec.doc or ''
-    if doc and not doc.endswith('.'):
-        doc += '.'
+
     return_doc = ''
     if spec.returns:
         return_type = ' {}'.format(spec.returns.type) if spec.returns.type else ''
         return_doc = ': {}'.format(spec.returns.doc) if spec.returns.doc else ''
         return_doc = 'Returns{}{}'.format(return_type, return_doc)
-        if not return_doc.endswith('.'):
-            return_doc += '.'
-    return ' '.join([doc, return_doc])
+
+    return '\n\n'.join([doc, return_doc])
 
 
 def _to_class_name(spaced):

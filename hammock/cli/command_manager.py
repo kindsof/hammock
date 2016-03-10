@@ -52,6 +52,6 @@ class CommandManager(commandmanager.CommandManager):
     def _add_command(self, method, commands, command_name):
         commands = commands + [command_name]
         command_type = command.factory(method, commands)
-        command_name = ' '.join(commands)
+        command_name = ' '.join([part for part in commands if part])
         LOG.debug('Adding command: %s', command_name)
         self.add_command(command_name, command_type)

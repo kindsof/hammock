@@ -26,7 +26,7 @@ class TestFuncSpec(unittest.TestCase):
         self.assertListEqual(spec.args, ['an_int', 'a_string', 'an_arg_without_type'])
         self.assertDictEqual(spec.kwargs, {'a_default_bool': True})
 
-        self.assertEqual(spec.doc, 'This is a test function\nSecond line doc')
+        self.assertEqual(spec.doc, '\nThis is a test function\nSecond line doc')
 
         self.assertEqual(spec.args_info('an_int').type, int)
         self.assertEqual(spec.args_info('a_string').type, str)
