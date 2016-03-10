@@ -47,8 +47,14 @@ class App(app.App):
     def initialize_app(self, argv):
         super(App, self).initialize_app(argv)
         logging.getLogger('requests').setLevel(self.REQUESTS_LOGGING_LEVEL if not self.options.debug else logging.DEBUG)
+        self.LOG.info('Destination URL: %s', self.options.url)
         self.LOG.debug("options: %s", self.options)
         self.options.headers = [header.split(':') for header in self.options.headers.split(',') if ':' in header]
+        if self.options.headers:
+            self.LOG.info(
+                'Using request headers:\n%s',
+                '\n'.join([': '.join(header) for header in self.options.headers])
+            )
         self.session.headers.update(dict(self.options.headers))
         clients = [client_class(url=self.options.url, session=self.session) for client_class in self.client_classes]
         self.command_manager.load_commands(clients)
