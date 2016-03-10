@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import logging
 import cliff.commandmanager as commandmanager
-import hammock.cli.command as command
+from . import command as command
 
 
 LOG = logging.getLogger(__name__)
