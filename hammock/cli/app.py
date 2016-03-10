@@ -4,7 +4,7 @@ import os
 import requests
 import cliff.app as app
 import cliff.interactive as interactive
-import hammock.cli.command_manager as command_manager
+from . import command_manager as command_manager
 
 
 class App(app.App):

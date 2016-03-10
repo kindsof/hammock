@@ -13,7 +13,7 @@ import waiting
 import falcon
 
 import hammock
-import hammock.cli.app as app
+import hammock.cli
 import hammock.client as client
 
 PORT = '6543'
@@ -53,8 +53,6 @@ def get_unified_resources_package(build_path):
     sys.path.append(build_path)
     for i in range(1, 3):
         subprocess.check_output('cp -r tests/resources{}/* {}'.format(i, resources_path), shell=True)
-        # for file_name in glob.glob('tests/resources{}/*'.format(i)):
-        #     shutil.copyfile(file_name, os.path.join(resources_path, os.path.basename(file_name)))
     return importlib.import_module('resources')
 
 
@@ -64,7 +62,7 @@ hammock.Hammock(API, get_unified_resources_package('build/cli-tests'), policy_fi
 
 
 def cli(argv=sys.argv[1:], stdout=sys.stdout):
-    return app.App(clients, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
+    return hammock.cli.App(clients, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
 
 
 def server():
