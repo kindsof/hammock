@@ -56,8 +56,14 @@ class App(app.App):
                 '\n'.join([': '.join(header) for header in self.options.headers])
             )
         self.session.headers.update(dict(self.options.headers))
-        clients = [client_class(url=self.options.url, session=self.session) for client_class in self.client_classes]
-        self.command_manager.load_commands(clients)
+        self.command_manager.load_commands(self._clients())
+
+    def _clients(self):
+        clients = []
+        for client_class in self.client_classes:
+            self.LOG.debug('Loading client %s', client_class.__name__)
+            clients.append(client_class(url=self.options.url, session=self.session))
+        return clients
 
     def _interactive_app_factory(self, *args, **kwargs):
         interactive_app = interactive.InteractiveApp(*args, **kwargs)
