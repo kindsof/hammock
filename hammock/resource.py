@@ -109,9 +109,15 @@ class Resource(object):
         mapping = {}
         for route_method in cls.iter_route_methods():
             command_name = route_method.cli_command_name
-            if command_name is None:
-                command_name = names.to_command(route_method.__name__)
-            mapping[names.to_variable_name(route_method.__name__)] = command_name
+            if command_name is False:
+                continue
+            if route_method.client_methods:
+                for name in route_method.client_methods:
+                    mapping[name] = names.to_command(name)
+            else:
+                if command_name is None:
+                    command_name = names.to_command(route_method.__name__)
+                mapping[names.to_variable_name(route_method.__name__)] = command_name
         return mapping
 
 
