@@ -65,10 +65,10 @@ class FuncSpec(object):
             # get func doc
             for line in doc.split('\n'):
                 if not PARAM_IS_SPECIAL.match(line):
-                    intro.append(line.strip())
+                    intro.append(line)
                 else:
                     break
-            intro = '\n'.join(intro).strip()
+            intro = '\n'.join(self._trim_leading_spaces(intro))
 
             # get params
             doc = self._doc_mask_endlines(doc)
@@ -84,6 +84,16 @@ class FuncSpec(object):
                 break
 
         return intro, args_info, returns
+
+    @staticmethod
+    def _trim_leading_spaces(lines):
+        spaces_count = [len(line) - len(line.lstrip()) for line in lines]
+        trim_left = min([count for count in spaces_count if count] or [0])
+        if not trim_left:
+            lines = [line.lstrip() for line in lines]
+        else:
+            lines = [line[trim_left:] if line.startswith(' ' * trim_left) else line.lstrip() for line in lines]
+        return lines
 
     @staticmethod
     def _doc_mask_endlines(doc):

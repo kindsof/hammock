@@ -11,7 +11,7 @@ SPLIT_CAMEL_BLOCKS = functools.partial(re.compile(r'[A-Z][a-z0-9_$]+').sub, lamb
 
 
 def _to_parts(name):
-    name.replace('-', '_')
+    name = name.replace('-', '_')
     name = SPLIT_CAMEL_BLOCKS(name).strip('_').lower()
     return [part for part in name.split('_') if part]
 
