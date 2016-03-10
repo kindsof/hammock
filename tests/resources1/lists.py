@@ -15,5 +15,11 @@ class Lists(hammock.Resource):
 
     @hammock.post('{path}')
     def append(self, path, _list):
+        """
+        Append to a list
+        :param int path: append to list
+        :param list _list: list to append to
+        :return list: the list with extra value
+        """
         _list.append(int(path))
         return _list

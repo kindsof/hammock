@@ -44,7 +44,7 @@ class {{ class_name }}(object):
     def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None):
         url_kw = url_kw or {}
         url = url_join(self._url, url).format(**url_kw)
-        if json:
+        if json and not isinstance(json, list):
             json.update(kwargs or {})
         _kwargs = {
             "timeout": self._timeout,

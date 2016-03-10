@@ -48,7 +48,8 @@ class PositionalArg(object):
         return self.name
 
     def _parser_update_kwargs(self, kwargs):
-        pass
+        if self.type is list:
+            kwargs['nargs'] = '*'
 
 
 class OptionalArg(PositionalArg):
@@ -59,6 +60,7 @@ class OptionalArg(PositionalArg):
         return '--{}'.format(names.to_command(self.name))
 
     def _parser_update_kwargs(self, kwargs):
+        super(OptionalArg, self)._parser_update_kwargs(kwargs)
         # dest keyword can be added only if the argument is optional,
         kwargs['dest'] = self.name
         if self.default is True:
