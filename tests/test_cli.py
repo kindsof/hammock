@@ -63,11 +63,20 @@ class TestCli(base.Base):
         self.assertEqual('moshe\n', self.run_command('variable-in-url-variable-name get moshe'))
         self.assertEqual('moshe\n', self.run_command('variable-name-variable-in-url get moshe'))
 
+    def test_headers(self):
+        self.assertEqual('True\n', self.run_command('--headers a:b headers request-headers a b'))
+        self.assertEqual('False\n', self.run_command('--headers a:b headers request-headers a c'))
+
+    def test_ignores(self):
+        self.assertRaises(base.CLIException, self.run_command, 'cli-ignored-package sub get')
+        self.assertRaises(base.CLIException, self.run_command, 'cli-ignored-resource sub get')
+        self.assertRaises(base.CLIException, self.run_command, 'cli-names ignored-method')
+
+        self.assertEqual('sub-in-ignored\n', self.run_command('cli-ignored-package sub get', remove_ignored_commands=False))
+        self.assertEqual('cli-ignored-resource\n', self.run_command('cli-ignored-resource get', remove_ignored_commands=False))
+        self.assertEqual('ignored-method\n', self.run_command('cli-names ignored-method', remove_ignored_commands=False))
+
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)
         for elem1, elem2 in zip(sorted(list1), sorted(list2)):
             self.assertDictEqual(elem1, elem2)
-
-    def test_headers(self):
-        self.assertEqual('True\n', self.run_command('--headers a:b headers request-headers a b'))
-        self.assertEqual('False\n', self.run_command('--headers a:b headers request-headers a c'))

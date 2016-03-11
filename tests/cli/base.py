@@ -61,8 +61,9 @@ API = falcon.API()
 hammock.Hammock(API, get_unified_resources_package('build/cli-tests'), policy_file=os.path.abspath('tests/policy.json'))
 
 
-def cli(argv=sys.argv[1:], stdout=sys.stdout):
-    return hammock.cli.App(clients, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
+def cli(argv=sys.argv[1:], remove_ignored_commands=True, stdout=sys.stdout):
+    app_class = type('App', (hammock.cli.App, ), {'REMOVE_COMMANDS_WITH_NAME_FALSE': remove_ignored_commands})
+    return app_class(clients, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
 
 
 def server():
@@ -99,12 +100,12 @@ class Base(unittest.TestCase):
     def tearDownClass(cls):
         kill_server(cls.server)
 
-    def run_command(self, command):
+    def run_command(self, command, remove_ignored_commands=True):
         out = StringIO.StringIO()
-        return_code = cli(command.split(' '), stdout=out)
+        return_code = cli(command.split(' '), remove_ignored_commands=remove_ignored_commands, stdout=out)
         if return_code != 0:
             raise CLIException('Error code {} from running command {}'.format(return_code, command))
         return out.getvalue()
 
-    def run_json_command(self, command):
-        return json.loads(self.run_command(command + ' -f json'))
+    def run_json_command(self, command, remove_ignored_commands=True):
+        return json.loads(self.run_command(command + ' -f json', remove_ignored_commands=remove_ignored_commands))

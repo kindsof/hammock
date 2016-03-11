@@ -16,7 +16,7 @@ def url_join(*args):
 
 class {{ class_name }}(object):
 
-    def __init__(self, hostname=None, port=None, url=None, token=None, timeout=None, headers=None, retries=None, session=None):
+    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %} , token=None, timeout=None, headers=None, retries=None, session=None):
         """
         :param url: url to connect to
         :param token: a token to be used for requests
@@ -106,8 +106,9 @@ class {{ class_name }}(object):
 {{ resource_classes|join("") }}
 if __name__ == '__main__':
     import sys
-    import hammock.cli.app as app
-    app.App.prompt = '{} > '.format('{{ class_name }}')
+    import hammock.cli
+    hammock.cli.App.prompt = '{} > '.format('{{ class_name }}')
+    hammock.cli.App.IGNORE_COMMAND_NAME_FALSE = True
     {% if default_url %}
     app.App.DEFAULT_URL = '{{ default_url }}'
     {% endif %}

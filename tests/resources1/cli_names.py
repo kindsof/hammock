@@ -29,6 +29,10 @@ class CLINames(hammock.Resource):
     def set_false(self, set_false=True):
         return set_false
 
+    @hammock.get('ignored-method', cli_command_name=False)
+    def ignored_method(self):
+        return 'ignored-method'
+
 
 def _get_func(func_name):
     @hammock.get(func_name)
