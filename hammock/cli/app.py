@@ -15,6 +15,7 @@ class App(app.App):
     REQUESTS_LOGGING_LEVEL = logging.ERROR
     ENV_URL = 'URL'
     DEFAULT_URL = 'http://localhost'
+    REMOVE_COMMANDS_WITH_NAME_FALSE = True
 
     def __init__(self, clients, **kwargs):
         """
@@ -24,7 +25,7 @@ class App(app.App):
         super(App, self).__init__(
             description=self.description,
             version=self.version,
-            command_manager=command_manager.CommandManager(),
+            command_manager=command_manager.CommandManager(self.REMOVE_COMMANDS_WITH_NAME_FALSE),
             interactive_app_factory=self._interactive_app_factory,
             **kwargs
         )

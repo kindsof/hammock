@@ -100,24 +100,21 @@ class Resource(object):
 
     @classmethod
     def cli_command_name(cls):
-        if cls.CLI_COMMAND_NAME or cls.CLI_COMMAND_NAME is False:
-            return cls.CLI_COMMAND_NAME
-        return names.to_command(cls.name())
+        return cls.CLI_COMMAND_NAME if cls.CLI_COMMAND_NAME is not None else names.to_command(cls.name())
 
     @classmethod
     def route_cli_commands_map(cls):
         mapping = {}
         for route_method in cls.iter_route_methods():
+            method_name = names.to_variable_name(route_method.__name__)
             command_name = route_method.cli_command_name
             if command_name is False:
-                continue
-            if route_method.client_methods:
+                mapping[method_name] = False
+            elif route_method.client_methods:
                 for name in route_method.client_methods:
                     mapping[name] = names.to_command(name)
             else:
-                if command_name is None:
-                    command_name = names.to_command(route_method.__name__)
-                mapping[names.to_variable_name(route_method.__name__)] = command_name
+                mapping[method_name] = command_name or names.to_command(route_method.__name__)
         return mapping
 
 
