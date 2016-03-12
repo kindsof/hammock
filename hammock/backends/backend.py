@@ -49,7 +49,7 @@ class Backend(object):
     def add_route(self, path, methods_map):
         """ Add routes on a specific path
         :param path: url of routing
-        :param methods_map: a map of {mathod: responder)
+        :param methods_map: a map of {method: responder)
         """
 
     @abc.abstractmethod

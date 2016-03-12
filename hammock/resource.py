@@ -53,8 +53,7 @@ class Resource(object):
         routes = collections.defaultdict(dict)
         for route_method in self.iter_route_methods():
             route_method.set_resource(self)
-            method = route_method.method.upper()
-            routes[common.url_join(self.path(), route_method.path)][method] = route_method.call
+            routes[common.url_join(self.path(), route_method.path)][route_method.method] = route_method.call
         return routes
 
     @property
@@ -122,24 +121,24 @@ class Resource(object):
 
 def get(path='', **kwargs):
     warnings.warn('resource.get is deprecated, use hammock.get instead', UserWarning)
-    return wrappers.wrapper(path, 'GET', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'GET', **kwargs)
 
 
 def head(path='', **kwargs):
     warnings.warn('resource.head is deprecated, use hammock.head instead', UserWarning)
-    return wrappers.wrapper(path, 'HEAD', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'HEAD', **kwargs)
 
 
 def post(path='', **kwargs):
     warnings.warn('resource.post is deprecated, use hammock.post instead', UserWarning)
-    return wrappers.wrapper(path, 'POST', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'POST', **kwargs)
 
 
 def put(path='', **kwargs):
     warnings.warn('resource.put is deprecated, use hammock.put instead', UserWarning)
-    return wrappers.wrapper(path, 'PUT', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'PUT', **kwargs)
 
 
 def delete(path='', **kwargs):
     warnings.warn('resource.delete is deprecated, use hammock.delete instead', UserWarning)
-    return wrappers.wrapper(path, 'DELETE', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'DELETE', **kwargs)

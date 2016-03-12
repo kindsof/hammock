@@ -13,15 +13,48 @@ class Route(wrapper.Wrapper):
     Decorates a routing method
     """
 
-    success_code = 200,
-    response_content_type = common.TYPE_JSON,  # XXX: This should be removed.
-    keyword_map = None
-    client_methods = None
-    cli_command_name = None
+    def __init__(
+        self, func, path, method,
+        success_code=200,
+        keyword_map=None,
+        rule_name=None,
+        client_methods=None,
+        cli_command_name=None,
+        response_content_type=common.TYPE_JSON,
+        **kwargs
+    ):
+        """
+        Create a decorator of a rout method in a resource class
+        :param func: a function to decorate
+        :param path: url path of the function
+        :param method: HTTP method
+        :param success_code: a code to return in http response.
+        :param keyword_map: a mapping between request keywords to required method keywords.
+        :param rule_name: a rule from policy.json
+        :param client_methods: a dict of how the method will look like in client code,
+            and overriding keys - values for method parameters.
+            { method-name: { key: value }}
+        :param cli_command_name: override cli command name for a route
+            if None, the command name will not be overridden.
+            if False, the command will not be added to the cli.
+        :param response_content_type: content type of response.
+        :param kwargs: wrappers.Wrapper keyword arguments
+        :return: the func, decorated
+        """
+        super(Route, self).__init__(func, path, **kwargs)
+        self.method = method.upper()
+        self.success_code = self.get_status_code(success_code)
+        self.client_methods = client_methods
+        self.cli_command_name = cli_command_name
+        self.keyword_map = keyword_map
+        self.rule_name = rule_name
+        self.full_policy_rule_name = None
+        self.response_content_type = response_content_type
 
-    def __init__(self, func):
-        wrapper.Wrapper.__init__(self, func)
         self._validate_keyword_map()
+
+        if self.method in common.URL_PARAMS_METHODS and common.KW_LIST in (set(self.spec.args) | set(self.spec.kwargs)):
+            raise RuntimeError("Can't declare a url params method with _list argument, it it useful only when you get request body.")
 
     def _wrapper(self, req):
         """
@@ -39,11 +72,26 @@ class Route(wrapper.Wrapper):
                     kwargs[common.KW_ENFORCER] = enforcer
             if common.KW_HEADERS in self.spec.args:
                 kwargs[common.KW_HEADERS] = req.headers
-            result = self(**kwargs)  # pylint: disable=not-callable
+
+            # Invoke the routing method:
+            result = self(**kwargs)
+
             resp = response.Response.from_result(result, self.success_code)
         else:
             resp = proxy.proxy(req, self.dest)
         return resp
+
+    def set_resource(self, resource):
+        super(Route, self).set_resource(resource)
+        if not self._is_policy_disabled:
+            self.full_policy_rule_name = self._generate_full_policy_rule_name()
+        else:
+            self.full_policy_rule_name = None
+            # check if a method that enforces policy, expects credentials or enforcer.
+            method_expects_policy_arguments = {common.KW_CREDENTIALS, common.KW_ENFORCER} & set(self.spec.args)
+            if method_expects_policy_arguments:
+                raise RuntimeError('Method {} in class {} expects {}, but is not enforced by policy'.format(
+                    self.__name__, self._resource.__class__.__name__, method_expects_policy_arguments))
 
     def _extract_kwargs(self, req, collected_data):
         try:
@@ -98,6 +146,20 @@ class Route(wrapper.Wrapper):
             return status
         else:
             return int(status.split(' ')[0])
+
+    @property
+    def _is_policy_disabled(self):
+        return (self._resource.POLICY_GROUP_NAME is False) or (self.dest is not None) or self._resource.api.policy.is_disabled
+
+    def _generate_full_policy_rule_name(self):
+        group_name = self._resource.POLICY_GROUP_NAME or self._resource.name().lower()
+        rule_name = self.rule_name or self.__name__
+        full_policy_rule_name = '{}:{}'.format(group_name, rule_name)
+        if full_policy_rule_name not in self._resource.api.policy.rules:
+            raise RuntimeError('Policy rule {} of method {} in resource class {} does not exist in policy file'.format(
+                full_policy_rule_name, self.__name__, self._resource.__class__.__name__
+            ))
+        return full_policy_rule_name
 
     def _get_mapped_keyword(self, original_keyword):
         """Return the alternative keyword if one exists."""

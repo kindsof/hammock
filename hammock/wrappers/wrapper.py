@@ -19,62 +19,52 @@ LOG = logging.getLogger(__name__)
 
 
 class Wrapper(object):
+    """
+    A class that wraps a function,
+    used to decorate route and sink methods in a resource class
+    """
 
-    path = None
-    method = None
-    exception_handler = None
-    dest = None
-    rule_name = 'default'
-    pre_process = None
-    post_process = None
-    trim_prefix = False
-
-    def __init__(self, func):
+    def __init__(
+        self, func, path,
+        exception_handler=None,
+        dest=None, pre_process=None, post_process=None, trim_prefix=False
+    ):
         """
         Create a decorator of a method in a resource class
         :param func: a function to decorate
-        :return: a decorator
+        :param path: url path of the function
+        :param exception_handler: a specific handler for exceptions.
+        :param dest: a hostname + path to pass the request to.
+        :param pre_process: a method to invoke on the request before process.
+        :param post_process:  a method to invoke on the request after process.
+        :param trim_prefix: a prefix to trim from the path.
+        :return: the func, decorated
         """
-        # decorator.decorate(func, self)
-        self.spec = func_spec.FuncSpec(func)
         self.func = func
+        self.spec = func_spec.FuncSpec(func)
         self._resource = None  # Can be determined only after resource class instantiation.
+        self.path = path
+        self.exception_handler = exception_handler
+        self.dest = dest
+        self.pre_process = pre_process
+        self.post_process = post_process
+        self.trim_prefix = trim_prefix
+
         self.__name__ = func.__name__
         self.__doc__ = func.__doc__
-        self.full_policy_rule_name = None
 
         # If it is a proxy, make sure function doesn't do anything.
         if self.dest is not None:
             common.func_is_pass(func)
 
-    def set_resource(self, resource):
-        self._resource = resource
-        if not self._is_policy_disabled:
-            self.full_policy_rule_name = self._generate_full_policy_rule_name()
-        else:
-            self.full_policy_rule_name = None
-            # check if a method that enforces policy, expects credentials or enforcer.
-            method_expects_policy_arguments = {common.KW_CREDENTIALS, common.KW_ENFORCER} & set(self.spec.args)
-            if method_expects_policy_arguments:
-                raise RuntimeError('Method {} in class {} expects {}, but is not enforced by policy'.format(
-                    self.__name__, self._resource.__class__.__name__, method_expects_policy_arguments))
-
     def __call__(self, *args, **kwargs):
+        """
+        The actual method that decorate the wrapped function.
+        """
         return self.func(self._resource, *args, **kwargs)
 
-    @property
-    def _is_policy_disabled(self):
-        return (self._resource.POLICY_GROUP_NAME is False) or (self.dest is not None) or self._resource.api.policy.is_disabled
-
-    def _generate_full_policy_rule_name(self):
-        group_name = self._resource.POLICY_GROUP_NAME or self._resource.name().lower()
-        rule_name = self.rule_name or self.func.__name__
-        full_policy_rule_name = '{}:{}'.format(group_name, rule_name)
-        if full_policy_rule_name not in self._resource.api.policy.rules:
-            raise RuntimeError('Policy rule {} of method {} in resource class {} does not exist in policy file'.format(
-                self.full_policy_rule_name, self.func.__name__, self._resource.__class__.__name__
-            ))
-        return full_policy_rule_name
+    def set_resource(self, resource):
+        self._resource = resource
 
     def _exc_log_and_handle(self, exc, req):
         self._resource.handle_exception(exc, self.exception_handler)
@@ -91,13 +81,13 @@ class Wrapper(object):
         try:
             if self.trim_prefix:
                 req.trim_prefix(self.trim_prefix)
-            if self.__class__.pre_process:
-                self.__class__.pre_process(req, context, **req.url_params)  # pylint: disable=not-callable
+            if self.pre_process:
+                self.pre_process(req, context, **req.url_params)  # pylint: disable=not-callable
 
             resp = self._wrapper(req)
 
-            if self.__class__.post_process:
-                resp = self.__class__.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
+            if self.post_process:
+                resp = self.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
 
         except exceptions.HttpError as exc:
             self._exc_log_and_handle(exc, req)

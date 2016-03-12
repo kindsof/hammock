@@ -20,44 +20,44 @@ class Hammock(resource_node.ResourceNode):
 
 
 def get(path='', **kwargs):
-    return wrappers.wrapper(path, 'GET', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'GET', **kwargs)
 
 
 def head(path='', **kwargs):
-    return wrappers.wrapper(path, 'HEAD', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'HEAD', **kwargs)
 
 
 def post(path='', **kwargs):
-    return wrappers.wrapper(path, 'POST', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'POST', **kwargs)
 
 
 def put(path='', **kwargs):
-    return wrappers.wrapper(path, 'PUT', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'PUT', **kwargs)
 
 
 def delete(path='', **kwargs):
-    return wrappers.wrapper(path, 'DELETE', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'DELETE', **kwargs)
 
 
 def patch(path='', **kwargs):
-    return wrappers.wrapper(path, 'PATCH', **kwargs)
+    return lambda func: wrappers.Route(func, path, 'PATCH', **kwargs)
 
 
 def get_passthrough(dest, path='', **kwargs):
-    return wrappers.wrapper(path, 'GET', dest=dest, **kwargs)
+    return lambda func: wrappers.Route(func, path, 'GET', dest=dest, **kwargs)
 
 
 def post_passthrough(dest, path='', **kwargs):
-    return wrappers.wrapper(path, 'POST', dest=dest, **kwargs)
+    return lambda func: wrappers.Route(func, path, 'POST', dest=dest, **kwargs)
 
 
 def put_passthrough(dest, path='', **kwargs):
-    return wrappers.wrapper(path, 'PUT', dest=dest, **kwargs)
+    return lambda func: wrappers.Route(func, path, 'PUT', dest=dest, **kwargs)
 
 
 def delete_passthrough(dest, path='', **kwargs):
-    return wrappers.wrapper(path, 'DELETE', dest=dest, **kwargs)
+    return lambda func: wrappers.Route(func, path, 'DELETE', dest=dest, **kwargs)
 
 
 def sink(path='', **kwargs):
-    return wrappers.wrapper(path, 'SINK', **kwargs)
+    return lambda func: wrappers.Sink(func, path, **kwargs)
