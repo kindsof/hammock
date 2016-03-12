@@ -22,16 +22,7 @@ class FuncSpec(object):
 
     def args_info(self, arg):
         info = self._args_info.get(arg)
-        if not info:
-            if arg in self.args:
-                info = args.PositionalArg(arg, None, None)
-            elif arg in self.kwargs:
-                info = args.OptionalArg(arg, None, None, self.kwargs[arg])
-            elif arg == self.keywords:
-                info = args.KeywordArg(self.keywords)
-            else:
-                raise AttributeError('No such argument {} in method {}'.format(arg, self._func.__name__))
-        return info
+        return info if info else self._get_arg(arg)
 
     def _inspect(self, func):
         if six.PY2:
@@ -75,12 +66,12 @@ class FuncSpec(object):
             doc = doc.replace('\\n:param', '\n:param').replace('\\n:return', '\n:return')
             for arg_info in PARAM_RE.finditer(doc):
                 if arg_info:
-                    arg = self._get_arg(arg_info)
+                    arg = self._get_arg_from_doc(arg_info)
                     args_info[arg.name] = arg
 
             # get return
             for returns in RETURN_RE.finditer(doc):
-                returns = self._get_arg(returns)
+                returns = self._get_arg_from_doc(returns)
                 break
 
         return intro, args_info, returns
@@ -103,14 +94,19 @@ class FuncSpec(object):
     def _doc_return_endlines(doc):
         return doc.replace('\\n', '\n').strip()
 
-    def _get_arg(self, match):
+    def _get_arg_from_doc(self, match):
         arg = match.groupdict()
         doc = self._doc_return_endlines(arg['doc'])
         if 'name' not in arg:
             return args.ReturnArg(arg['type'], doc)
-        if arg['name'] in self.args:
-            return args.PositionalArg(arg['name'], arg['type'], doc)
-        elif arg['name'] in self.kwargs:
-            return args.OptionalArg(arg['name'], arg['type'], doc, default=self.kwargs[arg['name']])
-        elif arg['name'] == self.keywords:
-            return args.KeywordArg(arg['name'], doc)
+        return self._get_arg(arg['name'], arg['type'], doc)
+
+    def _get_arg(self, name, arg_type=None, doc=None):
+        if name in self.args:
+            return args.PositionalArg(name, arg_type, doc)
+        elif name in self.kwargs:
+            return args.OptionalArg(name, arg_type, doc, default=self.kwargs[name])
+        elif name == self.keywords:
+            return args.KeywordArg(name, doc)
+        else:
+            raise AttributeError('No such argument {} in method {}'.format(name, self._func.__name__))
