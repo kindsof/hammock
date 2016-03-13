@@ -112,4 +112,4 @@ if __name__ == '__main__':
     {% if default_url %}
     app.App.DEFAULT_URL = '{{ default_url }}'
     {% endif %}
-    app.App([{{ class_name }}]).run(sys.argv[1:])
+    app.App({'client': {{ class_name }}}).run(sys.argv[1:])

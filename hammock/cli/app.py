@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import logging
 import os
 import requests
+import six
 import cliff.app as app
 import cliff.interactive as interactive
 from . import command_manager as command_manager
@@ -30,6 +31,7 @@ class App(app.App):
             **kwargs
         )
         self.client_classes = clients
+        self.clients = {}
         self.session = requests.Session()
 
     def build_option_parser(self, description, version, argparse_kwargs=None):
@@ -46,24 +48,32 @@ class App(app.App):
         return parser
 
     def initialize_app(self, argv):
+        """
+        Initialize:
+        - Parse argv into self.options.
+        - Update headers in self.session from argv.
+        - Initialize self.clients with parsed options.
+        - Loads the commands from the clients.
+        """
         super(App, self).initialize_app(argv)
-        logging.getLogger('requests').setLevel(self.REQUESTS_LOGGING_LEVEL if not self.options.debug else logging.DEBUG)
-        self.LOG.info('Destination URL: %s', self.options.url)
         self.LOG.debug("options: %s", self.options)
-        self.options.headers = [header.split(':') for header in self.options.headers.split(',') if ':' in header]
-        if self.options.headers:
-            self.LOG.info(
-                'Using request headers:\n%s',
-                '\n'.join([': '.join(header) for header in self.options.headers])
-            )
-        self.session.headers.update(dict(self.options.headers))
-        self.command_manager.load_commands(self._clients())
+        self.LOG.info('Destination URL: %s', self.options.url)
+        logging.getLogger('requests').setLevel(self.REQUESTS_LOGGING_LEVEL if not self.options.debug else logging.DEBUG)
+        self._set_headers()
+        self.clients = self._init_clients()
+        self.command_manager.load_commands(self.clients.values())
 
-    def _clients(self):
-        clients = []
-        for client_class in self.client_classes:
+    def _set_headers(self):
+        headers = [header.split(':') for header in self.options.headers.split(',') if ':' in header]
+        if headers:
+            self.LOG.info('Using request headers:\n%s', '\n'.join([': '.join(header) for header in headers]))
+        self.session.headers.update(dict(headers))
+
+    def _init_clients(self):
+        clients = {}
+        for name, client_class in six.iteritems(self.client_classes):
             self.LOG.debug('Loading client %s', client_class.__name__)
-            clients.append(client_class(url=self.options.url, session=self.session))
+            clients[name] = client_class(url=self.options.url, session=self.session)
         return clients
 
     def _interactive_app_factory(self, *args, **kwargs):

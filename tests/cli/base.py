@@ -33,15 +33,15 @@ def get_clients(build_path):
     if not os.path.exists(build_path):
         os.makedirs(build_path)
     sys.path.append(build_path)
-    client_list = []
+    client_map = {}
     for i in range(1, 3):
         with open('{}/client{}.py'.format(build_path, i), 'w') as file_object:
             file_object.write(client.ClientGenerator(
                 'Client',
                 importlib.import_module('tests.resources{}'.format(i))
             ).code)
-        client_list.append(getattr(importlib.import_module('client{}'.format(i)), 'Client'))
-    return client_list
+        client_map['client{}'.format(i)] = getattr(importlib.import_module('client{}'.format(i)), 'Client')
+    return client_map
 
 
 def get_unified_resources_package(build_path):
