@@ -66,10 +66,6 @@ class Wrapper(object):
     def set_resource(self, resource):
         self._resource = resource
 
-    def _exc_log_and_handle(self, exc, req):
-        self._resource.handle_exception(exc, self.exception_handler)
-        common.log_exception(exc, req.uid)
-
     def call(self, req):
         """
         Calls self.func with resource and req parameters.
@@ -90,7 +86,8 @@ class Wrapper(object):
                 resp = self.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
 
         except exceptions.HttpError as exc:
-            self._exc_log_and_handle(exc, req)
+            common.log_exception(exc, req.uid)
+            raise
         # XXX: temporary, until all dependencies will transfer to hammock exceptions
         except falcon.HTTPError as exc:
             self._exc_log_and_handle(exc, req)
@@ -100,6 +97,9 @@ class Wrapper(object):
         else:
             LOG.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
             return resp
+
+    def _exc_log_and_handle(self, exc, req):
+        self._resource.handle_exception(exc, self.exception_handler, req.uid)
 
     @abc.abstractmethod
     def _wrapper(self, req):

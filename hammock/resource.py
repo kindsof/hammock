@@ -1,13 +1,20 @@
 from __future__ import absolute_import
 import collections
 import functools
+import warnings
+import logging
+import sys
+import six
+
 import hammock.exceptions as exceptions
 import hammock.common as common
 import hammock.names as names
 import hammock.wrappers as wrappers
 import hammock.wrappers.route as route
 import hammock.wrappers.sink as sink
-import warnings
+
+
+LOG = logging.getLogger(__name__)
 
 
 class Resource(object):
@@ -38,12 +45,26 @@ class Resource(object):
     def path(cls):
         return getattr(cls, "PATH", names.to_path(cls.__name__))
 
-    def handle_exception(self, exc, exception_handler):
-        if exception_handler:
-            exc = exception_handler(exc)
-        elif self._default_exception_handler:
-            exc = self._default_exception_handler(exc)
-        raise self._to_internal_server_error(exc)
+    def handle_exception(self, exc, exception_handler, request_uuid):
+        """
+        Convert the exception to HTTP error
+        """
+        try:
+            if exception_handler:
+                exc = exception_handler(exc)
+            elif self._default_exception_handler:
+                exc = self._default_exception_handler(exc)
+
+            common.log_exception(exc, request_uuid)
+        except:
+            LOG.exception('Exception during exception handling in handle_exception.')
+        finally:
+            # If exception was not converted yet, we convert it to internal server error.
+            if not isinstance(exc, exceptions.HttpError):
+                exc = exceptions.InternalServerError(str(exc))
+
+            # Raise exc, with the original traceback
+            six.reraise(exc, None, sys.exc_info()[2])
 
     @property
     def routes(self):
@@ -67,10 +88,6 @@ class Resource(object):
             sink_method.set_resource(self)
             sinks.append((common.url_join(self.path(), sink_method.path), sink_method.call))
         return sinks
-
-    @staticmethod
-    def _to_internal_server_error(exc):
-        return exc if isinstance(exc, exceptions.HttpError) else exceptions.InternalServerError(str(exc))
 
     @classmethod
     def iter_route_methods(cls, route_class=route.Route):
