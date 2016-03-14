@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import os
 import requests
 import logging
 import munch
@@ -41,7 +42,8 @@ class {{ class_name }}(object):
     def close(self):
         self._client.close()
 
-    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None):
+    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None, headers=None):
+        eventually_close_file_object = None
         url_kw = url_kw or {}
         url = url_join(self._url, url).format(**url_kw)
         if json and not isinstance(json, list):
@@ -52,7 +54,28 @@ class {{ class_name }}(object):
         }
         if method.upper() not in {{ url_params_methods }}:
             if file_stream:
-                stream = File(file_stream.stream, file_stream.content_length)
+                if hasattr(file_stream, 'stream') and hasattr(file_stream, 'content_length'):
+                    stream = File(file_stream.stream, file_stream.content_length)
+                else:
+                    if isinstance(file_stream, basestring) and not file_stream.startswith('http'):
+                        file_stream = open(file_stream, 'rb')
+                        eventually_close_file_object = file_stream
+                    if hasattr(file_stream, 'read'):
+                        if hasattr(file_stream, 'tell') and hasattr(file_stream, 'seek'):
+                            file_stream.seek(0, os.SEEK_END)
+                            content_length = file_stream.tell()
+                            file_stream.seek(0, os.SEEK_SET)
+                        elif hasattr(file_stream, 'name'):
+                            content_length = os.stat(file_stream).st_size
+                        else:
+                            raise RuntimeError('File stream does not have required attributes.')
+                        stream = File(file_stream, content_length)
+                    elif isinstance(file_stream, basestring) and file_stream.startswith('http'):
+                        http_request = requests.get(file_stream, stream=True)
+                        stream = File(http_request.raw, http_request.headers['content-length'])
+                        eventually_close_file_object = http_request
+                    else:
+                        raise RuntimeError('File stream should be a file object or a path')
                 _kwargs["data"] = stream
                 _kwargs["headers"] = {"content-type": "{{ type_octet_stream }}"}
                 if json:
@@ -62,6 +85,8 @@ class {{ class_name }}(object):
                     _kwargs["json"] = json
         else:
             _kwargs["params"] = json
+        if headers:
+            _kwargs.setdefault('headers', {}).update(headers)
         LOG.debug("Sending %s request: %s %s", method, url, json)
         try:
             response = getattr(self._client, method.lower())(url, **_kwargs)
@@ -80,6 +105,8 @@ class {{ class_name }}(object):
             return result
         finally:
             self.close()
+            if eventually_close_file_object:
+                eventually_close_file_object.close()
 
     def set_token(self, token):
         if token:
