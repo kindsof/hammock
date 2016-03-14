@@ -38,7 +38,9 @@ def factory(func, commands):
 
     def action_command(inner_self, parsed_args):
         result = _action(parsed_args)
-        if result is not None:
+        if result is not None and (spec.returns is None or spec.returns.type is not None):
+            if spec.returns:
+                result = spec.returns.type(result)
             inner_self.app.stdout.write(str(result) + '\n')
 
     super_class = command.Command
@@ -77,7 +79,7 @@ def _get_doc(spec):
     doc = spec.doc or ''
 
     return_doc = ''
-    if spec.returns:
+    if spec.returns and spec.returns.type is not None:
         return_type = ' {}'.format(spec.returns.type) if spec.returns.type else ''
         return_doc = ': {}'.format(spec.returns.doc) if spec.returns.doc else ''
         return_doc = 'Returns{}{}'.format(return_type, return_doc)
