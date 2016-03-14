@@ -33,6 +33,13 @@ class CLINames(hammock.Resource):
     def ignored_method(self):
         return 'ignored-method'
 
+    @hammock.get('returns-nothing-type')
+    def returns_nothing_type(self):
+        """
+        :return None:
+        """
+        return 'something'
+
 
 def _get_func(func_name):
     @hammock.get(func_name)
