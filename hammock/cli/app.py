@@ -39,7 +39,7 @@ class App(app.App):
         parser.add_argument(
             'url', nargs='?',
             default=os.environ.get(self.ENV_URL, self.DEFAULT_URL),
-            help='Server connection URL.',
+            help='(env {}) Server connection URL.'.format(self.ENV_URL),
         )
         parser.add_argument(
             '--headers', default='',

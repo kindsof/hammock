@@ -17,7 +17,7 @@ def url_join(*args):
 
 class {{ class_name }}(object):
 
-    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %} , token=None, timeout=None, headers=None, retries=None, session=None):
+    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %}, token=None, timeout=None, headers=None, retries=None, session=None):
         """
         :param url: url to connect to
         :param token: a token to be used for requests
@@ -139,4 +139,4 @@ if __name__ == '__main__':
     {% if default_url %}
     app.App.DEFAULT_URL = '{{ default_url }}'
     {% endif %}
-    app.App({'client': {{ class_name }}}).run(sys.argv[1:])
+    hammock.cli.app.App({'client': {{ class_name }}}).run(sys.argv[1:])
