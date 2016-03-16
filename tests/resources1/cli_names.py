@@ -13,7 +13,7 @@ class CLINames(hammock.Resource):
     POLICY_GROUP_NAME = False
 
     @hammock.post('optional-variable-with-underscore')
-    def optional_variable_with_underscores(self, optional_variable=None):
+    def optional_variable_with_underscores(self, optional_variable=None):  # pylint: disable=invalid-name
         """
         Returns an optional variable
         :param optional_variable: an optional variable

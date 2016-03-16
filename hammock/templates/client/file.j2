@@ -35,16 +35,16 @@ class {{ class_name }}(object):
         self._client = requests.Session() if not session else session
         self._client.mount(self._url, requests.adapters.HTTPAdapter(max_retries=retries))
         self._timeout = timeout
-        self.set_token(token)
+        self._set_token(token)
         self._client.headers.update(headers or {})
 {%- for resource_name, resource_class, resource_path in resources_names %}
-        self.{{ resource_name }} = self.{{ resource_class }}(self, '{{ resource_path }}')
+        self.{{ resource_name }} = self.{{ resource_class }}(self._fetch, '{{ resource_path }}')
 {%- endfor %}
 
     def close(self):
         self._client.close()
 
-    def fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None, headers=None):
+    def _fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None, headers=None):
         eventually_close_file_object = None
         url_kw = url_kw or {}
         url = url_join(self._url, url).format(**url_kw)
@@ -94,7 +94,7 @@ class {{ class_name }}(object):
             response = getattr(self._client, method.lower())(url, **_kwargs)
             result = None
             if '{{ type_json }}' in response_type:
-                result = self.jsonify(response)
+                result = self._jsonify(response)
                 LOG.debug("Got response status %s, body: %s", response.status_code, result)
             elif '{{ type_octet_stream }}' in response_type:
                 result = response.raw
@@ -110,7 +110,7 @@ class {{ class_name }}(object):
             if eventually_close_file_object:
                 eventually_close_file_object.close()
 
-    def set_token(self, token):
+    def _set_token(self, token):
         if token:
             self._client.headers.update({"{{ token_entry }}": token})
         elif "{{ token_entry }}" in self._client.headers:
@@ -120,7 +120,7 @@ class {{ class_name }}(object):
     def token(self):
         return self._client.headers.get("{{ token_entry }}")
 
-    def jsonify(self, response):
+    def _jsonify(self, response):
         try:
             result = response.json()
             if type(result) == dict:
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     import hammock.cli
     hammock.cli.App.prompt = '{} > '.format('{{ class_name }}')
     hammock.cli.App.IGNORE_COMMAND_NAME_FALSE = True
-    {% if default_url %}
+    {%- if default_url %}
     app.App.DEFAULT_URL = '{{ default_url }}'
-    {% endif %}
-    hammock.cli.app.App({'client': {{ class_name }}}).run(sys.argv[1:])
+    {%- endif %}
+    hammock.cli.app.App({{ class_name }}).run(sys.argv[1:])

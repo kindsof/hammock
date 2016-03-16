@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import six
 import logging
 import cliff.commandmanager as commandmanager
 from . import command as command
@@ -6,8 +7,7 @@ import hammock.names as names
 
 
 LOG = logging.getLogger(__name__)
-RESOURCE_CLASS_IGNORES = {'CLI_COMMAND_NAME', 'ROUTE_CLI_COMMAND_MAP'}
-CLIENT_CLASS_IGNORES = {'token'}
+IGNORES = {'CLI_COMMAND_NAME', 'ROUTE_CLI_COMMAND_MAP', 'token', 'close'}
 
 
 class CommandManager(commandmanager.CommandManager):
@@ -21,39 +21,45 @@ class CommandManager(commandmanager.CommandManager):
         super(CommandManager, self).__init__('')
         self.remove_commands_with_name_false = remove_commands_with_name_false
 
-    def load_commands(self, clients):
+    def load_commands(self, client):
         """
         This method is called by the __init__ method, to load the commands from the argument
         passed to init.
-        :param clients: a list of hammock clients
+        :param client: a hammock clients
         """
-        for client in clients:
-            self._load_client(client)
+        if isinstance(client, six.string_types):
+            return
+        self._load_class(client)
 
-    def _load_client(self, client):
+    def _load_class(self, instance, commands=None):
         """
         Loads a hammock client into app
         :param client: hammock client instance
         """
-        for name in dir(client):
-            # Get all clients' resources:
-            attribute = getattr(client, name)
-            if isinstance(attribute, type) or callable(attribute) or name.startswith('_') or name in CLIENT_CLASS_IGNORES:
-                continue
-            self._add_resource(attribute)
+        resource_command_name = getattr(instance, 'CLI_COMMAND_NAME', '')
 
-    def _add_resource(self, resource, commands=None):
-        if resource.CLI_COMMAND_NAME is False and self.remove_commands_with_name_false:
+        def cli_command_map(func_name):
+            return getattr(instance, 'ROUTE_CLI_COMMAND_MAP', {func_name: func_name})[func_name]
+
+        if resource_command_name is False and self.remove_commands_with_name_false:
             return
-        commands = (commands or []) + [resource.CLI_COMMAND_NAME or names.to_command(resource.__class__.__name__)]
-        for name in dir(resource):
-            attribute = getattr(resource, name)
-            if isinstance(attribute, type) or name.startswith('_') or name in RESOURCE_CLASS_IGNORES:
+
+        commands = (commands or []) + [
+            resource_command_name
+            if isinstance(resource_command_name, six.string_types)
+            else names.to_command(instance.__class__.__name__)
+        ]
+
+        for name in dir(instance):
+            # Get all clients' resources:
+            attribute = getattr(instance, name)
+            if isinstance(attribute, type) or name.startswith('_') or name in IGNORES:
                 continue
+
             if callable(attribute):
-                self._add_command(attribute, commands, resource.ROUTE_CLI_COMMAND_MAP[name])
+                self._add_command(attribute, commands, cli_command_map(name))
             else:
-                self._add_resource(attribute, commands)
+                self._load_class(attribute, commands)
 
     def _add_command(self, method, commands, command_name):
         if command_name is False and self.remove_commands_with_name_false:

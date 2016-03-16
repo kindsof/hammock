@@ -17,11 +17,11 @@ class File(object):
 
 @contextlib.contextmanager
 def from_path(path):
-    f = open(path, 'rb')
-    old_file_position = f.tell()
-    f.seek(0, os.SEEK_END)
-    size = f.tell()
-    f.seek(old_file_position, os.SEEK_SET)
-    file_object = File(f, size)
+    file_pobject = open(path, 'rb')
+    old_file_position = file_pobject.tell()
+    file_pobject.seek(0, os.SEEK_END)
+    size = file_pobject.tell()
+    file_pobject.seek(old_file_position, os.SEEK_SET)
+    file_object = File(file_pobject, size)
     yield file_object
     file_object.stream.close()
