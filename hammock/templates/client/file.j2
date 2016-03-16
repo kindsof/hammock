@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 import os
 import requests
+import requests.adapters
+import six
 import logging
 import munch
 import warnings
@@ -57,7 +59,7 @@ class {{ class_name }}(object):
                 if hasattr(file_stream, 'stream') and hasattr(file_stream, 'content_length'):
                     stream = File(file_stream.stream, file_stream.content_length)
                 else:
-                    if isinstance(file_stream, basestring) and not file_stream.startswith('http'):
+                    if isinstance(file_stream, six.string_types) and not file_stream.startswith('http'):
                         file_stream = open(file_stream, 'rb')
                         eventually_close_file_object = file_stream
                     if hasattr(file_stream, 'read'):
@@ -70,7 +72,7 @@ class {{ class_name }}(object):
                         else:
                             raise RuntimeError('File stream does not have required attributes.')
                         stream = File(file_stream, content_length)
-                    elif isinstance(file_stream, basestring) and file_stream.startswith('http'):
+                    elif isinstance(file_stream, six.string_types) and file_stream.startswith('http'):
                         http_request = requests.get(file_stream, stream=True)
                         stream = File(http_request.raw, http_request.headers['content-length'])
                         eventually_close_file_object = http_request
