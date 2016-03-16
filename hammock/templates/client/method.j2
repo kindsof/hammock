@@ -22,7 +22,7 @@ def {{ method_name }}(self
     {% if keyword_map -%}
     keyword_map = {{ keyword_map }}
     for key in json.keys():
-        json[keyword_map[key]] = json.pop(key)
+        json[keyword_map.get(key, key)] = json.pop(key)
     {% endif -%}
     {%- else %}
     json = {{ kw_list }}
