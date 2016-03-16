@@ -29,7 +29,7 @@ class CLIException(Exception):
 #  Generate clients file, and load their classes into variables
 #
 
-def get_clients(build_path):
+def get_unified_client(build_path):
     if not os.path.exists(build_path):
         os.makedirs(build_path)
     sys.path.append(build_path)
@@ -39,9 +39,16 @@ def get_clients(build_path):
             file_object.write(client.ClientGenerator(
                 'Client',
                 importlib.import_module('tests.resources{}'.format(i))
-            ).code)
+            ).code + '\n')
         client_map['client{}'.format(i)] = getattr(importlib.import_module('client{}'.format(i)), 'Client')
-    return client_map
+
+    class Client(object):
+
+        def __init__(self, *args, **kwargs):
+            self.client1 = client_map['client1'](*args, **kwargs)
+            self.client2 = client_map['client2'](*args, **kwargs)
+
+    return Client
 
 
 def get_unified_resources_package(build_path):
@@ -56,14 +63,14 @@ def get_unified_resources_package(build_path):
     return importlib.import_module('resources')
 
 
-clients = get_clients(BUILD_PATH)
+UnifiedClient = get_unified_client(BUILD_PATH)
 API = falcon.API()
 hammock.Hammock(API, get_unified_resources_package('build/cli-tests'), policy_file=os.path.abspath('tests/policy.json'))
 
 
 def cli(argv=sys.argv[1:], remove_ignored_commands=True, stdout=sys.stdout):
     app_class = type('App', (hammock.cli.App, ), {'REMOVE_COMMANDS_WITH_NAME_FALSE': remove_ignored_commands})
-    return app_class(clients, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
+    return app_class(UnifiedClient, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
 
 
 def server():

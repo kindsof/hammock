@@ -3,13 +3,13 @@ class {% if name %}{{ name }}{% else %}Empty{% endif %}(object):
     CLI_COMMAND_NAME = {% if name %}{{ cli_command_name }}{% else %}''{% endif %}
     ROUTE_CLI_COMMAND_MAP = {{ route_cli_commands_map }}
 
-    def __init__(self, client, url):
-        self._client = client
+    def __init__(self, fetch, url):
+        self._fetch = fetch
         self._url = url
         {% for resource, resource_class, resource_path in sub_resources -%}
         self.{% if resource %}{{ resource }}{% else %}empty{% endif %} = self.
         {%- if resource %}{{ resource_class }}{% else %}Empty
-        {%- endif -%}(self._client, "%s/{{ resource_path }}" % self._url)
+        {%- endif -%}(self._fetch, "%s/{{ resource_path }}" % self._url)
         {% endfor -%}
         {%- for method in methods %}
 {{ method|indent(4, true) }}

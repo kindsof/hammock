@@ -27,7 +27,7 @@ def {{ method_name }}(self
     {%- else %}
     json = {{ kw_list }}
     {% endif -%}
-    return self._client.fetch(
+    return self._fetch(
         method='{{ method }}',
         url=
             {%- if url %}url_join({% endif -%}
