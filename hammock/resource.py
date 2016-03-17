@@ -54,10 +54,10 @@ class Resource(object):
                 exc = exception_handler(exc)
             elif self._default_exception_handler:
                 exc = self._default_exception_handler(exc)
-
             common.log_exception(exc, request_uuid)
-        except:
-            LOG.exception('Exception during exception handling in handle_exception.')
+        except Exception as handle_exception:  # pylint: disable=broad-except
+            exc = exceptions.InternalServerError(
+                'Error handling exception {}: {}'.format(str(exc), str(handle_exception)))
         finally:
             # If exception was not converted yet, we convert it to internal server error.
             if not isinstance(exc, exceptions.HttpError):
