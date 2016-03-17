@@ -1,18 +1,8 @@
 from __future__ import absolute_import
 import logging
 import abc
-from hammock import exceptions
 from hammock.types import func_spec
 import hammock.common as common
-
-# XXX: temporary workaround,
-# until all dependencies will change their exceptions to hammock.exceptions.
-try:
-    import falcon
-except ImportError:
-    # fake falcon module and some specific exception, so we can except it later.
-    falcon = type('falcon', (object,), {'HTTPError': type('HTTPError', (Exception,), {})})  # pylint: disable=invalid-name
-# XXX
 
 
 LOG = logging.getLogger(__name__)
@@ -85,21 +75,11 @@ class Wrapper(object):
             if self.post_process:
                 resp = self.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
 
-        except exceptions.HttpError as exc:
-            common.log_exception(exc, req.uid)
-            raise
-        # XXX: temporary, until all dependencies will transfer to hammock exceptions
-        except falcon.HTTPError as exc:
-            self._exc_log_and_handle(exc, req)
-        # XXX
         except Exception as exc:  # pylint: disable=broad-except
-            self._exc_log_and_handle(exc, req)
+            self._resource.handle_exception(exc, self.exception_handler, req.uid)
         else:
             LOG.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
             return resp
-
-    def _exc_log_and_handle(self, exc, req):
-        self._resource.handle_exception(exc, self.exception_handler, req.uid)
 
     @abc.abstractmethod
     def _wrapper(self, req):
