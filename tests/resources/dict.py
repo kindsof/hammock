@@ -12,8 +12,8 @@ class Dict(hammock.Resource):
 
     POLICY_GROUP_NAME = False
 
-    def __init__(self, *args):
-        super(Dict, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(Dict, self).__init__(*args, **kwargs)
         self._dict = {}
 
     @hammock.post("{key}")
