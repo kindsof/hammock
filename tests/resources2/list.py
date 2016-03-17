@@ -12,8 +12,8 @@ class List(hammock.Resource):
 
     POLICY_GROUP_NAME = False
 
-    def __init__(self, *args):
-        super(List, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(List, self).__init__(*args, **kwargs)
         self._list = []
 
     @hammock.post(success_code=201)
