@@ -70,6 +70,10 @@ class Route(wrapper.Wrapper):
                     kwargs[common.KW_CREDENTIALS] = credentials
                 if common.KW_ENFORCER in self.spec.args:
                     kwargs[common.KW_ENFORCER] = enforcer
+
+            # Convert arguments according to expected type
+            self._convert_argument_types(kwargs)
+            # Add headers:
             if common.KW_HEADERS in self.spec.args:
                 kwargs[common.KW_HEADERS] = req.headers
 
@@ -107,8 +111,6 @@ class Route(wrapper.Wrapper):
     def _convert_to_kwargs(self, req, collected_data):
         args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS})
         kwargs = collected_data
-        if common.KW_HEADERS in self.spec.args:
-            kwargs[common.KW_HEADERS] = req.headers
 
         for keyword, error_msg in (
             (common.KW_FILE, 'expected {} as {}'.format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
@@ -134,6 +136,30 @@ class Route(wrapper.Wrapper):
                        for keyword, default in six.iteritems(self.spec.kwargs)})
 
         return kwargs
+
+    def _convert_argument_types(self, data):
+        """
+        Inplace convertion of the data types according to self.spec
+        :param data: keyword arguments supposed to be passed to self.func
+        """
+        for name, value in six.iteritems(data):
+            arg = self.spec.args_info(name)
+            if arg.type is list:
+                if not isinstance(value, list):
+                    data[name] = [value] if value is not None else []
+            elif arg.type is bool:
+                if isinstance(value, six.string_types):
+                    data[name] = value in {'True', 'true'}
+                else:
+                    data[name] = bool(value)
+            elif arg.type is not None and value is not None:
+                try:
+                    data[name] = arg.type(value)
+                except ValueError as exc:
+                    raise exceptions.BadRequest(
+                        "Method {}.{} expects argument {} to be of type {}, got bad value: '{}'. ({})".format(
+                            self._resource.name(), self.__name__, name, arg.type, value, exc
+                        ))
 
     @staticmethod
     def get_status_code(status):

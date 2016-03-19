@@ -15,7 +15,7 @@ class PositionalArg(object):
         'list': list,
         'dict': dict,
         'None': None,
-        None: str,
+        None: lambda x: x,
     }
 
     def __init__(self, name, type, doc, default=None):  # pylint: disable=redefined-builtin
