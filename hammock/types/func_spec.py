@@ -109,4 +109,7 @@ class FuncSpec(object):
         elif name == self.keywords:
             return args.KeywordArg(name, doc)
         else:
-            raise AttributeError('No such argument {} in method {}'.format(name, self._func.__name__))
+            if not self.keywords:
+                raise AttributeError('No argument {} in method {}:{}'.format(
+                    name, inspect.getmodule(self._func).__name__, self._func.__name__))
+            return args.OptionalArg(name, None, '')

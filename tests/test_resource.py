@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import tests.base as base
 import six
-import os
 import logging
 import hammock.common as common
 import hammock.types as types
@@ -10,64 +9,26 @@ import tests.resources1.keywords as keywords
 
 class TestResource(base.TestBase):
 
-    def test_resource(self):
-        def dict_url(key):
-            return "/dict/%s" % key
+    def test_dict(self):
+        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('POST', '/dict/a', body={'value': 1}))
+        self.assertDictEqual({'key': 'b', 'value': 2}, self._simulate('POST', '/dict/b', body={'value': 2}))
+        self.assert_status(400, 'POST', '/dict/a', body={'value': 10})
+        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('GET', '/dict/a'))
+        self.assertDictEqual({'key': 'b', 'value': 2}, self._simulate('GET', '/dict/b'))
+        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('PUT', '/dict/a', body={'value': 10}))
+        self.assertDictEqual({'key': 'a', 'value': 10}, self._simulate('GET', '/dict/a'))
+        self.assertDictEqual({'key': 'a', 'value': 10}, self._simulate('DELETE', '/dict/a'))
+        self.assert_status(404, 'DELETE', '/dict/a')
+        self.assert_status(404, 'GET', '/dict/a')
+        self.assert_status(404, 'PUT', '/dict/a', body={'value': '1'})
 
-        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('POST', dict_url('a'), body={'value': 1}))
-        self.assertDictEqual({'key': 'b', 'value': 2}, self._simulate('POST', dict_url('b'), body={'value': 2}))
-        self.assert_status(400, 'POST', dict_url('a'), body={'value': 10})
-        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('GET', dict_url('a')))
-        self.assertDictEqual({'key': 'b', 'value': 2}, self._simulate('GET', dict_url('b')))
-        self.assertDictEqual({'key': 'a', 'value': 1}, self._simulate('PUT', dict_url('a'), body={'value': 10}))
-        self.assertDictEqual({'key': 'a', 'value': 10}, self._simulate('GET', dict_url('a')))
-        self.assertDictEqual({'key': 'a', 'value': 10}, self._simulate('DELETE', dict_url('a')))
-        self.assert_status(404, 'DELETE', dict_url('a'))
-        self.assert_status(404, 'GET', dict_url('a'))
-        self.assert_status(404, 'PUT', dict_url('a'), body={'value': '1'})
-
+    def test_text(self):
         self.assertEqual("HELLO", self._simulate("GET", "/text/upper/hello"))
         self.assertEqual("helly", self._simulate("GET", "/text/replace/hello", query_string="old=o&new=y"))
         self.assertEqual("helly", self._simulate("GET", "/text/replace2/hello", query_string="old=o&new=y"))
         self.assertEqual("hallo", self._simulate("PUT", "/text/replace/hello", body={"old": "e", "new": "a"}))
         self.assertEqual("hallo", self._simulate("POST", "/text/replace/hello", body={"old": "e", "new": "a"}))
         self.assertEqual("helly", self._simulate("DELETE", "/text/replace/hello", query_string="old=o&new=y"))
-
-    def test_files(self):
-        path = "/files"
-        mb_to_test = 100
-        logging.info("Testing post and get of %d mb", mb_to_test)
-        body = bytearray(mb_to_test << 20)
-        response = self._simulate(
-            "POST",
-            path,
-            body=body,
-            headers={
-                common.CONTENT_TYPE: common.TYPE_OCTET_STREAM,
-                common.CONTENT_LENGTH: str(len(body)),
-            },
-        )
-        if not isinstance(response, six.binary_type):
-            body = body.decode()
-        self.assertEqual(response, body)
-
-        logging.info("Testing get of %d mb", mb_to_test)
-        response = self._simulate(
-            "GET",
-            path,
-            query_string="size_mb={:d}".format(mb_to_test)
-        )
-        size_bytes = len(response) if not isinstance(response, six.binary_type) else response.__sizeof__()
-        self.assertEqual(mb_to_test, size_bytes >> 20)
-        logging.info("Testing reading in server of %d mb", mb_to_test)
-        response = self._simulate(
-            "POST",
-            os.path.join(path, "check_size"),
-            query_string="size_mb={:d}".format(mb_to_test),
-            body=body,
-            headers={common.CONTENT_TYPE: common.TYPE_OCTET_STREAM},
-        )
-        self.assertEqual(response, "OK")
 
     def test_sink(self):
         self.assert_status(404, "GET", "/get_something_wrong")

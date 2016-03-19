@@ -30,7 +30,6 @@ class TestFuncSpec(unittest.TestCase):
 
         self.assertEqual(spec.args_info('an_int').type, int)
         self.assertEqual(spec.args_info('a_string').type, str)
-        self.assertEqual(spec.args_info('an_arg_without_type').type, str)
         self.assertEqual(spec.args_info('a_default_bool').type, bool)
         self.assertEqual(spec.args_info('kwargs_parameter').type, dict)
 
