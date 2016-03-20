@@ -40,7 +40,7 @@ hammock.Hammock('falcon', resources)
 ## rest methods.
 As explained above, adding a rest method is done by adding a method to the resource class with an 
 appropriate decorator.
-You can use one decorators: `resource.get`, `resource.post`, `resource.put` and `resource.delete`.
+You can use one decorators: `hammock.get`, `hammock.post`, `hammock.put` and `hammock.delete`.
 The developer may write a method that gets arguments, or keyword arguments, and returns
 something, usually an object that can be converted to json in the response body. The arguments
 will be parsed automatically from the request url query or json body (depends on the method used), and the return
@@ -52,6 +52,25 @@ surrounded by curly braces, same as you would have done in falcon.
 - success_code (default: 200): the code that will be returned with the HTTP response, 
 in case that no error was raised.
 - result_content_type (default "application/json"): the content type that will be in the header of the response.
+- rule_name: see [Policy](#policy), below.
+
+## Route Argument types
+
+You may add types for the route method's arguments.
+The types are given in the docstring of the method and also influence the CLI.
+To document an argument, add line/lines to the docstring:
+```python
+"""
+:param [<optional-param-type>] <param-name>: <param-doc (multiline)>
+"""
+```
+The you define an argument type, the argument will be converted to the proper type
+before entering your method. If an error accrue during the conversion, an HTTP 400 (Bad request)
+will be raised. Special cases:
+
+- If a type is `list`, and a single item will be given, the item will be converted to a list with one item.
+- The value `None`, It won't be converted and it will be passed as is. In the case of type `list`, an empty list
+  will be passed to the method.
 
 ### Special arguments.
 Naming the method's argument in a special way, might result in a different behaviour:
