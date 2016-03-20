@@ -65,7 +65,7 @@ class CommandManager(commandmanager.CommandManager):
         if command_name is False and self.remove_commands_with_name_false:
             return
         commands = commands + [command_name or names.to_command(method.__name__)]
-        command_type = command.factory(method, commands)
+        command_type = command.factory(method)
         command_name = ' '.join([part for part in commands if part])
         LOG.debug('Adding command: %s', command_name)
         self.add_command(command_name, command_type)

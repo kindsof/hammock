@@ -6,24 +6,74 @@ import cliff.lister as lister
 import hammock.types.func_spec as func_spec
 
 
-def factory(func, commands):
+def factory(func):
 
     spec = func_spec.FuncSpec(func)
 
-    def _action(parsed_args):
+    if spec.returns:
+        if spec.returns.type is dict:
+            return type(func.__name__, (CommandItem, ), {'func': func})
+        elif spec.returns.type is list:
+            return type(func.__name__, (CommandList, ), {'func': func})
+    return type(func.__name__, (Command, ), {'func': func})
+
+
+class Command(command.Command):
+
+    def __init__(self, *args, **kwargs):
+        super(Command, self).__init__(*args, **kwargs)
+        self.spec = func_spec.FuncSpec(self.func)
+        self.__doc__ = self._get_doc()
+
+    def take_action(self, parsed_args):
+        result = self._action(parsed_args)
+        if result is not None and (self.spec.returns is None or self.spec.returns.type is not None):
+            if self.spec.returns:
+                result = self.spec.returns.type(result)
+            self.app.stdout.write(str(result) + '\n')
+
+    def get_parser(self, prog_name):
+        parser = super(Command, self).get_parser(prog_name)
+        parser.formatter_class = argparse.RawTextHelpFormatter
+
+        # add all method arguments to parser
+        for name in self.spec.kwargs.keys() + self.spec.args:
+            self.spec.args_info(name).add_to_parser(parser)
+        if self.spec.keywords:
+            self.spec.args_info(self.spec.keywords).add_to_parser(parser)
+        return parser
+
+    def _action(self, parsed_args):
         kwargs = {
             arg: getattr(parsed_args, arg)
-            for arg in (set(spec.args) | set(spec.kwargs))
+            for arg in (set(self.spec.args) | set(self.spec.kwargs))
         }
-        return func(**kwargs)
+        return self.func(**kwargs)
 
-    def action_show_one(inner_self, parsed_args):  # pylint: disable=unused-argument
-        result = _action(parsed_args)
+    def _get_doc(self):
+        doc = self.spec.doc or ''
+
+        return_doc = ''
+        if self.spec.returns and self.spec.returns.type is not None:
+            return_type = ' {}'.format(self.spec.returns.type) if self.spec.returns.type else ''
+            return_doc = ': {}'.format(self.spec.returns.doc) if self.spec.returns.doc else ''
+            return_doc = 'Returns{}{}'.format(return_type, return_doc)
+
+        return '\n\n'.join([doc, return_doc])
+
+
+class CommandItem(Command, show.ShowOne):
+
+    def take_action(self, parsed_args):  # pylint: disable=unused-argument
+        result = self._action(parsed_args)
         names = result.keys()
         return names, (result[name] for name in names)
 
-    def action_list(inner_self, parsed_args):  # pylint: disable=unused-argument
-        list_result = _action(parsed_args)
+
+class CommandList(Command, lister.Lister):
+
+    def take_action(self, parsed_args):  # pylint: disable=unused-argument
+        list_result = self._action(parsed_args)
         # We expect the method to return a list of dicts, or a list of values.
         names = set()
         for one in list_result:
@@ -35,57 +85,3 @@ def factory(func, commands):
             [one.get(name) for name in names]
             for one in list_result
         ]
-
-    def action_command(inner_self, parsed_args):
-        result = _action(parsed_args)
-        if result is not None and (spec.returns is None or spec.returns.type is not None):
-            if spec.returns:
-                result = spec.returns.type(result)
-            inner_self.app.stdout.write(str(result) + '\n')
-
-    super_class = command.Command
-    take_action = action_command
-    if spec.returns:
-        if spec.returns.type is dict:
-            super_class = show.ShowOne
-            take_action = action_show_one
-        elif spec.returns.type is list:
-            super_class = lister.Lister
-            take_action = action_list
-
-    def get_parser(inner_self, prog_name):
-        parser = super_class.get_parser(inner_self, prog_name)
-        parser.formatter_class = argparse.RawTextHelpFormatter
-
-        # add all method arguments to parser
-        for name in spec.kwargs.keys() + spec.args:
-            spec.args_info(name).add_to_parser(parser)
-        if spec.keywords:
-            spec.args_info(spec.keywords).add_to_parser(parser)
-        return parser
-
-    return type(
-        _to_class_name(' '.join(commands + [func.__name__])),
-        (super_class, ),
-        {
-            'take_action': take_action,
-            'get_parser': get_parser,
-            '__doc__': _get_doc(spec),
-        }
-    )
-
-
-def _get_doc(spec):
-    doc = spec.doc or ''
-
-    return_doc = ''
-    if spec.returns and spec.returns.type is not None:
-        return_type = ' {}'.format(spec.returns.type) if spec.returns.type else ''
-        return_doc = ': {}'.format(spec.returns.doc) if spec.returns.doc else ''
-        return_doc = 'Returns{}{}'.format(return_type, return_doc)
-
-    return '\n\n'.join([doc, return_doc])
-
-
-def _to_class_name(spaced):
-    return ''.join(part.capitalize() for part in spaced.split())
