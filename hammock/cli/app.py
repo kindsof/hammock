@@ -16,6 +16,10 @@ class App(app.App):
     ENV_URL = 'URL'
     DEFAULT_URL = 'http://localhost'
     REMOVE_COMMANDS_WITH_NAME_FALSE = True
+    # Lowercase names of columns, define the order in the output.
+    OUTPUT_COLUMN_ORDER = []
+    # COLORS: A dict, {column-name: {value: method-that-accepts-string-and-return-string}}
+    OUTPUT_COLUMN_COLORS = {}
 
     def __init__(self, client, **kwargs):
         """
@@ -25,7 +29,8 @@ class App(app.App):
         super(App, self).__init__(
             description=self.description,
             version=self.version,
-            command_manager=command_manager.CommandManager(self.REMOVE_COMMANDS_WITH_NAME_FALSE),
+            command_manager=command_manager.CommandManager(
+                self.REMOVE_COMMANDS_WITH_NAME_FALSE, self.OUTPUT_COLUMN_ORDER, self.OUTPUT_COLUMN_COLORS),
             interactive_app_factory=self._interactive_app_factory,
             **kwargs
         )

@@ -12,7 +12,7 @@ IGNORES = {'CLI_COMMAND_NAME', 'ROUTE_CLI_COMMAND_MAP', 'token', 'close'}
 
 class CommandManager(commandmanager.CommandManager):
 
-    def __init__(self, remove_commands_with_name_false=True):
+    def __init__(self, remove_commands_with_name_false=True, column_order=None, column_colors=None):
         """
         Loads commands from hammock clients
         :param bool remove_commands_with_name_false: Ignore packages, resources or methods that specify
@@ -20,6 +20,8 @@ class CommandManager(commandmanager.CommandManager):
         """
         super(CommandManager, self).__init__('')
         self.remove_commands_with_name_false = remove_commands_with_name_false
+        self.column_order = column_order
+        self.column_colors = column_colors
 
     def load_commands(self, client):
         """
@@ -65,7 +67,7 @@ class CommandManager(commandmanager.CommandManager):
         if command_name is False and self.remove_commands_with_name_false:
             return
         commands = commands + [command_name or names.to_command(method.__name__)]
-        command_type = command.factory(method)
+        command_type = command.factory(method, self.column_order, self.column_colors)
         command_name = ' '.join([part for part in commands if part])
         LOG.debug('Adding command: %s', command_name)
         self.add_command(command_name, command_type)
