@@ -56,7 +56,7 @@ class App(app.App):
         """
         super(App, self).initialize_app(argv)
         self.LOG.debug("options: %s", self.options)
-        self.LOG.info('Destination URL: %s', self.options.url)
+        self.LOG.debug('Destination URL: %s', self.options.url)
         logging.getLogger('requests').setLevel(self.REQUESTS_LOGGING_LEVEL if not self.options.debug else logging.DEBUG)
         self._set_headers()
         self.client = self.client_class(url=self.options.url, session=self.session)
@@ -65,7 +65,7 @@ class App(app.App):
     def _set_headers(self):
         headers = [header.split(':') for header in self.options.headers.split(',') if ':' in header]
         if headers:
-            self.LOG.info('Using request headers:\n%s', '\n'.join([': '.join(header) for header in headers]))
+            self.LOG.debug('Using request headers:\n%s', '\n'.join([': '.join(header) for header in headers]))
         self.session.headers.update(dict(headers))
 
     def _interactive_app_factory(self, *args, **kwargs):
