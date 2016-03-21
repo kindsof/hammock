@@ -139,6 +139,6 @@ if __name__ == '__main__':
     hammock.cli.App.prompt = '{} > '.format('{{ class_name }}')
     hammock.cli.App.IGNORE_COMMAND_NAME_FALSE = True
     {%- if default_url %}
-    app.App.DEFAULT_URL = '{{ default_url }}'
+    hammock.cli.App.DEFAULT_URL = '{{ default_url }}'
     {%- endif %}
-    hammock.cli.app.App({{ class_name }}).run(sys.argv[1:])
+    hammock.cli.App({{ class_name }}).run(sys.argv[1:])
