@@ -100,7 +100,7 @@ def _recursion_code(package, resource_hirarchy, paths=None):
 
 
 def _format_cli_command_name(name):
-    return '"{}"'.format(name) if name else name
+    return '"{}"'.format(name) if isinstance(name, six.string_types) else name
 
 
 def _resource_tuple(resource_class):
