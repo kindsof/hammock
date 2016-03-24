@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 import copy
 import logging
-import ujson as json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions

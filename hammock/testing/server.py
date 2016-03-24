@@ -2,7 +2,10 @@ from __future__ import absolute_import
 import six
 import threading
 import logging
-import ujson as json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import socket
 import hammock.common as common
 
