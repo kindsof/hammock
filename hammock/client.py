@@ -78,14 +78,14 @@ def _resource_class_code(_resource, paths=None):
     )
 
 
-def _recursion_code(package, resource_hirarchy, paths=None):
+def _recursion_code(package, resource_hierarchy, paths=None):
     paths = paths or []
     sub_classes = [
         _resource_class_code(_resource, paths)
-        for _resource in resource_hirarchy.get("", [])
+        for _resource in resource_hierarchy.get("", [])
     ]
-    sub_resources = [_resource_tuple(_resource) for _resource in resource_hirarchy.get("", [])]
-    for sub_package, value in six.iteritems(resource_hirarchy):
+    sub_resources = [_resource_tuple(_resource) for _resource in resource_hierarchy.get("", [])]
+    for sub_package, value in six.iteritems(resource_hierarchy):
         if sub_package == "":
             continue
         sub_classes.append(_recursion_code(sub_package, value, paths + [sub_package.path]))

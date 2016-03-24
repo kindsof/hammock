@@ -1,17 +1,26 @@
-class {% if name %}{{ name }}{% else %}Empty{% endif %}(object):
+{%- if name -%}
+class {{ name }}(object):
 
-    CLI_COMMAND_NAME = {% if name %}{{ cli_command_name }}{% else %}''{% endif %}
+    CLI_COMMAND_NAME = {{ cli_command_name }}
     ROUTE_CLI_COMMAND_MAP = {{ route_cli_commands_map }}
 
     def __init__(self, fetch, url):
         self._fetch = fetch
         self._url = url
         {% for resource, resource_class, resource_path in sub_resources -%}
-        self.{% if resource %}{{ resource }}{% else %}empty{% endif %} = self.
-        {%- if resource %}{{ resource_class }}{% else %}Empty
-        {%- endif -%}(self._fetch, "%s/{{ resource_path }}" % self._url)
+        {%- if resource -%}
+        self.{{ resource }} = self.{{ resource_class }}(self._fetch, "%s/{{ resource_path }}" % self._url)
+        {%- endif %}
         {% endfor -%}
         {%- for method in methods %}
 {{ method|indent(4, true) }}
         {% endfor %}
 {{ sub_classes }}
+{%- else -%}
+ROUTE_CLI_COMMAND_MAP.update({{ route_cli_commands_map }})
+
+{% for method in methods -%}
+{{ method }}
+
+{% endfor %}
+{%- endif -%}

@@ -44,6 +44,8 @@ class TestClient(unittest.TestCase):
         self.assertTrue(hasattr(self._client, "sub_resource2"))
         self.assertTrue(hasattr(self._client.sub_resource2, "sub"))
         self.assertTrue(hasattr(self._client, "different_path"))
+        self.assertTrue(hasattr(self._client.sub_resource.nested, "additional"))
+        self.assertTrue(hasattr(self._client.sub_resource.nested, "additional_2"))
 
     def test_auth_specials(self):
         self.assertTrue(hasattr(self._client, "auth"))

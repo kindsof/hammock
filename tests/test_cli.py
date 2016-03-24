@@ -79,6 +79,10 @@ class TestCli(base.Base):
     def test_result_type(self):
         self.assertEqual('', self.run_command('cli-names returns-nothing-type'))
 
+    def test_empty_resources(self):
+        self.assertEqual('additional\n', self.run_command('sub-resource nested additional'))
+        self.assertEqual('additional-2\n', self.run_command('sub-resource nested additional-2'))
+
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)
         for elem1, elem2 in zip(sorted(list1), sorted(list2)):
