@@ -1,23 +1,10 @@
 from __future__ import absolute_import
 import warnings
-import hammock.backends as backends
-import hammock.resource_node as resource_node
 import hammock.wrappers as wrappers
-import hammock.policy as policy
 from hammock.common import CONTENT_TYPE, CONTENT_LENGTH   # noqa  # pylint: disable=unused-import
 from hammock.common import TYPE_JSON, TYPE_OCTET_STREAM, TOKEN_ENTRY, KW_HEADERS   # noqa  # pylint: disable=unused-import
 from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
-
-
-class Hammock(resource_node.ResourceNode):
-    def __init__(
-            self, api, resource_package,
-            policy_file=None, credentials_class=None,
-            **resource_params):
-        self._api = api
-        self.policy = policy.Policy(policy_file=policy_file, credentials_class=credentials_class)
-        self._backend = backends.get(api)
-        self._backend.add_resources(self, resource_package, **resource_params)
+from hammock.api import Hammock  # noqa  # pylint:disable=unused-import
 
 
 def get(path='', **kwargs):
