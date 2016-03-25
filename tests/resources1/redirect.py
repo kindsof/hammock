@@ -49,7 +49,7 @@ class Redirect(hammock.Resource):
     def specific(self):
         return "specific"
 
-    @hammock.post_passthrough(
+    @hammock.post(
         dest=DEST,
         path='post-passthrough',
         trim_prefix='redirect',
@@ -59,7 +59,7 @@ class Redirect(hammock.Resource):
     def post_passthrough(self):
         pass
 
-    @hammock.post_passthrough(
+    @hammock.post(
         dest=None,
         path='post-passthrough-with-body',
         trim_prefix='redirect',
@@ -80,7 +80,7 @@ class Redirect(hammock.Resource):
             200
         )
 
-    @hammock.get_passthrough(
+    @hammock.get(
         dest=DEST,
         path='manipulate-path',
         trim_prefix='redirect',

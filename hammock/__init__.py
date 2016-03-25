@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import warnings
 import hammock.backends as backends
 import hammock.resource_node as resource_node
 import hammock.wrappers as wrappers
@@ -20,44 +21,48 @@ class Hammock(resource_node.ResourceNode):
 
 
 def get(path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'GET', **kwargs)
+    return wrappers.route(path, 'GET', **kwargs)
 
 
 def head(path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'HEAD', **kwargs)
+    return wrappers.route(path, 'HEAD', **kwargs)
 
 
 def post(path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'POST', **kwargs)
+    return wrappers.route(path, 'POST', **kwargs)
 
 
 def put(path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'PUT', **kwargs)
+    return wrappers.route(path, 'PUT', **kwargs)
 
 
 def delete(path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'DELETE', **kwargs)
+    return wrappers.route(path, 'DELETE', **kwargs)
 
 
 def patch(path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'PATCH', **kwargs)
+    return wrappers.route(path, 'PATCH', **kwargs)
 
 
 def get_passthrough(dest, path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'GET', dest=dest, **kwargs)
+    warnings.warn('get_passthrough is deprecated, use get with dest= keyword argument instead', UserWarning)
+    return wrappers.route(path, 'GET', dest=dest, **kwargs)
 
 
 def post_passthrough(dest, path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'POST', dest=dest, **kwargs)
+    warnings.warn('post_passthrough is deprecated, use post with dest= keyword argument instead', UserWarning)
+    return wrappers.route(path, 'POST', dest=dest, **kwargs)
 
 
 def put_passthrough(dest, path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'PUT', dest=dest, **kwargs)
+    warnings.warn('put_passthrough is deprecated, use put with dest= keyword argument instead', UserWarning)
+    return wrappers.route(path, 'PUT', dest=dest, **kwargs)
 
 
 def delete_passthrough(dest, path='', **kwargs):
-    return lambda func: wrappers.Route(func, path, 'DELETE', dest=dest, **kwargs)
+    warnings.warn('delete_passthrough is deprecated, use delete with dest= keyword argument instead', UserWarning)
+    return wrappers.route(path, 'DELETE', dest=dest, **kwargs)
 
 
 def sink(path='', **kwargs):
-    return lambda func: wrappers.Sink(func, path, **kwargs)
+    return wrappers.sink(path, **kwargs)

@@ -10,8 +10,6 @@ import hammock.exceptions as exceptions
 import hammock.common as common
 import hammock.names as names
 import hammock.wrappers as wrappers
-import hammock.wrappers.route as route
-import hammock.wrappers.sink as sink
 
 
 LOG = logging.getLogger(__name__)
@@ -90,7 +88,7 @@ class Resource(object):
         return sinks
 
     @classmethod
-    def iter_route_methods(cls, route_class=route.Route):
+    def iter_route_methods(cls, route_class=wrappers.Route):
         return (
             getattr(cls, attr) for attr in dir(cls)
             if isinstance(getattr(cls, attr, None), route_class)
@@ -101,7 +99,7 @@ class Resource(object):
         return sorted(
             (
                 getattr(cls, attr) for attr in dir(cls)
-                if isinstance(getattr(cls, attr, None), sink.Sink)
+                if isinstance(getattr(cls, attr, None), wrappers.Sink)
             ),
             key=functools.cmp_to_key(lambda p1, p2: len(p1.path) - len(p2.path))
         )
