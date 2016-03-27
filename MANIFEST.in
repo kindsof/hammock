@@ -1,1 +1,0 @@
-recursive-include hammock/templates *.j2
