@@ -31,6 +31,10 @@ class Request(object):
         return self._url.url
 
     @property
+    def parsed_url(self):
+        return self._url.parsed
+
+    @property
     def path(self):
         return self._url.path
 

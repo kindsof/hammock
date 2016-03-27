@@ -76,11 +76,17 @@ class Route(wrapper.Wrapper):
             # Add headers:
             if common.KW_HEADERS in self.spec.args:
                 kwargs[common.KW_HEADERS] = req.headers
+            if common.KW_HOST in self.spec.args:
+                kwargs[common.KW_HOST] = '{}://{}{}'.format(
+                    req.parsed_url.scheme,
+                    req.parsed_url.netloc,
+                    ':{}'.format(req.parsed_url.port) if req.parsed_url.port else ''
+                )
 
             # Invoke the routing method:
             result = self(**kwargs)
 
-            resp = response.Response.from_result(result, self.success_code)
+            resp = response.Response.from_result(result, self.success_code, self.response_content_type)
         else:
             resp = proxy.proxy(req, self.dest)
         return resp
@@ -109,7 +115,7 @@ class Route(wrapper.Wrapper):
             raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
 
     def _convert_to_kwargs(self, req, collected_data):
-        args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS})
+        args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS, common.KW_HOST})
         kwargs = collected_data
 
         for keyword, error_msg in (

@@ -18,7 +18,7 @@ class Response(object):
         self.status = str(status)
 
     @classmethod
-    def from_result(cls, result=None, status=200):
+    def from_result(cls, result=None, status=200, content_type=common.TYPE_JSON):
         """
         Create a response object from a response dict
         :param result: a result dict or list, a dict may contain special fields:
@@ -41,7 +41,7 @@ class Response(object):
             if length:
                 response_headers[common.CONTENT_LENGTH] = length
             response_headers.update(result)
-        else:
+        elif content_type == common.TYPE_JSON:
             if common.KW_CONTENT in result:
                 content = result.pop(common.KW_CONTENT)
                 response_headers.update(result)
@@ -53,6 +53,10 @@ class Response(object):
                     common.CONTENT_LENGTH: len(content),
                     common.CONTENT_TYPE: common.TYPE_JSON,
                 })
+        else:
+            response_headers[common.CONTENT_TYPE] = content_type
+            content = result[common.KW_CONTENT]
+
         return cls(content, response_headers, response_status)
 
     def set_header(self, key, value):
