@@ -10,8 +10,8 @@ class {{ name }}(object):
         {% for resource, resource_class, resource_path in sub_resources -%}
         {%- if resource -%}
         self.{{ resource }} = self.{{ resource_class }}(self._fetch, "%s/{{ resource_path }}" % self._url)
-        {%- endif %}
-        {% endfor -%}
+        {% endif -%}
+        {% endfor %}
         {%- for method in methods %}
 {{ method|indent(4, true) }}
         {% endfor %}
