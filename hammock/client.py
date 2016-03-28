@@ -28,7 +28,7 @@ IMPORT = __builtin__.__import__
 def try_import(*args, **kwargs):
     try:
         return IMPORT(*args, **kwargs)
-    except ImportError:
+    except:
         pass
 
 

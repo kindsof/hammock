@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import importlib
 import pkgutil
 import inspect
 import hammock
@@ -43,7 +42,7 @@ def _rec_iter_modules(package, parents=None):
         if is_package:
             # name is package name
             package_parents = parents[:]
-            son_package = importlib.import_module(".".join([package.__name__, name]), package.__name__)
+            son_package = __import__(".".join([package.__name__, name]))
             path = getattr(son_package, "PATH", name)
             class_name = names.to_class_name(path)
             path_name = getattr(son_package, "PATH", names.to_path(path))
@@ -52,7 +51,7 @@ def _rec_iter_modules(package, parents=None):
             modules.extend(_rec_iter_modules(son_package, package_parents))
         else:
             # name is module name
-            module = importlib.import_module(".".join([package.__name__, name]), package.__name__)
+            module = __import__(".".join([package.__name__, name]))
             modules.append((module, parents))
     return modules
 
