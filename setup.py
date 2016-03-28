@@ -29,6 +29,5 @@ setuptools.setup(
         'decorator==4.0.6',
         'oslo.policy==1.5.0',
         'cliff==1.15.0',
-        'mock==1.3.0',
     ]
 )
