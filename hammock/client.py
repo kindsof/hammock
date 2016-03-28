@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
+import __builtin__
+import mock
 import importlib
 import inspect
 import jinja2
@@ -20,11 +22,27 @@ AUTH_METHODS_CODE = ENV.get_template('auth_methods.j2')
 IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDENTIALS, common.KW_ENFORCER}
 
 
+IMPORT = __builtin__.__import__
+
+
+def try_import(*args, **kwargs):
+    try:
+        return IMPORT(*args, **kwargs)
+    except ImportError:
+        pass
+
+
 class ClientGenerator(object):
     def __init__(self, class_name, resources_package, default_url=''):
         self._resources = {}
 
-        self._add_resources(resources_package)
+        if isinstance(resources_package, str):
+            resources_package = importlib.import_module(resources_package)
+
+        # Mock __import__, so when resources try to import a module that
+        # exists only in the server, There won't be any ImportError
+        with mock.patch('__builtin__.__import__', try_import):
+            self._add_resources(resources_package)
         resource_classes = [
             _tabify(_resource_class_code(_resource))
             for _resource in self._resources.get("", [])
@@ -181,7 +199,7 @@ def client_methods_propeties(resource_object, paths):
 
 
 def main(class_name, package_name, default_url=''):
-    print(ClientGenerator(class_name, importlib.import_module(package_name), default_url).code)
+    print(ClientGenerator(class_name, package_name, default_url).code)
 
 
 if __name__ == '__main__':
