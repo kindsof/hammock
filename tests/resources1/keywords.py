@@ -9,6 +9,9 @@ class Keywords(hammock.Resource):
 
     @hammock.get()
     def get(self, arg, default=DEFAULT, **kwargs):
+        """
+        :return dict: answer
+        """
         return self._answer(arg, default, **kwargs)
 
     @hammock.post()

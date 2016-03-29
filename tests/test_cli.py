@@ -83,6 +83,18 @@ class TestCli(base.Base):
         self.assertEqual('additional\n', self.run_command('sub-resource nested additional'))
         self.assertEqual('additional-2\n', self.run_command('sub-resource nested additional-2'))
 
+    def test_keywords(self):
+        for version in [
+            'keywords get --kwargs a:b,c:d --default f k',
+            'keywords get --kwargs "a:b,c:d" --default f k',
+            "keywords get --kwargs 'a:b,c:d' --default f k",
+        ]:
+            result = self.run_json_command(version)
+            self.assertEquals(result['a'], 'b')
+            self.assertEquals(result['c'], 'd')
+            self.assertEquals(result['arg'], 'k')
+            self.assertEquals(result['default'], 'f')
+
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)
         for elem1, elem2 in zip(sorted(list1), sorted(list2)):

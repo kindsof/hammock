@@ -83,7 +83,7 @@ class KeywordArg(PositionalArg):
 
     @property
     def _parser_name(self):
-        return '--extras'
+        return '--{}'.format(self.name)
 
 
 class ReturnArg(PositionalArg):
