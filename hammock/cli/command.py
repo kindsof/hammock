@@ -60,9 +60,7 @@ class Command(command.Command):
             for arg in (set(self.spec.args) | set(self.spec.kwargs))
         }
         if self.spec.keywords:
-            keywords_str = getattr(parsed_args, self.spec.keywords, '').strip('"\'')
-            keywords_dict = dict(tup.split(':') for tup in keywords_str.split(','))
-            kwargs.update(keywords_dict)
+            kwargs.update(getattr(parsed_args, self.spec.keywords, ''))
         return self.func(**kwargs)
 
     def _get_doc(self):

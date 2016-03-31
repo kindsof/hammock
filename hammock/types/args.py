@@ -1,5 +1,10 @@
 from __future__ import absolute_import
+
 import hammock.names as names
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 
 class PositionalArg(object):
@@ -8,6 +13,16 @@ class PositionalArg(object):
     PARSER_TYPE_MAP = {dict: str, list: str}
     PARSER_NARGS_MAP = {dict: '*', list: '*'}
     ALLOWED_ARG_TYPES = {
+        'bool': bool,
+        'int': int,
+        'float': float,
+        'str': str,
+        'list': list,
+        'dict': json.loads,
+        'None': None,
+        None: lambda x: x,
+    }
+    ALLOWED_RETURN_TYPES = {
         'bool': bool,
         'int': int,
         'float': float,
@@ -78,7 +93,7 @@ class KeywordArg(PositionalArg):
     """Represent a function keywords argument"""
 
     def __init__(self, name, doc=None):
-        doc = doc or 'Extra arguments, a comma separated key=value literals.'
+        doc = doc or 'Extra arguments, a dict as a json string.'
         super(KeywordArg, self).__init__(name, 'dict', doc)
 
     @property
@@ -90,3 +105,8 @@ class ReturnArg(PositionalArg):
 
     def __init__(self, type, doc):  # pylint: disable=redefined-builtin
         super(ReturnArg, self).__init__(None, type, doc)
+
+    def _get_type(self, type_string):
+        if type_string and type_string not in self.ALLOWED_RETURN_TYPES:
+            raise RuntimeError('return type {} not allowed'.format(type_string))
+        return self.ALLOWED_RETURN_TYPES[type_string]

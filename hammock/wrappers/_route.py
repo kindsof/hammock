@@ -160,7 +160,10 @@ class Route(wrapper.Wrapper):
                     data[name] = bool(value)
             elif arg.type is not None and value is not None:
                 try:
-                    data[name] = arg.type(value)
+                    if type(value) is dict:
+                        data[name] = value
+                    else:
+                        data[name] = arg.type(value)
                 except ValueError as exc:
                     raise exceptions.BadRequest(
                         "Method {}.{} expects argument {} to be of type {}, got bad value: '{}'. ({})".format(

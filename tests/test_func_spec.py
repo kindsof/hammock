@@ -1,9 +1,14 @@
 from __future__ import absolute_import
+
+try:
+    import ujson as json
+except ImportError:
+    import json
 import unittest
 import hammock.types.func_spec as func_spec
 
 
-def test_func(an_int, a_string, an_arg_without_type, a_default_bool=True, **kwargs_parameter):  # pylint: disable=unused-argument
+def test_func(an_int, a_string, an_arg_without_type, dict_arg, a_default_bool=True, **kwargs_parameter):  # pylint: disable=unused-argument
     """
     This is a test function
     Second line doc
@@ -11,6 +16,7 @@ def test_func(an_int, a_string, an_arg_without_type, a_default_bool=True, **kwar
     :param str a_string: string value.
         second line doc
     :param an_arg_without_type: no type here...
+    :param dict dict_arg: some dict argument.
     :param bool a_default_bool: a boolean value with default True.
     :param kwargs_parameter: some more arguments.
     :return dict: return value
@@ -23,7 +29,7 @@ class TestFuncSpec(unittest.TestCase):
     def test_func_spec(self):
         spec = func_spec.FuncSpec(test_func)
 
-        self.assertListEqual(spec.args, ['an_int', 'a_string', 'an_arg_without_type'])
+        self.assertListEqual(spec.args, ['an_int', 'a_string', 'an_arg_without_type', 'dict_arg'])
         self.assertDictEqual(spec.kwargs, {'a_default_bool': True})
 
         self.assertEqual(spec.doc, '\nThis is a test function\nSecond line doc')
@@ -31,7 +37,8 @@ class TestFuncSpec(unittest.TestCase):
         self.assertEqual(spec.args_info('an_int').type, int)
         self.assertEqual(spec.args_info('a_string').type, str)
         self.assertEqual(spec.args_info('a_default_bool').type, bool)
-        self.assertEqual(spec.args_info('kwargs_parameter').type, dict)
+        self.assertEqual(spec.args_info('dict_arg').type, json.loads)
+        self.assertEqual(spec.args_info('kwargs_parameter').type, json.loads)
 
         self.assertEqual(spec.args_info('an_int').doc, 'integer value.')
         self.assertEqual(spec.args_info('a_string').doc, 'string value.\nsecond line doc')

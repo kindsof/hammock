@@ -109,10 +109,16 @@ class Base(unittest.TestCase):
 
     def run_command(self, command, remove_ignored_commands=True):
         out = StringIO.StringIO()
-        return_code = cli(command.split(' '), remove_ignored_commands=remove_ignored_commands, stdout=out)
+        if not isinstance(command, list):
+            command = command.split(' ')
+        return_code = cli(command, remove_ignored_commands=remove_ignored_commands, stdout=out)
         if return_code != 0:
             raise CLIException('Error code {} from running command {}'.format(return_code, command))
         return out.getvalue()
 
     def run_json_command(self, command, remove_ignored_commands=True):
-        return json.loads(self.run_command(command + ' -f json', remove_ignored_commands=remove_ignored_commands))
+        if isinstance(command, list):
+            command += ['-f', 'json']
+        else:
+            command += ' -f json'
+        return json.loads(self.run_command(command, remove_ignored_commands=remove_ignored_commands))
