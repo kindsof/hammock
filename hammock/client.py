@@ -7,8 +7,8 @@ import inspect
 import jinja2
 import re
 import six
-
 import hammock
+import sys
 import hammock.common as common
 import hammock.names as names
 import hammock.packages as packages
@@ -30,8 +30,8 @@ IMPORT = __builtin__.__import__
 def try_import(*args, **kwargs):
     try:
         return IMPORT(*args, **kwargs)
-    except ImportError:
-        pass
+    except:
+        sys.modules[args[0]] = mock.MagicMock()
 
 
 class ClientGenerator(object):
@@ -211,5 +211,4 @@ def main(class_name, package_name, default_url=''):
 
 
 if __name__ == '__main__':
-    import sys
     main(*sys.argv[1:])
