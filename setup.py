@@ -35,6 +35,7 @@ setuptools.setup(
         # TODO: The following should be moved to extras_requires['client']
         'cliff==1.15.0',
         'coloredlogs==5.0',
+        'mock==1.3.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
