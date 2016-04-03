@@ -27,11 +27,19 @@ IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDEN
 IMPORT = __builtin__.__import__
 
 
-def try_import(*args, **kwargs):
-    try:
-        return IMPORT(*args, **kwargs)
-    except:
-        sys.modules[args[0]] = mock.MagicMock()
+def try_import_generator(resource_package_name):
+    def try_import(*args, **kwargs):
+        try:
+            return IMPORT(*args, **kwargs)
+        except:
+            if args[0].startswith(resource_package_name):
+                # This is a module we need to import, so we don't mock it
+                # and raising the exception
+                raise
+            # Mock external module so we can peacefully create our client
+            sys.modules[args[0]] = mock.MagicMock()
+            return sys.modules[args[0]]
+    return try_import
 
 
 class ClientGenerator(object):
@@ -43,8 +51,9 @@ class ClientGenerator(object):
 
         # Mock __import__, so when resources try to import a module that
         # exists only in the server, There won't be any ImportError
-        with mock.patch('__builtin__.__import__', try_import):
+        with mock.patch('__builtin__.__import__', try_import_generator(resources_package.__name__)):
             self._add_resources(resources_package)
+
         resource_classes = [
             _tabify(_resource_class_code(_resource))
             for _resource in self._resources.get("", [])
