@@ -130,9 +130,13 @@ class Route(wrapper.Wrapper):
 
                 args.remove(keyword)
 
-        missing = set([self._get_mapped_keyword(arg) for arg in args]) - set(kwargs)
+        expected = set([self._get_mapped_keyword(arg) for arg in args])
+        request_arguments = set(kwargs)
+        missing = expected - request_arguments
         if missing:
-            raise exceptions.BadRequest('Missing parameters: {}'.format(', '.join(missing)))
+            raise exceptions.BadRequest('Missing parameters: {}, request argeuments {}, expected {}'.format(', '.join(missing),
+                                                                                                            ', '.join(request_arguments),
+                                                                                                            ', '.join(expected)))
 
         # Handle args keyword conversion
         kwargs.update({keyword: kwargs.pop(self._get_mapped_keyword(keyword)) for keyword in args})
