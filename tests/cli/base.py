@@ -21,10 +21,6 @@ LOG = logging.getLogger(__name__)
 BUILD_PATH = 'build/cli-tests'
 
 
-class CLIException(Exception):
-    pass
-
-
 #
 #  Generate clients file, and load their classes into variables
 #
@@ -113,7 +109,7 @@ class Base(unittest.TestCase):
             command = command.split(' ')
         return_code = cli(command, remove_ignored_commands=remove_ignored_commands, stdout=out)
         if return_code != 0:
-            raise CLIException('Error code {} from running command {}'.format(return_code, command))
+            raise hammock.cli.CLIException('Error code {} from running command {}'.format(return_code, command))
         return out.getvalue()
 
     def run_json_command(self, command, remove_ignored_commands=True):

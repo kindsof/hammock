@@ -1,9 +1,15 @@
 from __future__ import absolute_import
+import logging
+import requests
 import argparse
 import cliff.command as command
 import cliff.show as show
 import cliff.lister as lister
 import hammock.types.func_spec as func_spec
+import hammock.cli
+
+
+LOG = logging.getLogger(__name__)
 
 
 def factory(func, column_order=None, column_colors=None):
@@ -61,7 +67,10 @@ class Command(command.Command):
         }
         if self.spec.keywords:
             kwargs.update(getattr(parsed_args, self.spec.keywords, ''))
-        return self.func(**kwargs)
+        try:
+            return self.func(**kwargs)
+        except requests.HTTPError as exc:
+            raise hammock.cli.CLIException(self._format_exception(exc))
 
     def _get_doc(self):
         doc = self.spec.doc or ''
@@ -86,6 +95,19 @@ class Command(command.Command):
             return self.column_colors[column][value.lower()](value)
         except KeyError:
             return value
+
+    @staticmethod
+    def _format_exception(exc):
+        if 'application/json' in exc.response.headers.get('content-type'):
+            try:
+                error_content = exc.response.json()
+                title = error_content.get('title')
+                description = error_content.get('description')
+                if title or description:
+                    return description if description else title
+            except:
+                pass
+        return 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
 
 
 class CommandItem(Command, show.ShowOne):

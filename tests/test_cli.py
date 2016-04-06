@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import six
+import hammock.cli
 import tests.cli.base as base
 import tests.resources1.cli_names as cli_names
 
@@ -22,7 +23,7 @@ class TestCli(base.Base):
         self.assert_list_of_dicts_equal([{'key': 'A', 'value': 'new-a'}], self.run_json_command('dict list'))
 
         # get key that does not exists
-        self.assertRaises(base.CLIException, self.run_json_command, 'dict get C')
+        self.assertRaises(hammock.cli.CLIException, self.run_json_command, 'dict get C')
         # missing argument
         self.assertRaises(SystemExit, self.run_json_command, 'dict insert A')
 
@@ -38,7 +39,7 @@ class TestCli(base.Base):
         self.assert_list_of_dicts_equal([{'value': '2'}], self.run_json_command('list list'))
 
         # remove value that does not exists
-        self.assertRaises(base.CLIException, self.run_command, 'list remove 3')
+        self.assertRaises(hammock.cli.CLIException, self.run_command, 'list remove 3')
         # missing argument
         self.assertRaises(SystemExit, self.run_command, 'list remove')
 
@@ -52,7 +53,7 @@ class TestCli(base.Base):
         for method_name, translated_name in six.iteritems(cli_names.NAMES):
             self.assertEqual(method_name + '\n', self.run_command('cli-names {}'.format(translated_name)))
         self.assertEqual('moshe\n', self.run_command('cli-names optional-variable-with-underscores --optional-variable moshe'))
-        self.assertEqual('', self.run_command('cli-names optional-variable-with-underscores'))
+        self.assertEqual('\n', self.run_command('cli-names optional-variable-with-underscores'))
         self.assertEqual('True\n', self.run_command('cli-names set-false'))
         self.assertEqual('False\n', self.run_command('cli-names set-false --set-false'))
         self.assertEqual('False\n', self.run_command('cli-names set-true'))
@@ -68,9 +69,9 @@ class TestCli(base.Base):
         self.assertEqual('False\n', self.run_command('--headers a:b headers request-headers a c'))
 
     def test_ignores(self):
-        self.assertRaises(base.CLIException, self.run_command, 'cli-ignored-package sub get')
-        self.assertRaises(base.CLIException, self.run_command, 'cli-ignored-resource sub get')
-        self.assertRaises(base.CLIException, self.run_command, 'cli-names ignored-method')
+        self.assertRaises(hammock.cli.CLIException, self.run_command, 'cli-ignored-package sub get')
+        self.assertRaises(hammock.cli.CLIException, self.run_command, 'cli-ignored-resource sub get')
+        self.assertRaises(hammock.cli.CLIException, self.run_command, 'cli-names ignored-method')
 
         self.assertEqual('sub-in-ignored\n', self.run_command('cli-ignored-package sub get', remove_ignored_commands=False))
         self.assertEqual('cli-ignored-resource\n', self.run_command('cli-ignored-resource get', remove_ignored_commands=False))
