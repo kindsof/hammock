@@ -44,7 +44,7 @@ class {{ class_name }}(object):
     def close(self):
         self._client.close()
 
-    def _fetch(self, method, url, json=None, file_stream=None, success_code=200, response_type='{{ type_json }}', kwargs=None, url_kw=None, headers=None):
+    def _fetch(self, method, url, json=None, file_stream=None, success_code=200, kwargs=None, url_kw=None, headers=None):
         eventually_close_file_object = None
         url_kw = url_kw or {}
         url = url_join(self._url, url).format(**url_kw)
@@ -93,11 +93,13 @@ class {{ class_name }}(object):
         try:
             response = getattr(self._client, method.lower())(url, **_kwargs)
             result = None
-            if '{{ type_json }}' in response_type:
+            if '{{ type_json }}' in response.headers.get('content-type', ''):
                 result = self._jsonify(response)
                 LOG.debug("Got response status %s, body: %s", response.status_code, result)
-            elif '{{ type_octet_stream }}' in response_type:
+            elif '{{ type_octet_stream }}' in response.headers.get('content-type', ''):
                 result = response.raw
+            else:
+                result = response.text
             if response.status_code != success_code:
                 LOG.debug(
                     "Response status %d does not match expected success status %d",

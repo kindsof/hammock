@@ -52,6 +52,5 @@ def {{ method_name }}(self
         {%- if kw_file in args  %}
         file_stream={{ kw_file }},
         {%- endif %}
-        response_type='{{ response_type }}',
         success_code={{ success_code }},
     )

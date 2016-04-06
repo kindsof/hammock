@@ -124,7 +124,7 @@ def _tabify(text):
     ])
 
 
-def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, response_type, keywords, doc_string, keyword_map):
+def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, success_code, keywords, doc_string, keyword_map):
     params_kw = set(args) - (set(defaults) | set(url_kw) | {"self"}) - IGNORE_KW
     url_kw = set(url_kw) - IGNORE_KW
 
@@ -147,7 +147,6 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         params_kw=params_kw,
         defaults=defaults,
         success_code=success_code,
-        response_type=response_type,
         kw_file=common.KW_FILE,
         kw_list=common.KW_LIST,
         keywords=keywords,
@@ -172,7 +171,6 @@ def client_methods_propeties(resource_object, paths):
                 url_kw=[arg for arg in method.spec.args if "{{{}}}".format(arg) in url],
                 defaults=method_defaults,
                 success_code=method.success_code,
-                response_type=method.response_content_type,
                 keywords=method.spec.keywords,
                 doc_string=inspect.getdoc(method),
                 keyword_map=method.keyword_map,
