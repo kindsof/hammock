@@ -99,7 +99,7 @@ class {{ class_name }}(object):
             elif '{{ type_octet_stream }}' in response_type:
                 result = response.raw
             if response.status_code != success_code:
-                LOG.info(
+                LOG.debug(
                     "Response status %d does not match expected success status %d",
                     response.status_code, success_code
                 )
