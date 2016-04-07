@@ -58,6 +58,10 @@ class TestCli(base.Base):
         self.assertEqual('False\n', self.run_command('cli-names set-false --set-false'))
         self.assertEqual('False\n', self.run_command('cli-names set-true'))
         self.assertEqual('True\n', self.run_command('cli-names set-true --set-true'))
+        self.assertEqual('True\n', self.run_command('cli-names bool-type --value True'))
+        self.assertEqual('True\n', self.run_command('cli-names bool-type --value true'))
+        self.assertEqual('False\n', self.run_command('cli-names bool-type --value False'))
+        self.assertEqual('False\n', self.run_command('cli-names bool-type --value some-string'))
 
         self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
         self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))

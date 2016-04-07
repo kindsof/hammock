@@ -1,10 +1,17 @@
 from __future__ import absolute_import
 
-import hammock.names as names
+import six
 try:
     import ujson as json
 except ImportError:
     import json
+import hammock.names as names
+
+
+def parse_bool(value):
+    if isinstance(value, six.string_types):
+        value = value in {'true', 'True'}
+    return bool(value)
 
 
 class PositionalArg(object):
@@ -13,7 +20,7 @@ class PositionalArg(object):
     PARSER_TYPE_MAP = {dict: str, list: str}
     PARSER_NARGS_MAP = {dict: '*', list: '*'}
     ALLOWED_ARG_TYPES = {
-        'bool': bool,
+        'bool': parse_bool,
         'int': int,
         'float': float,
         'str': str,

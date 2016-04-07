@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import hammock
+import hammock.exceptions as exceptions
 
 NAMES = {
     'name_with_underscores': 'name-with-underscores',
@@ -28,6 +29,17 @@ class CLINames(hammock.Resource):
     @hammock.post('set-false')
     def set_false(self, set_false=True):
         return set_false
+
+    @hammock.post('bool-type')
+    def bool_type(self, value=None):
+        """
+        Return a bool value
+        :param bool value: value
+        :return bool: the value
+        """
+        if not isinstance(value, bool):
+            raise exceptions.BadRequest('Value should be bool')
+        return value
 
     @hammock.get('ignored-method', cli_command_name=False)
     def ignored_method(self):
