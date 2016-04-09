@@ -6,7 +6,7 @@ except ImportError:
     import json
 import unittest
 import hammock.types.func_spec as func_spec
-import hammock.types.args as args
+import hammock.common as common
 
 
 def test_func(an_int, a_string, an_arg_without_type, dict_arg, a_default_bool=True, **kwargs_parameter):  # pylint: disable=unused-argument
@@ -37,7 +37,7 @@ class TestFuncSpec(unittest.TestCase):
 
         self.assertEqual(spec.args_info('an_int').type, int)
         self.assertEqual(spec.args_info('a_string').type, str)
-        self.assertEqual(spec.args_info('a_default_bool').type, args.parse_bool)
+        self.assertEqual(spec.args_info('a_default_bool').type, common.parse_bool)
         self.assertEqual(spec.args_info('dict_arg').type, json.loads)
         self.assertEqual(spec.args_info('kwargs_parameter').type, json.loads)
 

@@ -158,13 +158,10 @@ class Route(wrapper.Wrapper):
                 if not isinstance(value, list):
                     data[name] = [value] if value is not None else []
             elif arg.type is bool:
-                if isinstance(value, six.string_types):
-                    data[name] = value in {'True', 'true'}
-                else:
-                    data[name] = bool(value)
+                data[name] = common.parse_bool(value)
             elif arg.type is not None and value is not None:
                 try:
-                    if type(value) is dict:
+                    if isinstance(value, dict):
                         data[name] = value
                     else:
                         data[name] = arg.type(value)
