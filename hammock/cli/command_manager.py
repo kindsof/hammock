@@ -34,10 +34,6 @@ class CommandManager(commandmanager.CommandManager):
         self._load_class(client)
 
     def _load_class(self, instance, commands=None):
-        """
-        Loads a hammock client into app
-        :param client: hammock client instance
-        """
         resource_command_name = getattr(instance, 'CLI_COMMAND_NAME', '')
 
         def cli_command_map(func_name):

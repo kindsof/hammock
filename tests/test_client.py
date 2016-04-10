@@ -51,6 +51,6 @@ class TestClient(unittest.TestCase):
         self.assertTrue(hasattr(self._client, "auth"))
         for method_name in ('login', 'logout', 'refresh'):
             self.assertTrue(hasattr(self._client.auth, method_name))
-            self.assertTrue(hasattr(self._client.auth, '_' + method_name))
+            self.assertTrue(hasattr(self._client, method_name))
         self.assertTrue(hasattr(self._client.auth, 'status'))
         self.assertFalse(hasattr(self._client.auth, '_status'))

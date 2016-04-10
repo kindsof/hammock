@@ -16,7 +16,6 @@ ENV = jinja2.Environment(loader=jinja2.PackageLoader('hammock.templates', 'clien
 FILE_TEMPLATE = ENV.get_template('file.j2')
 METHOD_TEMPLATE = ENV.get_template('method.j2')
 RESOURCE_CLASS_TEMPLATE = ENV.get_template('resource_class.j2')
-AUTH_METHODS_CODE = ENV.get_template('auth_methods.j2')
 IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDENTIALS, common.KW_ENFORCER}
 
 
@@ -59,16 +58,10 @@ class ClientGenerator(object):
 
 def _resource_class_code(_resource, paths=None):
     paths = paths or []
-    is_auth_resource = _resource.name().lower() == common.AUTH_RESOURCE_NAME
-
     methods = []
     for kwargs in client_methods_propeties(_resource, paths):
-        if is_auth_resource and kwargs['method_name'] in common.AUTH_SPECIAL_METHODS_NAMES:
-            kwargs['method_name'] = '_' + kwargs['method_name']
         methods.append(_method_code(**kwargs))
 
-    if is_auth_resource:
-        methods.insert(0, AUTH_METHODS_CODE.render())  # pylint: disable=no-member
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
         name=_resource.client_class_name(),
         resource=_resource,
