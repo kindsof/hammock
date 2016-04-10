@@ -29,5 +29,6 @@ setuptools.setup(
         'decorator==4.0.6',
         'oslo.policy==1.5.0',
         'cliff==1.15.0',
+        'jinja2==2.8',
     ]
 )
