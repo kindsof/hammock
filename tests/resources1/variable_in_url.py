@@ -5,7 +5,7 @@ import hammock
 class VariableInUrl(hammock.Resource):
 
     POLICY_GROUP_NAME = False
-    PATH = 'variable-in-url/{variable_name}'
+    PATH = 'variable-in-url-1/{variable_name}'
 
     @hammock.get()
     def get(self, variable_name):
@@ -15,7 +15,7 @@ class VariableInUrl(hammock.Resource):
 class VariableFirstInUrl(hammock.Resource):
 
     POLICY_GROUP_NAME = False
-    PATH = '{variable_name}/variable-in-url'
+    PATH = '{variable_name}/variable-in-url-2'
 
     @hammock.get()
     def get(self, variable_name):

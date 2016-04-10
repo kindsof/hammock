@@ -89,4 +89,5 @@ class TestUwsgi(uwsgi_base.UwsgiBase):
 
     def test_classes_method_names(self):
         self.assertEqual('modified-in-modified', self._client.different_path.different_sub.get())
-        self.assertEqual('moshe', self._client.variable_in_url_variable_name.get('moshe'))
+        self.assertEqual('moshe', self._client.variable_in_url_1.get('moshe'))
+        self.assertEqual('moshe', self._client.variable_in_url_2.get('moshe'))

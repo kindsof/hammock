@@ -65,8 +65,8 @@ class TestCli(base.Base):
 
         self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
         self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))
-        self.assertEqual('moshe\n', self.run_command('variable-in-url-variable-name get moshe'))
-        self.assertEqual('moshe\n', self.run_command('variable-name-variable-in-url get moshe'))
+        self.assertEqual('moshe\n', self.run_command('variable-in-url-1 get moshe'))
+        self.assertEqual('moshe\n', self.run_command('variable-in-url-2 get moshe'))
 
     def test_headers(self):
         self.assertEqual('True\n', self.run_command('--headers a:b headers request-headers a b'))

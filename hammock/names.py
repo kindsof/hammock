@@ -5,7 +5,7 @@ import functools
 
 REMOVE_NAME_INVALID_CHARS = functools.partial(re.compile(r'[./]').sub, '')
 PATH_VARIABLE = re.compile(r'{([^}]+)}')
-REMOVE_VARIABLES = functools.partial(PATH_VARIABLE.sub, r'_\1_')
+REMOVE_VARIABLES = functools.partial(PATH_VARIABLE.sub, r'_')
 CONVERT_PATH_VARIABLES = functools.partial(PATH_VARIABLE.sub, r'(?P<\1>[^/]+)')
 SPLIT_CAMEL_BLOCKS = functools.partial(re.compile(r'[A-Z][a-z0-9_$]+').sub, lambda match: '_{}_'.format(match.group(0)))
 

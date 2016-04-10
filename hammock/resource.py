@@ -43,6 +43,12 @@ class Resource(object):
     def path(cls):
         return getattr(cls, "PATH", names.to_path(cls.__name__))
 
+    @classmethod
+    def policy_group_name(cls):
+        if cls.POLICY_GROUP_NAME is False:
+            return False
+        return cls.POLICY_GROUP_NAME or names.to_command(cls.name().lower())
+
     def handle_exception(self, exc, exception_handler, request_uuid):
         """
         Convert the exception to HTTP error
