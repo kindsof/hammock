@@ -54,7 +54,8 @@ class Route(wrapper.Wrapper):
         self._validate_keyword_map()
 
         if self.method in common.URL_PARAMS_METHODS and common.KW_LIST in (set(self.spec.args) | set(self.spec.kwargs)):
-            raise RuntimeError("Can't declare a url params method with _list argument, it it useful only when you get request body.")
+            raise exceptions.BadResourceDefinition(
+                "Can't declare a url params method with _list argument, it it useful only when you get request body.")
 
     def _wrapper(self, req):
         """
@@ -97,11 +98,12 @@ class Route(wrapper.Wrapper):
             self.full_policy_rule_name = self._generate_full_policy_rule_name()
         else:
             self.full_policy_rule_name = None
-            # check if a method that enforces policy, expects credentials or enforcer.
-            method_expects_policy_arguments = {common.KW_CREDENTIALS, common.KW_ENFORCER} & set(self.spec.args)
-            if method_expects_policy_arguments:
-                raise RuntimeError('Method {} in class {} expects {}, but is not enforced by policy'.format(
-                    self.__name__, self._resource.__class__.__name__, method_expects_policy_arguments))
+            # check if a method that enforces policy, expects enforcer.
+            if common.KW_ENFORCER in self.spec.args:
+                raise self._error(
+                    exceptions.BadResourceDefinition,
+                    'Method {} in class {} has argument {}, thus should be in policy file'.format(
+                        self.__name__, self._resource.__class__.__name__, common.KW_ENFORCER))
 
     def _extract_kwargs(self, req, collected_data):
         try:
@@ -134,9 +136,9 @@ class Route(wrapper.Wrapper):
         request_arguments = set(kwargs)
         missing = expected - request_arguments
         if missing:
-            raise exceptions.BadRequest('Missing parameters: {}, request argeuments {}, expected {}'.format(', '.join(missing),
-                                                                                                            ', '.join(request_arguments),
-                                                                                                            ', '.join(expected)))
+            raise exceptions.BadRequest(
+                'Missing parameters: {}. Request arguments {}. Expected {}.'.format(
+                    ', '.join(missing), ', '.join(request_arguments), ', '.join(expected)))
 
         # Handle args keyword conversion
         kwargs.update({keyword: kwargs.pop(self._get_mapped_keyword(keyword)) for keyword in args})
@@ -149,7 +151,7 @@ class Route(wrapper.Wrapper):
 
     def _convert_argument_types(self, data):
         """
-        Inplace convertion of the data types according to self.spec
+        Inplace conversion of the data types according to self.spec
         :param data: keyword arguments supposed to be passed to self.func
         """
         for name, value in six.iteritems(data):
@@ -167,9 +169,8 @@ class Route(wrapper.Wrapper):
                         data[name] = arg.type(value)
                 except ValueError as exc:
                     raise exceptions.BadRequest(
-                        "Method {}.{} expects argument {} to be of type {}, got bad value: '{}'. ({})".format(
-                            self._resource.name(), self.__name__, name, arg.type, value, exc
-                        ))
+                        "argument {} should be of type {}, got bad value: '{}'. ({})".format(
+                            name, arg.type, value, exc))
 
     @staticmethod
     def get_status_code(status):
@@ -192,9 +193,9 @@ class Route(wrapper.Wrapper):
         rule_name = self.rule_name or self.__name__
         full_policy_rule_name = '{}:{}'.format(group_name, rule_name)
         if full_policy_rule_name not in self._resource.api.policy.rules:
-            raise RuntimeError('Policy rule {} of method {} in resource class {} does not exist in policy file'.format(
-                full_policy_rule_name, self.__name__, self._resource.__class__.__name__
-            ))
+            raise self._error(
+                exceptions.BadResourceDefinition,
+                'Policy rule {} does not exist in policy file'.format(full_policy_rule_name))
         return full_policy_rule_name
 
     def _get_mapped_keyword(self, original_keyword):
@@ -215,7 +216,15 @@ class Route(wrapper.Wrapper):
         invalid_arguments = mapped_args - func_args
 
         if invalid_arguments:
-            raise RuntimeError('Mapped arguments {} are not in method arguments'.format(', '.join(invalid_arguments)))
+            raise self._error(
+                exceptions.BadResourceDefinition,
+                'Mapped arguments {} are not in method arguments'.format(', '.join(invalid_arguments)))
 
         if len(set(self.keyword_map.values())) < len(self.keyword_map):
-            raise RuntimeError('Multiple keywords are mapped to the same one {}'.format(self.keyword_map))
+            raise self._error(
+                exceptions.BadResourceDefinition,
+                'Multiple keywords are mapped to the same one {}'.format(self.keyword_map))
+
+    def _error(self, exception_type, description):
+        return exception_type('[Resource {}:{}] {}'.format(
+            self._resource.__class__.__name__, self.__name__, description))

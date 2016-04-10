@@ -19,13 +19,22 @@ class Backend(object):
         :param api: a resource node to add package resources to
         :param resource_package: resources package
         """
+        bad_definition = False
         for resource_class, parents in packages.iter_resource_classes(resource_package):
             prefix = '/'.join([parent.path for parent in parents])
             node = api.get_node([parent.name for parent in parents])
             node.add(resource_class.name(), resource_class)
             resource = resource_class(api, base_path=None, **resource_params)  # XXX: temporary 2nd argument None, remove them when sagittarius is fixed
-            self._add_route_methods(resource, prefix)
-            self._add_sink_methods(resource, prefix)
+            try:
+                self._add_route_methods(resource, prefix)
+            except exceptions.BadResourceDefinition:
+                bad_definition = True
+            try:
+                self._add_sink_methods(resource, prefix)
+            except exceptions.BadResourceDefinition:
+                bad_definition = True
+        if bad_definition:
+            raise exceptions.BadResourceDefinition('Bad definition of resource, see log for errors.')
 
     def _add_route_methods(self, resource, base_path):
         """Add route methods of a resource

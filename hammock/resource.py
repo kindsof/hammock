@@ -70,9 +70,17 @@ class Resource(object):
         :return: A dict representing routes in a resource: { url: {method: responder} }
         """
         routes = collections.defaultdict(dict)
+        errors = []
         for route_method in self.iter_route_methods():
-            route_method.set_resource(self)
-            routes[common.url_join(self.path(), route_method.path)][route_method.method] = route_method.call
+            try:
+                route_method.set_resource(self)
+                routes[common.url_join(self.path(), route_method.path)][route_method.method] = route_method.call
+            except exceptions.BadResourceDefinition as exc:
+                errors.append(exc)
+        if errors:
+            for error in errors:
+                logging.error(error)
+            raise exceptions.BadResourceDefinition('Bad definition of resource, see log for errors.')
         return routes
 
     @property
@@ -82,9 +90,17 @@ class Resource(object):
             The list is sorted by url size, largest first.
         """
         sinks = []
+        errors = []
         for sink_method in self.iter_sink_methods():
-            sink_method.set_resource(self)
-            sinks.append((common.url_join(self.path(), sink_method.path), sink_method.call))
+            try:
+                sink_method.set_resource(self)
+                sinks.append((common.url_join(self.path(), sink_method.path), sink_method.call))
+            except exceptions.BadResourceDefinition as exc:
+                errors.append(exc)
+        if errors:
+            for error in errors:
+                logging.error(error)
+            raise exceptions.BadResourceDefinition('Bad definition of resource, see log for errors.')
         return sinks
 
     @classmethod

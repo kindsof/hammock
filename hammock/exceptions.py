@@ -64,3 +64,7 @@ ResourceNotImplemented = class_factory(RESOURCE_NOT_IMPLEMENTED, 'Not Implemente
 ServiceUnavailable = class_factory(SERVICE_UNAVAILABLE, 'Service Unavailable')
 MalformedJson = class_factory(MALFORMED_JSON, 'Malformed JSON',
                               'Could not decode the request body. The JSON was incorrect or not encoded as UTF-8.')
+
+
+class BadResourceDefinition(Exception):
+    pass

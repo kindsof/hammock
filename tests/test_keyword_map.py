@@ -4,6 +4,7 @@ import httplib
 
 import hammock
 import hammock.common as common
+import hammock.exceptions as exceptions
 import tests.base as base
 
 
@@ -36,7 +37,7 @@ class TestKeywordMapping(base.TestBase):
                 pass
 
         # Validate that mapping an argument that doesnt appear in the method definition fails.
-        self.assertRaises(RuntimeError, hammock.get(keyword_map={'missing_arg': 'bla'}), TestResource.test_method)
+        self.assertRaises(exceptions.BadResourceDefinition, hammock.get(keyword_map={'missing_arg': 'bla'}), TestResource.test_method)
 
         # Validate that mapping two argument to the same target fails.
-        self.assertRaises(RuntimeError, hammock.get(keyword_map={'arg1': 'x', 'arg2': 'x'}), TestResource.test_method)
+        self.assertRaises(exceptions.BadResourceDefinition, hammock.get(keyword_map={'arg1': 'x', 'arg2': 'x'}), TestResource.test_method)
