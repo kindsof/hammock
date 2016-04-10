@@ -226,5 +226,5 @@ class Route(wrapper.Wrapper):
                 'Multiple keywords are mapped to the same one {}'.format(self.keyword_map))
 
     def _error(self, exception_type, description):
-        return exception_type('[Resource {}:{}] {}'.format(
-            self._resource.__class__.__name__, self.__name__, description))
+        return exception_type('[Resource {}.{}:{}] {}'.format(
+            self._resource.__class__.__module__, self._resource.__class__.__name__, self.__name__, description))
