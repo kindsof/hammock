@@ -1,8 +1,9 @@
 from __future__ import absolute_import
+import munch
 import hammock.common as common
 
 
-class Credentials(dict):
+class Credentials(munch.Munch):
     """
     Converts a headers object into a credentials dict,
     It is used by the policy.Policy class.
