@@ -41,7 +41,7 @@ class App(app.App):
     def build_option_parser(self, description, version, argparse_kwargs=None):
         parser = super(App, self).build_option_parser(description, version, argparse_kwargs)
         parser.add_argument(
-            'url', nargs='?',
+            '--url',
             default=os.environ.get(self.ENV_URL, self.DEFAULT_URL),
             help='(env {}) Server connection URL, default: {}.'.format(self.ENV_URL, self.DEFAULT_URL),
         )

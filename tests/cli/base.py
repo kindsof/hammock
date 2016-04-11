@@ -66,7 +66,7 @@ hammock.Hammock(API, get_unified_resources_package('build/cli-tests'), policy_fi
 
 def cli(argv=sys.argv[1:], remove_ignored_commands=True, stdout=sys.stdout):
     app_class = type('App', (hammock.cli.App, ), {'REMOVE_COMMANDS_WITH_NAME_FALSE': remove_ignored_commands})
-    return app_class(UnifiedClient, stdout=stdout).run(['http://localhost:{}'.format(PORT)] + argv)
+    return app_class(UnifiedClient, stdout=stdout).run(['--url', 'http://localhost:{}'.format(PORT)] + argv)
 
 
 def server():
