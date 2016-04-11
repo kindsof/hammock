@@ -179,13 +179,13 @@ class Route(wrapper.Wrapper):
 
     @property
     def _is_policy_disabled(self):
-        return (self._resource.policy_group_name() is False) or (self.dest is not None) or self._resource.api.policy.is_disabled
+        return (self._resource.policy_group_name() is False) or (self.dest is not None) or self.policy.is_disabled
 
     def _generate_full_policy_rule_name(self):
         group_name = self._resource.policy_group_name()
         rule_name = self.rule_name or self.__name__
         full_policy_rule_name = '{}:{}'.format(group_name, rule_name)
-        if full_policy_rule_name not in self._resource.api.policy.rules:
+        if full_policy_rule_name not in self.policy.rules:
             raise self._error(
                 exceptions.BadResourceDefinition,
                 'Policy rule {} does not exist in policy file'.format(full_policy_rule_name))

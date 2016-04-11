@@ -8,6 +8,10 @@ import hammock.exceptions as exceptions  # noqa  # pylint: disable=unused-import
 import hammock.types as types  # noqa  # pylint: disable=unused-import
 
 
+FALCON = 'falcon'
+AWEB = 'aweb'
+
+
 def get(path='', **kwargs):
     return wrappers.route(path, 'GET', **kwargs)
 

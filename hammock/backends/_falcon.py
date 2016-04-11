@@ -18,13 +18,13 @@ class Falcon(backend.Backend):
             for method, responder in six.iteritems(methods_map)
         }
         new_route_class = self._get_route_class(path, methods)
-        self._api.add_route(path, new_route_class())
+        self.api.add_route(path, new_route_class())
         for method in six.iterkeys(methods_map):
             LOG.debug('Added route %s %s', method, path)
 
     def add_sink(self, path, responder):
         pattern = re.compile(names.CONVERT_PATH_VARIABLES(path))
-        self._api.add_sink(self._responder(responder), pattern)
+        self.api.add_sink(self._responder(responder), pattern)
         LOG.debug('Added sink %s', path)
 
     def add_error_handler(self, exc_class, api):

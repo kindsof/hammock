@@ -88,6 +88,14 @@ class Wrapper(object):
             LOG.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
             return resp
 
+    @property
+    def params(self):
+        return self._resource.params
+
+    @property
+    def policy(self):
+        return self.params.get('_policy')
+
     @abc.abstractmethod
     def _wrapper(self, req):
         """

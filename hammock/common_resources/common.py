@@ -10,4 +10,4 @@ class CommonResources(hammock.Resource):
 
     @hammock.get('_client', response_content_type='text/x-python')
     def get_client(self, _host):
-        return client.ClientGenerator('Client', self.api.resource_package, _host).code
+        return client.ClientGenerator('Client', self.params['_resource_package'], _host).code

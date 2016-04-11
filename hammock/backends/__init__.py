@@ -2,6 +2,7 @@
 # pylint: disable=unused-import
 
 from __future__ import absolute_import
+import hammock
 from . import _falcon
 from . import _aweb
 
@@ -10,16 +11,16 @@ try:
 except ImportError:
     falcon = None
 
-try:
-    import aiohttp.web as aweb
-except ImportError:
-    aweb = None
 
-
-def get(api):
-    if falcon and isinstance(api, falcon.API):
+def get(api, **kwargs):
+    if api == hammock.FALCON:
+        api = falcon.API(**kwargs)
         return _falcon.Falcon(api)
-    elif aweb and isinstance(api, aweb.Application):
+    elif api == hammock.AWEB:
+        import aiohttp.web as aweb  # pylint: disable=import-error
+        api = aweb.Application(**kwargs)
         return _aweb.AWeb(api)
+    elif falcon and isinstance(api, falcon.API):
+        return _falcon.Falcon(api)
     else:
         raise RuntimeError('Invalid API given, or api library not available.')

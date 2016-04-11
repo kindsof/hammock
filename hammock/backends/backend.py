@@ -11,20 +11,20 @@ import hammock.common as common
 class Backend(object):
 
     def __init__(self, api):
-        self._api = api
-        self.add_error_handler(exceptions.HttpError, self._api)
+        self.api = api
+        self.add_error_handler(exceptions.HttpError, self.api)
 
-    def add_resources(self, api, resource_package, **resource_params):
+    def add_resources(self, node, resource_package, **resource_params):
         """
-        :param api: a resource node to add package resources to
+        :param node: a resource node to add package resources to
         :param resource_package: resources package
         """
         bad_definition = False
         for resource_class, parents in packages.iter_resource_classes(resource_package):
             prefix = '/'.join([parent.path for parent in parents])
-            node = api.get_node([parent.name for parent in parents])
+            node = node.get_node([parent.name for parent in parents])
             node.add(resource_class.name(), resource_class)
-            resource = resource_class(api, base_path=None, **resource_params)  # XXX: temporary 2nd argument None, remove them when sagittarius is fixed
+            resource = resource_class(**resource_params)
             try:
                 self._add_route_methods(resource, prefix)
             except exceptions.BadResourceDefinition:

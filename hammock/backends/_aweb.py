@@ -17,7 +17,7 @@ class AWeb(backend.Backend):
 
     def add_route(self, path, methods_map):
         for method, responder in six.iteritems(methods_map):
-            self._api.add_route(method, path, self._responder(responder))
+            self.api.add_route(method, path, self._responder(responder))
             LOG.debug('Added route %s %s', method, path)
 
     def add_sink(self, path, responder):
