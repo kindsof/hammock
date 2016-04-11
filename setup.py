@@ -27,7 +27,7 @@ setuptools.setup(
         'six==1.9.0',
         'munch==2.0.3',
         'decorator==4.0.6',
-        'oslo.policy==1.5.0',
+        'oslo.policy==0.11.0',
         'cliff==1.15.0',
     ]
 )
