@@ -17,10 +17,16 @@ CODES = {
 ENABLED = platform.system() != 'Windows'
 
 
-def colorize(color, val):
+def colorize(color, val, prompt=False):
     if ENABLED:
-        codes = CODES[color]
-        val = codes[0] + val + codes[1]
+        code_start, code_end = CODES[color]
+        if prompt:
+            # When writing color to cliff's prompt, we need to tell it that the color
+            # characters do not take screen space, for the history-searching to work correctly
+            # http://wiki.hackzine.org/development/misc/readline-color-prompt.html
+            code_start = "\001" + code_start + "\002"
+            code_end = "\001" + code_end + "\002"
+        val = code_start + val + code_end
     return val
 
 
