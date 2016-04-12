@@ -33,7 +33,7 @@ class TestBase(testing.TestBase):
         headers = headers or {}
         if query_string:
             kwargs["query_string"] = query_string
-        if body:
+        if body is not None:
             content_type = headers.get(common.CONTENT_TYPE, common.TYPE_JSON)
             kwargs["body"] = json.dumps(body) if common.TYPE_JSON in content_type else body
             headers.update({common.CONTENT_TYPE: content_type})
