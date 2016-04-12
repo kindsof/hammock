@@ -21,6 +21,8 @@ class TestResource(base.TestBase):
         self.assert_status(404, 'DELETE', '/dict/a')
         self.assert_status(404, 'GET', '/dict/a')
         self.assert_status(404, 'PUT', '/dict/a', body={'value': '1'})
+        self.simulate_request('/dict/a', method='POST', body='', headers={common.CONTENT_TYPE: common.TYPE_JSON})
+        self.assertEqual('400', self.srmock.status)
 
     def test_text(self):
         self.assertEqual("HELLO", self._simulate("GET", "/text/upper/hello"))
@@ -125,10 +127,8 @@ class TestResource(base.TestBase):
         self.assertListEqual(response, [1, 2, 3])
 
     def test_invalid_json_body(self):
-        self.assert_status(
-            753,
-            'POST', '/dict/a', '{"value":', headers={common.CONTENT_TYPE: common.TYPE_JSON}
-        )
+        self.simulate_request('/dict/a', method='POST', body='{"value":', headers={common.CONTENT_TYPE: common.TYPE_JSON})
+        self.assertEqual('753', self.srmock.status)
 
     def test_return_values(self):
         self.assertEqual('', self._simulate('GET', '/responses/none'))

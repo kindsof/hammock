@@ -99,17 +99,20 @@ class Request(object):
     def _collect_body(self):
         content_type = self.headers.get(common.CONTENT_TYPE, '')
         if common.TYPE_JSON in content_type:
+            body_string = self.stream.read()
+            if not body_string:
+                return None
             try:
-                body = json.load(self.stream)
-                if type(body) == dict:
+                body = json.loads(body_string)
+                if isinstance(body, dict):
                     return body
-                elif type(body) == list:
+                elif isinstance(body, list):
                     return {common.KW_LIST: body}
                 elif body is None:
                     return None
                 else:
                     return {common.KW_CONTENT: body}
             except (ValueError, UnicodeDecodeError):
-                raise exceptions.MalformedJson()
+                raise exceptions.MalformedJson("Could not parse json body '{}'".format(body_string))
         elif common.TYPE_OCTET_STREAM in content_type:
             return {common.KW_FILE: file_module.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}
