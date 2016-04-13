@@ -71,10 +71,10 @@ class Route(wrapper.Wrapper):
             kwargs = self._extract_kwargs(req, req.collected_data)
             enforcer = None
             credentials = None
-            if self._resource.api.credentials_class:
-                credentials = self._resource.api.credentials_class(req.headers)
+            if self.credentials_class:
+                credentials = self.credentials_class(req.headers)
                 if self.full_policy_rule_name:
-                    enforcer = self._resource.api.policy.check(
+                    enforcer = self.policy.check(
                         self.full_policy_rule_name, target=kwargs, credentials=credentials)
 
             # Convert arguments according to expected type

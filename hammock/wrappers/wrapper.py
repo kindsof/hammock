@@ -96,6 +96,10 @@ class Wrapper(object):
     def policy(self):
         return self.params.get('_policy')
 
+    @property
+    def credentials_class(self):
+        return self.params.get('_credentials_class')
+
     @abc.abstractmethod
     def _wrapper(self, req):
         """

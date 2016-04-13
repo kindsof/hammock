@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import collections
 import functools
-import warnings
 import logging
 import sys
 import six
@@ -152,30 +151,3 @@ class Resource(object):
             else:
                 mapping[method_name] = command_name or names.to_command(route_method.__name__)
         return mapping
-
-
-# XXX: deprecated, those methods will be removed
-
-def get(path='', **kwargs):
-    warnings.warn('resource.get is deprecated, use hammock.get instead', UserWarning)
-    return lambda func: wrappers.Route(func, path, 'GET', **kwargs)
-
-
-def head(path='', **kwargs):
-    warnings.warn('resource.head is deprecated, use hammock.head instead', UserWarning)
-    return lambda func: wrappers.Route(func, path, 'HEAD', **kwargs)
-
-
-def post(path='', **kwargs):
-    warnings.warn('resource.post is deprecated, use hammock.post instead', UserWarning)
-    return lambda func: wrappers.Route(func, path, 'POST', **kwargs)
-
-
-def put(path='', **kwargs):
-    warnings.warn('resource.put is deprecated, use hammock.put instead', UserWarning)
-    return lambda func: wrappers.Route(func, path, 'PUT', **kwargs)
-
-
-def delete(path='', **kwargs):
-    warnings.warn('resource.delete is deprecated, use hammock.delete instead', UserWarning)
-    return lambda func: wrappers.Route(func, path, 'DELETE', **kwargs)
