@@ -1,4 +1,6 @@
-#! /bin/python
+#! /usr/bin/env python
+
+
 import os
 import setuptools
 
@@ -14,10 +16,10 @@ setuptools.setup(
     author='Eyal Posener',
     author_email='eyal@stratoscale.com',
     description='A good place to REST',
-    license='Apache Software License',
+    license='Apache License 2.0',
     keywords='REST',
-    url='http://packages.python.org/hammock',
-    packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
+    url='http://github.com/stratoscale/hammock.git',
+    packages=setuptools.find_packages(exclude=['tests']),
     long_description=read('README.md'),
     include_package_data=True,
     install_requires=[
@@ -29,5 +31,14 @@ setuptools.setup(
         'decorator==4.0.6',
         'oslo.policy==0.11.0',
         'cliff==1.15.0',
-    ]
+    ],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache Software License',
+        'Natural Language :: English',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware',
+    ],
 )
