@@ -28,7 +28,7 @@ class TestExceptions(base.TestBase):
         response = self.assert_status(500, 'GET', '/exceptions/internal')
         self.assertEqual(500, response['status'])
         self.assertEqual('Internal Server Error', response['title'])
-        self.assertEqual(exceptions_resource.DESCRIPTION, response['description'])
+        self.assertEqual(repr(Exception(exceptions_resource.DESCRIPTION)), response['description'])
 
         response = self.assert_status(404, 'GET', '/exceptions/not_found')
         self.assertEqual(404, response['status'])

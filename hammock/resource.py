@@ -61,11 +61,11 @@ class Resource(object):
             common.log_exception(exc, request_uuid)
         except Exception as handle_exception:  # pylint: disable=broad-except
             exc = exceptions.InternalServerError(
-                'Error handling exception {}: {}'.format(str(exc), str(handle_exception)))
+                'Error handling exception {:r}: {}'.format(exc, str(handle_exception)))
         finally:
             # If exception was not converted yet, we convert it to internal server error.
             if not isinstance(exc, exceptions.HttpError):
-                exc = exceptions.InternalServerError(str(exc))
+                exc = exceptions.InternalServerError(repr(exc))
 
             # Raise exc, with the original traceback
             six.reraise(exc, None, sys.exc_info()[2])

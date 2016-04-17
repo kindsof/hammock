@@ -113,8 +113,8 @@ class Route(wrapper.Wrapper):
         except exceptions.HttpError:
             raise
         except Exception as exc:  # pylint: disable=broad-except
-            logging.exception('[Error parsing request kwargs %s] %s', req.uid, exc)
-            raise exceptions.BadRequest('Error parsing request parameters, {}'.format(exc))
+            logging.exception('[Error parsing request kwargs %s] %r', req.uid, exc)
+            raise exceptions.BadRequest('Error parsing request parameters, {:r}'.format(exc))
 
     def _convert_to_kwargs(self, req, collected_data):
         args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS, common.KW_HOST})
