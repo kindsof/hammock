@@ -108,7 +108,6 @@ class {{ class_name }}(object):
             response.raise_for_status()
             return result
         finally:
-            self.close()
             if eventually_close_file_object:
                 eventually_close_file_object.close()
 
