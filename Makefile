@@ -1,18 +1,17 @@
-all: tox packages rename
+all: tox build rename
 
-ifndef TESTS
- TESTS := discover -b tests -p "test_*.py"
-endif
+TESTS ?= discover -b tests -p "test_*.py"
 
-# TODO: remove this paragraph, python3.5 is not yet installed on the slaves...
-ifndef TOXENV
- TOXENV := py27
-endif
+# TODO: remove this paragraph, python3.5 is not yet installed on the build machines...
+TOXENV ?= py27
 ENV := TOXENV=$(TOXENV)
 
 .PHONY: tox
-tox:
+tox: .tox
 	$(ENV) tox
+
+.tox: dev-requirements.txt tox.ini setup.py
+	$(ENV) tox --notest --recreate
 
 clean:
 	find -name *.pyc -delete
@@ -33,10 +32,7 @@ coverage:
 unittest:
 	python -m unittest $(TESTS)
 
-install:$ requirements setup.py hammock/*
-	python setup.py install
-
-packages: rpm rename
+build: rpm rename
 
 rpm:  setup.py hammock/*
 	python setup.py bdist --formats=rpm
@@ -57,17 +53,17 @@ approve:
 prepareForCleanBuild:
 	sudo pip install tox
 
-copy_code_to_node:
-	sshpass -p 'rackattack' scp -r -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null hammock root@$(IP):/usr/lib/python2.7/site-packages/
+install:$ setup.py hammock/*
+	python setup.py install
 
-requirements: requirements.txt dev-requirements.txt
-	pip install --upgrade pip -r requirements.txt -r dev-requirements.txt
+requirements: dev-requirements.txt
+	pip install --upgrade pip -r -r dev-requirements.txt
 
-test_gunicorn:
+test-gunicorn:
 	gunicorn tests.app:application
 
-test_uwsgi:
+test-uwsgi:
 	python -m tests.app
 
-test_cli:
+test-cli:
 	python -m tests.cli
