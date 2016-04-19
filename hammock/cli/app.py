@@ -3,13 +3,12 @@ import logging
 import os
 import requests
 import cliff.app as app
-import cliff.interactive as interactive
+from . import colors as colors
 from . import command_manager as command_manager
 
 
 class App(app.App):
 
-    prompt = '> '
     description = 'CLI'
     version = ''
     REQUESTS_LOGGING_LEVEL = logging.ERROR
@@ -20,6 +19,11 @@ class App(app.App):
     OUTPUT_COLUMN_ORDER = []
     # COLORS: A dict, {column-name: {value: method-that-accepts-string-and-return-string}}
     OUTPUT_COLUMN_COLORS = {}
+
+    WELCOME = ''
+    PROMPT = colors.colorize('cyan', '> ', prompt=True)
+    HISTORY_FILE = os.path.expanduser('~/.hammock-cli-history')
+    HELP = ''
 
     def __init__(self, client, **kwargs):
         """
@@ -74,6 +78,6 @@ class App(app.App):
         self.session.headers.update(dict(headers))
 
     def _interactive_app_factory(self, *args, **kwargs):
-        interactive_app = interactive.InteractiveApp(*args, **kwargs)
-        interactive_app.prompt = self.prompt
-        return interactive_app
+        # Defer importing interactive as cmd2 is a slow import
+        from . import interact
+        return interact.Interact(*args, **kwargs)
