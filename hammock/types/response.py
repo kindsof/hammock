@@ -5,16 +5,17 @@ except ImportError:
     import json
 import six
 import warnings
+import httplib
 import hammock.common as common
 from . import headers as headers_module
 
 
 class Response(object):
 
-    def __init__(self, content, headers, status):
+    def __init__(self, content=None, headers=None, status=httplib.OK):
         self._json = None
         self.content = content
-        self.headers = headers_module.Headers(headers)
+        self.headers = headers_module.Headers(headers or {})
         self.status = str(status)
 
     @classmethod
@@ -82,6 +83,14 @@ class Response(object):
         if not self._json:
             self._json = json.load(self.content) if self.is_stream else json.loads(self.content)
         return self._json
+
+    @json.setter
+    def json(self, data):
+        self.content = json.dumps(data)
+        self.headers.update({
+            common.CONTENT_LENGTH: len(self.content),
+            common.CONTENT_TYPE: common.TYPE_JSON,
+        })
 
     @classmethod
     def _convert_result_to_dict(cls, result):

@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import codecs
 import ujson as json
 import hammock
-from hammock import common
 from hammock import types
 
 PORT = 12345
@@ -18,10 +17,7 @@ def pre_manipulate(request, _):
 def post_manipulate(response, _):
     body = response.json
     assert body['body'].pop('some_more_data') == 'b'
-    body = json.dumps(body)
-    headers = types.Headers(response.headers)
-    headers[common.CONTENT_LENGTH] = str(len(body))
-    return types.Response(body, headers, response.status)
+    response.json = body
 
 
 def pre_manipulate_path(request, _):
@@ -31,10 +27,7 @@ def pre_manipulate_path(request, _):
 def post_manipulate_path(response, _):
     body = response.json
     assert body['path'] == '/a'
-    body = json.dumps(body)
-    headers = types.Headers(response.headers)
-    headers[common.CONTENT_LENGTH] = str(len(body))
-    return types.Response(body, headers, response.status)
+    response.json = body
 
 
 class Redirect(hammock.Resource):
@@ -67,18 +60,13 @@ class Redirect(hammock.Resource):
         post_process=post_manipulate,
     )
     def post_passthrough_with_body(self, request):
-        body = json.dumps(dict(
+        body = dict(
             body=json.loads(request.stream),
             headers=dict(request.headers),
-        ))
-        return types.Response(
-            body,
-            {
-                common.CONTENT_LENGTH: str(len(body)),
-                common.CONTENT_TYPE: common.TYPE_JSON
-            },
-            200
         )
+        response = types.Response()
+        response.json = body
+        return response
 
     @hammock.get(
         dest=DEST,
