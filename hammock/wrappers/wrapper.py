@@ -73,7 +73,7 @@ class Wrapper(object):
             resp = self._wrapper(req)
 
             if self.post_process:
-                resp = self.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
+                resp = self.post_process(resp, context, **req.url_params) or resp  # pylint: disable=not-callable
 
         except Exception as exc:  # pylint: disable=broad-except
             self._resource.handle_exception(exc, self.exception_handler, req.uid)
