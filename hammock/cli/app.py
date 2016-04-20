@@ -81,3 +81,7 @@ class App(app.App):
         # Defer importing interactive as cmd2 is a slow import
         from . import interact
         return interact.Interact(*args, **kwargs)
+
+    @staticmethod
+    def colorize(color, text, prompt=False):
+        return colors.colorize(color, text, prompt=prompt)
