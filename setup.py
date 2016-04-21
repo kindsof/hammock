@@ -31,6 +31,7 @@ setuptools.setup(
         'decorator==4.0.6',
         'oslo.policy==0.11.0',
         'cliff==1.15.0',
+        'jinja2==2.8',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
