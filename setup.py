@@ -11,7 +11,7 @@ def read(fname):
 
 
 setuptools.setup(
-    name='hammock',
+    name='hammock-rest',
     version='0.0.1',
     author='Eyal Posener',
     author_email='eyal@stratoscale.com',

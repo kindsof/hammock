@@ -40,7 +40,7 @@ rpm:  setup.py hammock/*
 	rm -rf build
 	rm dist/*.src.rpm dist/*.tar.gz
 
-rename: dist/hammock-0.0.1-1.noarch.rpm
+rename: dist/hammock-rest-0.0.1-1.noarch.rpm
 	- rm -f $(basename $<)-*.rpm
 	mv $< $(basename $<)-$(shell git rev-parse --short=7 HEAD).rpm
 
