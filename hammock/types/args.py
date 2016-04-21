@@ -55,10 +55,6 @@ class PositionalArg(object):
         return self.PARSER_TYPE_MAP.get(self.type, self.type)
 
     @property
-    def _parser_nargs(self):
-        return self.PARSER_NARGS_MAP.get(self.type, None)
-
-    @property
     def _parser_name(self):
         # Can't convert name with names.to_command, no option to add a 'dest' keyword
         # when using a positional argument.

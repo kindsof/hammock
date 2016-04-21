@@ -159,14 +159,9 @@ class Route(wrapper.Wrapper):
             if arg.type is list:
                 if not isinstance(value, list):
                     data[name] = [value] if value is not None else []
-            elif arg.type is bool:
-                data[name] = common.parse_bool(value)
             elif arg.type is not None and value is not None:
                 try:
-                    if isinstance(value, dict):
-                        data[name] = value
-                    else:
-                        data[name] = arg.type(value)
+                    data[name] = arg.type(value)
                 except ValueError as exc:
                     raise exceptions.BadRequest(
                         "argument {} should be of type {}, got bad value: '{}'. ({})".format(
