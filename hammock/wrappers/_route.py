@@ -78,11 +78,7 @@ class Route(wrapper.Wrapper):
             if common.KW_HEADERS in self.spec.args:
                 kwargs[common.KW_HEADERS] = req.headers
             if common.KW_HOST in self.spec.args:
-                kwargs[common.KW_HOST] = '{}://{}{}'.format(
-                    req.parsed_url.scheme,
-                    req.parsed_url.netloc,
-                    ':{}'.format(req.parsed_url.port) if req.parsed_url.port else ''
-                )
+                kwargs[common.KW_HOST] = '{}://{}'.format(req.parsed_url.scheme, req.parsed_url.netloc)
 
             # Invoke the routing method:
             result = self(**kwargs)
