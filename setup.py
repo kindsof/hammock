@@ -30,8 +30,11 @@ setuptools.setup(
         'munch==2.0.3',
         'decorator==4.0.6',
         'oslo.policy==0.11.0',
-        'cliff==1.15.0',
         'jinja2==2.8',
+
+        # TODO: The following should be moved to extras_requires['client']
+        'cliff==1.15.0',
+        'coloredlogs==5.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

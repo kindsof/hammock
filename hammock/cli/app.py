@@ -70,6 +70,11 @@ class App(app.App):
         self._set_headers()
         self.client = self.client_class(url=self.options.url, session=self.session)
         self.command_manager.load_commands(self.client)
+        try:
+            import coloredlogs
+            coloredlogs.install(fmt='%(message)s')
+        except ImportError:
+            pass
 
     def _set_headers(self):
         headers = [header.split(':') for header in self.options.headers.split(',') if ':' in header]
