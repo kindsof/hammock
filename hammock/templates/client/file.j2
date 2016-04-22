@@ -19,6 +19,8 @@ def url_join(*args):
 
 class {{ class_name }}(object):
 
+    ROUTE_CLI_COMMAND_MAP = {'login': False, 'logout': False, 'refresh': False}
+
     def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %}, token=None, timeout=None, headers=None, retries=None, session=None):
         """
         :param url: url to connect to
@@ -38,7 +40,7 @@ class {{ class_name }}(object):
         self._set_token(token)
         self._client.headers.update(headers or {})
 {%- for resource_name, resource_class, resource_path in resources_names %}
-        self.{{ resource_name }} = self.{{ resource_class }}(self._fetch, '{{ resource_path }}')
+        {% if resource_name %}self.{{ resource_name }} = self.{{ resource_class }}(self._fetch, '{{ resource_path }}'){% endif %}
 {%- endfor %}
 
     def close(self):
