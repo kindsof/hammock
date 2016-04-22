@@ -2,6 +2,8 @@ from __future__ import absolute_import
 import logging
 import requests
 import argparse
+import sys
+import shutil
 import cliff.command as command
 import cliff.show as show
 import cliff.lister as lister
@@ -27,6 +29,8 @@ def factory(func, column_order=None, column_colors=None):
             return type(func.__name__, (CommandItem, ), overrides)
         elif spec.returns.type is list:
             return type(func.__name__, (CommandList, ), overrides)
+        elif spec.returns.type == 'file':
+            return type(func.__name__, (CommandFile, ), overrides)
     return type(func.__name__, (Command, ), overrides)
 
 
@@ -111,6 +115,10 @@ class Command(command.Command):
 
 
 class CommandItem(Command, show.ShowOne):
+    """
+    Command that returns a single item,
+    in the form of a dict.
+    """
 
     def take_action(self, parsed_args):  # pylint: disable=unused-argument
         result = self._action(parsed_args)
@@ -119,6 +127,10 @@ class CommandItem(Command, show.ShowOne):
 
 
 class CommandList(Command, lister.Lister):
+    """
+    Command that retruns a list of items,
+    each one is a dict.
+    """
 
     def take_action(self, parsed_args):  # pylint: disable=unused-argument
         objects = self._action(parsed_args)
@@ -139,3 +151,23 @@ class CommandList(Command, lister.Lister):
             keys |= set(obj)
 
         return self._sorted_columns(keys)
+
+
+class CommandFile(Command):
+    """
+    Command that returns a file,
+    save it into a local file.
+    """
+
+    def get_parser(self, prog_name):
+        parser = super(CommandFile, self).get_parser(prog_name)
+        parser.add_argument('--path', help='Destination path.')
+        return parser
+
+    def take_action(self, parsed_args):  # pylint: disable=unused-argument
+        result = self._action(parsed_args)
+        if parsed_args.path:
+            with open(parsed_args.path, 'w') as destination:
+                shutil.copyfileobj(result, destination)
+        else:
+            shutil.copyfileobj(result, sys.stdout)

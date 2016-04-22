@@ -31,6 +31,7 @@ class PositionalArg(object):
         'list': list,
         'dict': dict,
         'None': None,
+        'file': 'file',
         None: lambda x: x,
     }
 
