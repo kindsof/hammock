@@ -24,10 +24,18 @@ class CLINames(hammock.Resource):
 
     @hammock.post('set-true')
     def set_true(self, set_true=False):
+        """
+        :param bool[False] set_true: Set true
+        :return bool:
+        """
         return set_true
 
     @hammock.post('set-false')
     def set_false(self, set_false=True):
+        """
+        :param bool[True] set_false: Set false
+        :return bool:
+        """
         return set_false
 
     @hammock.post('bool-type')

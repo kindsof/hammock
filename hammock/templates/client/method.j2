@@ -4,7 +4,7 @@ def {{ method_name }}(self
         {%- endif -%}
         {%- if kwargs -%}
             {%- for k, v in kwargs.items() -%}
-                , {{ k }}={{ v }}
+                , {{ k }}=None
             {%- endfor -%}
         {%- endif -%}
         {%- if keywords %}, **{{ keywords }}{% endif -%}

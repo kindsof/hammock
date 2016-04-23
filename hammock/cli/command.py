@@ -25,11 +25,11 @@ def factory(func, column_order=None, column_colors=None):
     }
 
     if spec.returns:
-        if spec.returns.type is dict:
+        if spec.returns.type_name == 'dict':
             return type(func.__name__, (CommandItem, ), overrides)
-        elif spec.returns.type is list:
+        elif spec.returns.type_name == 'list':
             return type(func.__name__, (CommandList, ), overrides)
-        elif spec.returns.type == 'file':
+        elif spec.returns.type_name == 'file':
             return type(func.__name__, (CommandFile, ), overrides)
     return type(func.__name__, (Command, ), overrides)
 
@@ -48,9 +48,9 @@ class Command(command.Command):
 
     def take_action(self, parsed_args):
         result = self._action(parsed_args)
-        if result is not None and (self.spec.returns is None or self.spec.returns.type is not None):
+        if result is not None and (self.spec.returns is None or self.spec.returns.convert is not None):
             if self.spec.returns:
-                result = self.spec.returns.type(result)
+                result = self.spec.returns.convert(result)
             self.app.stdout.write(str(result) + '\n')
 
     def get_parser(self, prog_name):
@@ -79,8 +79,8 @@ class Command(command.Command):
     def _get_doc(self):
         doc = self.spec.doc or ''
         return_doc = ''
-        if self.spec.returns and self.spec.returns.type is not None:
-            return_type = ' {}'.format(self.spec.returns.type) if self.spec.returns.type else ''
+        if self.spec.returns and self.spec.returns.convert is not None:
+            return_type = ' {}'.format(self.spec.returns.type_name) if self.spec.returns.type_name else ''
             return_doc = ': {}'.format(self.spec.returns.doc) if self.spec.returns.doc else ''
             return_doc = 'Returns{}{}'.format(return_type, return_doc)
         return '\n\n'.join([doc, return_doc])

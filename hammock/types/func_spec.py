@@ -6,7 +6,7 @@ import hammock.types.args as args
 
 
 PARAM_IS_SPECIAL = re.compile(r'^[ ]*:(param|return)')
-PARAM_RE = re.compile(r'^[ ]*:param([ ]+(?P<type>\w+))?[ ]+(?P<name>\w+):[ ]*(?P<doc>.*)$', re.MULTILINE)
+PARAM_RE = re.compile(r'^[ ]*:param([ ]+(?P<type>[\w\[\]]+))?[ ]+(?P<name>\w+):[ ]*(?P<doc>.*)$', re.MULTILINE)
 RETURN_RE = re.compile(r'^[ ]*:return([ ]+(?P<type>\w+))?:[ ]*(?P<doc>.*)$', re.MULTILINE)
 
 

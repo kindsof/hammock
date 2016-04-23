@@ -15,6 +15,8 @@ class PositionalArg(object):
     PARSER_NARGS_MAP = {dict: '*', list: '*'}
     ALLOWED_ARG_TYPES = {
         'bool': common.parse_bool,
+        'bool[True]': common.parse_bool,
+        'bool[False]': common.parse_bool,
         'int': int,
         'float': float,
         'str': str,
@@ -37,7 +39,8 @@ class PositionalArg(object):
 
     def __init__(self, name, type, doc, default=None):  # pylint: disable=redefined-builtin
         self.name = name
-        self.type = self._get_type(type)
+        self.type_name = type
+        self.convert = self._get_converter()
         self.doc = doc
         self.default = default
 
@@ -46,14 +49,14 @@ class PositionalArg(object):
         self._parser_update_kwargs(kwargs)
         parser.add_argument(self._parser_name, **kwargs)
 
-    def _get_type(self, type_string):
-        if type_string and type_string not in self.ALLOWED_ARG_TYPES:
-            raise RuntimeError('param type {} not allowed'.format(type_string))
-        return self.ALLOWED_ARG_TYPES[type_string]
+    def _get_converter(self):
+        if self.type_name and self.type_name not in self.ALLOWED_ARG_TYPES:
+            raise RuntimeError('param type {} not allowed'.format(self.type_name))
+        return self.ALLOWED_ARG_TYPES[self.type_name]
 
     @property
     def _parser_type(self):
-        return self.PARSER_TYPE_MAP.get(self.type, self.type)
+        return self.PARSER_TYPE_MAP.get(self.convert, self.convert)
 
     @property
     def _parser_name(self):
@@ -62,7 +65,7 @@ class PositionalArg(object):
         return self.name
 
     def _parser_update_kwargs(self, kwargs):
-        if self.type is list:
+        if self.convert is list:
             kwargs['nargs'] = '*'
 
 
@@ -77,10 +80,10 @@ class OptionalArg(PositionalArg):
         super(OptionalArg, self)._parser_update_kwargs(kwargs)
         # dest keyword can be added only if the argument is optional,
         kwargs['dest'] = self.name
-        if self.default is True:
+        if self.type_name == 'bool[True]':
             kwargs['action'] = 'store_false'
             kwargs.pop('type', None)
-        elif self.default is False:
+        elif self.type_name == 'bool[False]':
             kwargs['action'] = 'store_true'
             kwargs.pop('type', None)
         else:
@@ -104,7 +107,7 @@ class ReturnArg(PositionalArg):
     def __init__(self, type, doc):  # pylint: disable=redefined-builtin
         super(ReturnArg, self).__init__(None, type, doc)
 
-    def _get_type(self, type_string):
-        if type_string and type_string not in self.ALLOWED_RETURN_TYPES:
-            raise RuntimeError('return type {} not allowed'.format(type_string))
-        return self.ALLOWED_RETURN_TYPES[type_string]
+    def _get_converter(self):
+        if self.type_name and self.type_name not in self.ALLOWED_RETURN_TYPES:
+            raise RuntimeError('return type {} not allowed'.format(self.type_name))
+        return self.ALLOWED_RETURN_TYPES[self.type_name]

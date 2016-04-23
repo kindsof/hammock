@@ -9,7 +9,16 @@ import hammock.types.func_spec as func_spec
 import hammock.common as common
 
 
-def test_func(an_int, a_string, an_arg_without_type, dict_arg, a_default_bool=True, **kwargs_parameter):  # pylint: disable=unused-argument
+def test_func(  # pylint: disable=unused-argument
+    an_int,
+    a_string,
+    an_arg_without_type,
+    dict_arg,
+    a_default_bool=None,
+    a_default_bool_true=True,
+    a_default_bool_false=False,
+    **kwargs_parameter
+):
     """
     This is a test function
     Second line doc
@@ -19,6 +28,8 @@ def test_func(an_int, a_string, an_arg_without_type, dict_arg, a_default_bool=Tr
     :param an_arg_without_type: no type here...
     :param dict dict_arg: some dict argument.
     :param bool a_default_bool: a boolean value with default True.
+    :param bool[True] a_default_bool_true: a boolean value with default True.
+    :param bool[False] a_default_bool_false: a boolean value with default True.
     :param kwargs_parameter: some more arguments.
     :return dict: return value
     """
@@ -31,18 +42,27 @@ class TestFuncSpec(unittest.TestCase):
         spec = func_spec.FuncSpec(test_func)
 
         self.assertListEqual(spec.args, ['an_int', 'a_string', 'an_arg_without_type', 'dict_arg'])
-        self.assertDictEqual(spec.kwargs, {'a_default_bool': True})
+        self.assertDictEqual(spec.kwargs, {
+            'a_default_bool': None,
+            'a_default_bool_true': True,
+            'a_default_bool_false': False,
+        })
 
         self.assertEqual(spec.doc, '\nThis is a test function\nSecond line doc')
 
-        self.assertEqual(spec.args_info('an_int').type, int)
-        self.assertEqual(spec.args_info('a_string').type, str)
-        self.assertEqual(spec.args_info('a_default_bool').type, common.parse_bool)
-        self.assertEqual(spec.args_info('dict_arg').type, json.loads)
-        self.assertEqual(spec.args_info('kwargs_parameter').type, json.loads)
+        self.assertEqual(spec.args_info('an_int').convert, int)
+        self.assertEqual(spec.args_info('a_string').convert, str)
+        self.assertEqual(spec.args_info('a_default_bool').convert, common.parse_bool)
+        self.assertEqual(spec.args_info('a_default_bool_true').convert, common.parse_bool)
+        self.assertEqual(spec.args_info('a_default_bool_false').convert, common.parse_bool)
+        self.assertEqual(spec.args_info('a_default_bool').type_name, 'bool')
+        self.assertEqual(spec.args_info('a_default_bool_true').type_name, 'bool[True]')
+        self.assertEqual(spec.args_info('a_default_bool_false').type_name, 'bool[False]')
+        self.assertEqual(spec.args_info('dict_arg').convert, json.loads)
+        self.assertEqual(spec.args_info('kwargs_parameter').convert, json.loads)
 
         self.assertEqual(spec.args_info('an_int').doc, 'integer value.')
         self.assertEqual(spec.args_info('a_string').doc, 'string value.\nsecond line doc')
 
-        self.assertEqual(spec.returns.type, dict)
+        self.assertEqual(spec.returns.convert, dict)
         self.assertEqual(spec.returns.doc, 'return value')
