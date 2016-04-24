@@ -128,7 +128,7 @@ class CommandItem(Command, show.ShowOne):
 
 class CommandList(Command, lister.Lister):
     """
-    Command that retruns a list of items,
+    Command that returns a list of items,
     each one is a dict.
     """
 
