@@ -35,7 +35,7 @@ POST = 'POST'
 DELETE = 'DELETE'
 
 AUTH_RESOURCE_NAME = 'auth'
-AUTH_SPECIAL_METHODS_NAMES = {'login', 'logout', 'refresh'}
+AUTH_SPECIAL_METHODS_NAMES = {'logout', 'refresh'}
 
 
 def url_join(*parts):

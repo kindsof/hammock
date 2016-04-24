@@ -19,6 +19,31 @@ NOT_SET = object()
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
+class HammockString(str):
+    def __new__(cls, data='', headers=None):
+        new = str.__new__(cls, data)
+        new.headers = headers
+        return new
+
+class HammockDict(munch.Munch):
+
+    def __init__(self, seq=None, headers=None, **kwargs):
+        super(HammockDict, self).__init__(seq, **kwargs)
+        self.headers = headers
+
+    def __setattr__(self, key, value):
+        """
+        If setting the special attr 'headers', set it as a attr, otherwise, set as a key
+        """
+        if key != "headers":
+            super(HammockDict, self).__setattr__(key, value)
+        else:
+            object.__setattr__(self, key, value)
+
+class HammockList(list):
+    def __init__(self, seq=(), headers=None):
+        super(HammockList, self).__init__(seq)
+        self.headers = headers
 
 {{file_class}}
 
@@ -172,14 +197,22 @@ class {{ class_name }}(object):
     def _jsonify(self, response):
         try:
             result = response.json()
-            if type(result) == dict:
-                result = munch.Munch(result)
-            elif type(result) == list:
-                result = [item if type(item) != dict else munch.Munch(item) for item in result]
-            return result
         except ValueError:
             if response.text:
                 LOG.warning("Could not parse json from '%s'", response.text)
+            return
+        try:
+            if type(result) == dict:
+                result = HammockDict(result, headers=response.headers)
+            elif type(result) == list:
+                result = HammockList([item if type(item) != dict else munch.Munch(item) for item in result],
+                                     headers=response.headers)
+            elif isinstance(result, basestring):
+                result = HammockString(result, headers=response.headers)
+        except:
+            import traceback
+            raise Exception(traceback.format_exc())
+        return result
 
 {{ resource_classes|join("") }}
 if __name__ == '__main__':
