@@ -5,7 +5,6 @@ try:
     import ujson as json
 except ImportError:
     import json
-import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions
 from . import url as _module
@@ -57,15 +56,6 @@ class Request(object):
     @property
     def relative_uri(self):
         return self._url.path + (('?' + self._url.query) if self._url.query else '')
-
-    def get_header(self, key):
-        warnings.warn('This method is deprecated, please use req.headers.get instead', UserWarning)
-        return self.headers.get(key)
-
-    @property
-    def _cached_headers(self):  # XXX: backward compatibility, should be removed
-        warnings.warn('_cached_headers is deprecated, use headers', UserWarning)
-        return self.headers
 
     @property
     def collected_data(self):

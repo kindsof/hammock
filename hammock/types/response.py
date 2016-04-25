@@ -4,7 +4,6 @@ try:
 except ImportError:
     import json
 import six
-import warnings
 import httplib
 import hammock.common as common
 from . import headers as _headers
@@ -59,20 +58,6 @@ class Response(object):
             content = result[common.KW_CONTENT]
 
         return cls(content, response_headers, response_status)
-
-    def set_header(self, key, value):
-        warnings.warn('set_header is deprecated, use headers[key] = value instead', UserWarning)
-        self.headers[key] = value
-
-    @property
-    def body(self):
-        warnings.warn('body is deprecated, use .content instead', UserWarning)
-        return self.content
-
-    @property
-    def stream(self):
-        warnings.warn('stream is deprecated, use .content instead', UserWarning)
-        return self.content
 
     @property
     def is_stream(self):
