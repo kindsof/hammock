@@ -12,6 +12,7 @@ class Route(wrapper.Wrapper):
     """
     Decorates a routing method
     """
+    METHOD_SPECIAL_ARGS = {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS, common.KW_HOST}
 
     def __init__(
         self, func, path, method,
@@ -56,6 +57,9 @@ class Route(wrapper.Wrapper):
         if self.method in common.URL_PARAMS_METHODS and common.KW_LIST in (set(self.spec.args) | set(self.spec.kwargs)):
             raise exceptions.BadResourceDefinition(
                 "Can't declare a url params method with _list argument, it it useful only when you get request body.")
+
+        self.required_args = set(self.spec.args[:]) - self.METHOD_SPECIAL_ARGS
+        self.required_args_mapped = {self._get_mapped_keyword(arg) for arg in self.required_args}
 
     def _wrapper(self, req):
         """
@@ -109,47 +113,34 @@ class Route(wrapper.Wrapper):
 
     def _extract_kwargs(self, req, collected_data):
         try:
-            kwargs = self._convert_to_kwargs(req, collected_data)
-            logging.debug('[kwargs %s] %s', req.uid, kwargs)
-            return kwargs
+            self._check_for_missing_required_arguments(collected_data)
+            self._convert_to_kwargs(collected_data)
+            logging.debug('[kwargs %s] %s', req.uid, collected_data)
+            return collected_data
         except exceptions.HttpError:
             raise
         except Exception as exc:  # pylint: disable=broad-except
             logging.exception('[Error parsing request kwargs %s] %r', req.uid, exc)
             raise exceptions.BadRequest('Error parsing request parameters, {:r}'.format(exc))
 
-    def _convert_to_kwargs(self, req, collected_data):
-        args = list(set(self.spec.args[:]) - {common.KW_CREDENTIALS, common.KW_ENFORCER, common.KW_HEADERS, common.KW_HOST})
-        kwargs = collected_data
+    def _convert_to_kwargs(self, collected_data):
+        # Handle args keyword conversion
+        collected_data.update({
+            keyword: collected_data.pop(self._get_mapped_keyword(keyword))
+            for keyword in self.required_args
+        })
+        # Handle kwargs keyword conversion
+        collected_data.update({
+            keyword: collected_data.pop(self._get_mapped_keyword(keyword), default)
+            for keyword, default in six.iteritems(self.spec.kwargs)
+        })
 
-        for keyword, error_msg in (
-            (common.KW_FILE, 'expected {} as {}'.format(common.CONTENT_TYPE, common.TYPE_OCTET_STREAM)),
-            (common.KW_LIST, 'expected {} {} as list'.format(common.CONTENT_TYPE, common.TYPE_JSON)),
-        ):
-            if keyword in args:
-                try:
-                    kwargs[keyword] = req.collected_data[self._get_mapped_keyword(keyword)]
-                except KeyError:
-                    raise exceptions.BadData(error_msg)
-
-                args.remove(keyword)
-
-        expected = set([self._get_mapped_keyword(arg) for arg in args])
-        request_arguments = set(kwargs)
-        missing = expected - request_arguments
+    def _check_for_missing_required_arguments(self, kwargs):
+        missing = self.required_args_mapped - set(kwargs)
         if missing:
             raise exceptions.BadRequest(
                 'Missing parameters: {}. Request arguments {}. Expected {}.'.format(
-                    ', '.join(missing), ', '.join(request_arguments), ', '.join(expected)))
-
-        # Handle args keyword conversion
-        kwargs.update({keyword: kwargs.pop(self._get_mapped_keyword(keyword)) for keyword in args})
-
-        # Handle kwargs keyword conversion
-        kwargs.update({keyword: kwargs.pop(self._get_mapped_keyword(keyword), default)
-                       for keyword, default in six.iteritems(self.spec.kwargs)})
-
-        return kwargs
+                    ', '.join(missing), ', '.join(kwargs), ', '.join(self.required_args_mapped)))
 
     def _convert_argument_types(self, data):
         """
@@ -201,10 +192,7 @@ class Route(wrapper.Wrapper):
 
     def _get_mapped_keyword(self, original_keyword):
         """Return the alternative keyword if one exists."""
-        if original_keyword not in self.keyword_map:
-            return original_keyword
-
-        return self.keyword_map[original_keyword]
+        return self.keyword_map.get(original_keyword, original_keyword)
 
     def _validate_keyword_map(self):
         """Validate the keyword map content."""
