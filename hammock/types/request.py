@@ -1,28 +1,24 @@
 from __future__ import absolute_import
+
 import copy
 import logging
-try:
-    import ujson as json
-except ImportError:
-    import json
+
 import hammock.common as common
-import hammock.exceptions as exceptions
 from . import url as _module
-from . import headers as _headers
 from . import file as file_module
+from . import http_base as http_base
 
 LOG = logging.getLogger(__name__)
 
 
-class Request(object):
-    def __init__(self, method, url, headers, stream, url_params):
+class Request(http_base.HttpBase):
+
+    def __init__(self, method, url, headers, content, url_params):
+        super(Request, self).__init__(headers, content)
         self.method = method.upper()
         self._collected_data = None
         self._url = _module.Url(url)
-        self.headers = _headers.Headers(headers)
-        self.stream = stream
         self.url_params = url_params
-        self.uid = common.uid()
         LOG.debug('[request %s] %s %s', self.uid, self.method, self.url)
 
     @property
@@ -82,27 +78,17 @@ class Request(object):
         """
         self.path = self.path.lstrip("/")[len(prefix.strip("/")):]
 
-    def set_content(self, content):
-        self.stream = content
-        self.headers[common.CONTENT_LENGTH] = len(content)
-
     def _collect_body(self):
         content_type = self.headers.get(common.CONTENT_TYPE, '')
         if common.TYPE_JSON in content_type:
-            body_string = self.stream.read()
-            if not body_string:
+            body = self.json
+            if isinstance(body, dict):
+                return body
+            elif isinstance(body, list):
+                return {common.KW_LIST: body}
+            elif body is None:
                 return None
-            try:
-                body = json.loads(body_string)
-                if isinstance(body, dict):
-                    return body
-                elif isinstance(body, list):
-                    return {common.KW_LIST: body}
-                elif body is None:
-                    return None
-                else:
-                    return {common.KW_CONTENT: body}
-            except (ValueError, UnicodeDecodeError):
-                raise exceptions.MalformedJson("Could not parse json body '{}'".format(body_string))
+            else:
+                return {common.KW_CONTENT: body}
         elif common.TYPE_OCTET_STREAM in content_type:
-            return {common.KW_FILE: file_module.File(self.stream, self.headers.get(common.CONTENT_LENGTH))}
+            return {common.KW_FILE: file_module.File(self.content, self.headers.get(common.CONTENT_LENGTH))}

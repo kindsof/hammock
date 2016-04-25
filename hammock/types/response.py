@@ -3,18 +3,22 @@ try:
     import ujson as json
 except ImportError:
     import json
-import six
 import httplib
 import hammock.common as common
-from . import headers as _headers
+from . import http_base as http_base
 
 
-class Response(object):
+class Response(http_base.HttpBase):
 
     def __init__(self, content=None, headers=None, status=httplib.OK):
-        self._json = None
-        self.content = content
-        self.headers = _headers.Headers(headers or {})
+        """
+        Create a response object
+        :param content: Content of response, might be a file-like object
+            or any jsonable object.
+        :param headers: headers of response.
+        :param status: status code of response.
+        """
+        super(Response, self).__init__(headers, content)
         self.status = str(status)
 
     @classmethod
@@ -30,62 +34,38 @@ class Response(object):
         """
         result = cls._convert_result_to_dict(result)
 
-        response_headers = _headers.Headers(result.pop(common.KW_HEADERS, {}))
+        response_headers = result.pop(common.KW_HEADERS, {})
         content_stream = result.pop(common.KW_FILE, None)
         response_status = result.pop(common.KW_STATUS, status)
 
         if content_stream:
             content = common.to_bytes(content_stream)
             response_headers[common.CONTENT_TYPE] = common.TYPE_OCTET_STREAM
-            length = common.get_stream_length(content)
-            if length:
-                response_headers[common.CONTENT_LENGTH] = length
             response_headers.update(result)
         elif content_type == common.TYPE_JSON:
             if common.KW_CONTENT in result:
                 content = result.pop(common.KW_CONTENT)
                 response_headers.update(result)
+                if content is not None:
+                    content = json.dumps(content)
             else:
                 content = result
-            if content is not None:
-                content = json.dumps(content)
-                response_headers.update({
-                    common.CONTENT_LENGTH: len(content),
-                    common.CONTENT_TYPE: common.TYPE_JSON,
-                })
         else:
             response_headers[common.CONTENT_TYPE] = content_type
             content = result[common.KW_CONTENT]
 
         return cls(content, response_headers, response_status)
 
-    @property
-    def is_stream(self):
-        return hasattr(self.content, 'read')
-
-    @property
-    def json(self):
-        if not self._json:
-            body = self.content if not self.is_stream else self.content.read()
-            try:
-                self._json = json.loads(body)
-            except (ValueError, UnicodeDecodeError) as exc:
-                raise ValueError("Failed parsing json response '{}': {}".format(body, exc))
-        return self._json
-
-    @json.setter
-    def json(self, data):
-        self.content = json.dumps(data)
-        self.headers.update({
-            common.CONTENT_LENGTH: len(self.content),
-            common.CONTENT_TYPE: common.TYPE_JSON,
-        })
-
     @classmethod
     def _convert_result_to_dict(cls, result):
+        """
+        Convert any result into a dict-result.
+        :param result:
+        :return:
+        """
         if isinstance(result, dict):
             return result
-        elif isinstance(result, (list, six.string_types, six.binary_type, bool, type(None))):
+        elif not http_base.is_stream(result):
             return {common.KW_CONTENT: result}
         else:
             return {common.KW_FILE: result}

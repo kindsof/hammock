@@ -67,13 +67,20 @@ class Wrapper(object):
         try:
             if self.trim_prefix:
                 req.trim_prefix(self.trim_prefix)
+
             if self.pre_process:
                 self.pre_process(req, context, **req.url_params)  # pylint: disable=not-callable
 
+            req.update_content_length()
+
             resp = self._wrapper(req)
 
+            resp.update_content_length()
+
             if self.post_process:
-                resp = self.post_process(resp, context, **req.url_params) or resp  # pylint: disable=not-callable
+                self.post_process(resp, context, **req.url_params)  # pylint: disable=not-callable
+
+            resp.update_content_length()
 
         except Exception as exc:  # pylint: disable=broad-except
             self._resource.handle_exception(exc, self.exception_handler, req.uid)

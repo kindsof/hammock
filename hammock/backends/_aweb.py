@@ -42,7 +42,7 @@ class AWeb(backend.Backend):
             method=backend_req.method,
             url=urllib.parse.unparse(backend_req.scheme, backend_req.host, backend_req.path, backend_req.query_string),
             headers=backend_req.headers,
-            stream=backend_req.content if backend_req.has_body else None,
+            content=backend_req.content if backend_req.has_body else None,
             url_params=backend_req.match_info,
         )
 

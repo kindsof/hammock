@@ -62,20 +62,6 @@ def uid(length=8):
     return ''.join(random.sample(ID_LETTERS, length))
 
 
-def get_stream_length(stream):
-    if hasattr(stream, 'len'):
-        return stream.len
-    if hasattr(stream, '__len__'):
-        return len(stream)
-    elif isinstance(stream, (six.BytesIO, six.moves.StringIO)):
-        try:
-            stream.seek(0, six.io.SEEK_END)
-            return stream.tell()
-        finally:
-            stream.seek(0)
-    return None
-
-
 def to_bytes(source):
     if isinstance(source, six.string_types):
         return codecs.encode(source, ENCODING)

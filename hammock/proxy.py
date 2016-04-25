@@ -15,7 +15,7 @@ def proxy(req, dest):
     inner_request = requests.Request(
         req.method,
         url=redirection_url,
-        data=req.stream if req.method not in common.URL_PARAMS_METHODS else None,
+        data=req.content if req.method not in common.URL_PARAMS_METHODS else None,
         headers={
             k: v if k.lower() != "host" else six.moves.urllib.parse.urlparse(dest).netloc
             for k, v in six.iteritems(req.headers)

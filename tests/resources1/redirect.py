@@ -1,6 +1,4 @@
 from __future__ import absolute_import
-import codecs
-import ujson as json
 import hammock
 from hammock import types
 
@@ -9,9 +7,9 @@ DEST = "http://localhost:{:d}".format(PORT)
 
 
 def pre_manipulate(request, _):
-    body = json.load(codecs.getreader('utf-8')(request.stream))
+    body = request.json
     body['some_more_data'] = 'b'
-    request.set_content(json.dumps(body))
+    request.json = body
 
 
 def post_manipulate(response, _):
@@ -60,13 +58,11 @@ class Redirect(hammock.Resource):
         post_process=post_manipulate,
     )
     def post_passthrough_with_body(self, request):
-        body = dict(
-            body=json.loads(request.stream),
-            headers=dict(request.headers),
-        )
-        response = types.Response()
-        response.json = body
-        return response
+        body = {
+            'body': request.json,
+            'headers': dict(request.headers),
+        }
+        return types.Response(content=body)
 
     @hammock.get(
         dest=DEST,
