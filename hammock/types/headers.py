@@ -1,10 +1,8 @@
 from __future__ import absolute_import
-import falcon.util.structures as structures
+import requests.structures as structures
 
 
 class Headers(structures.CaseInsensitiveDict):
-    def __init__(self, headers):
-        super(Headers, self).__init__(headers)
 
     def __setitem__(self, key, value):
         super(Headers, self).__setitem__(key, str(value))
