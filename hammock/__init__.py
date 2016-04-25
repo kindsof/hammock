@@ -5,6 +5,7 @@ from hammock.common import TYPE_JSON, TYPE_OCTET_STREAM, TOKEN_ENTRY, KW_HEADERS
 from hammock.resource import Resource  # noqa  # pylint: disable=unused-import
 from hammock.api import Hammock  # noqa  # pylint: disable=unused-import
 import hammock.exceptions as exceptions  # noqa  # pylint: disable=unused-import
+import hammock.types as types  # noqa  # pylint: disable=unused-import
 
 
 def get(path='', **kwargs):
