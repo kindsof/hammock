@@ -1,11 +1,14 @@
 from __future__ import absolute_import
-import six
-import inspect
-import hammock.exceptions as exceptions
-import logging
+
 import codecs
+import inspect
+import logging
 import random
 import string
+
+import six
+
+import hammock.exceptions as exceptions
 
 URL_PARAMS_METHODS = {'GET', 'HEAD', 'DELETE'}
 KW_CONTENT = '_content'
@@ -80,17 +83,3 @@ def to_bytes(source):
         # XXX: maybe more efficient way then reading StringIO data.
         return codecs.encode(source.getvalue(), ENCODING)
     return source
-
-
-def parse_bool(value):
-    """
-    Converts value to bool.
-    Unlike bool(value), this one converts strings differently.
-    Only 'True' or 'true' will be converted to True,
-    all other strings will be converted to False.
-    :param value: Value to convert.
-    :return bool: Boolean value of value.
-    """
-    if isinstance(value, six.string_types):
-        value = value in {'true', 'True'}
-    return bool(value)

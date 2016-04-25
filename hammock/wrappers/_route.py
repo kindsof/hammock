@@ -149,20 +149,12 @@ class Route(wrapper.Wrapper):
         """
         for name, value in six.iteritems(data):
             arg = self.spec.args_info(name)
-            if arg.convert is list:
-                if not isinstance(value, list):
-                    data[name] = [value] if value is not None else []
-
-            elif arg.type_name == 'dict' and isinstance(value, dict):
-                continue
-
-            elif arg.convert is not None and value is not None:
-                try:
-                    data[name] = arg.convert(value)
-                except ValueError as exc:
-                    raise exceptions.BadRequest(
-                        "argument {} should be of type {}, got bad value: '{}'. ({})".format(
-                            name, arg.type_name, value, exc))
+            try:
+                data[name] = arg.convert(value)
+            except ValueError as exc:
+                raise exceptions.BadRequest(
+                    "Argument {} should be of type {}, got bad value: '{}'. ({})".format(
+                        name, arg.type_name, value, exc))
 
     @staticmethod
     def get_status_code(status):

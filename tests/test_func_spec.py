@@ -5,8 +5,9 @@ try:
 except ImportError:
     import json
 import unittest
+
 import hammock.types.func_spec as func_spec
-import hammock.common as common
+import hammock.converters as converters
 
 
 def test_func(  # pylint: disable=unused-argument
@@ -50,11 +51,11 @@ class TestFuncSpec(unittest.TestCase):
 
         self.assertEqual(spec.doc, '\nThis is a test function\nSecond line doc')
 
-        self.assertEqual(spec.args_info('an_int').convert, int)
-        self.assertEqual(spec.args_info('a_string').convert, str)
-        self.assertEqual(spec.args_info('a_default_bool').convert, common.parse_bool)
-        self.assertEqual(spec.args_info('a_default_bool_true').convert, common.parse_bool)
-        self.assertEqual(spec.args_info('a_default_bool_false').convert, common.parse_bool)
+        self.assertEqual(spec.args_info('an_int').convert, converters.to_int)
+        self.assertEqual(spec.args_info('a_string').convert, converters.to_str)
+        self.assertEqual(spec.args_info('a_default_bool').convert, converters.to_bool)
+        self.assertEqual(spec.args_info('a_default_bool_true').convert, converters.to_bool)
+        self.assertEqual(spec.args_info('a_default_bool_false').convert, converters.to_bool)
         self.assertEqual(spec.args_info('a_default_bool').type_name, 'bool')
         self.assertEqual(spec.args_info('a_default_bool_true').type_name, 'bool[True]')
         self.assertEqual(spec.args_info('a_default_bool_false').type_name, 'bool[False]')

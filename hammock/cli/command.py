@@ -48,7 +48,7 @@ class Command(command.Command):
 
     def take_action(self, parsed_args):
         result = self._action(parsed_args)
-        if result is not None and (self.spec.returns is None or self.spec.returns.convert is not None):
+        if result is not None and (self.spec.returns is None or self.spec.returns.type_name != 'None'):
             if self.spec.returns:
                 result = self.spec.returns.convert(result)
             self.app.stdout.write(str(result) + '\n')

@@ -7,7 +7,7 @@ import six
 import warnings
 import httplib
 import hammock.common as common
-from . import headers as headers_module
+from . import headers as _headers
 
 
 class Response(object):
@@ -15,7 +15,7 @@ class Response(object):
     def __init__(self, content=None, headers=None, status=httplib.OK):
         self._json = None
         self.content = content
-        self.headers = headers_module.Headers(headers or {})
+        self.headers = _headers.Headers(headers or {})
         self.status = str(status)
 
     @classmethod
@@ -31,7 +31,7 @@ class Response(object):
         """
         result = cls._convert_result_to_dict(result)
 
-        response_headers = headers_module.Headers(result.pop(common.KW_HEADERS, {}))
+        response_headers = _headers.Headers(result.pop(common.KW_HEADERS, {}))
         content_stream = result.pop(common.KW_FILE, None)
         response_status = result.pop(common.KW_STATUS, status)
 

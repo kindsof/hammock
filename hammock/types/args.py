@@ -4,8 +4,9 @@ try:
     import ujson as json
 except ImportError:
     import json
+
 import hammock.names as names
-import hammock.common as common
+import hammock.converters as converters
 
 
 class PositionalArg(object):
@@ -14,15 +15,15 @@ class PositionalArg(object):
     PARSER_TYPE_MAP = {dict: str, list: str}
     PARSER_NARGS_MAP = {dict: '*', list: '*'}
     ALLOWED_ARG_TYPES = {
-        'bool': common.parse_bool,
-        'bool[True]': common.parse_bool,
-        'bool[False]': common.parse_bool,
-        'int': int,
-        'float': float,
-        'str': str,
-        'list': list,
+        'bool': converters.to_bool,
+        'bool[True]': converters.to_bool,
+        'bool[False]': converters.to_bool,
+        'int': converters.to_int,
+        'float': converters.to_float,
+        'str': converters.to_str,
+        'list': converters.to_list,
         'dict': json.loads,
-        'None': None,
+        'None': lambda x: None,
         None: lambda x: x,
     }
     ALLOWED_RETURN_TYPES = {
@@ -32,7 +33,7 @@ class PositionalArg(object):
         'str': str,
         'list': list,
         'dict': dict,
-        'None': None,
+        'None': lambda x: None,
         'file': 'file',
         None: lambda x: x,
     }

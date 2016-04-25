@@ -17,13 +17,17 @@ class ArgumentTypes(hammock.Resource):
         :param list a_list: a list argument
         :return bool: True if all arguments have the correct type
         """
-        return all([
-            isinstance(a_list, list),
-            isinstance(an_int, int),
-            isinstance(a_float, float),
-            isinstance(a_bool, bool),
-            isinstance(a_string, str),
-        ])
+        if not isinstance(a_list, list):
+            raise hammock.exceptions.BadRequest('a_list is not a list')
+        if not isinstance(an_int, int):
+            raise hammock.exceptions.BadRequest('an_int is not an int')
+        if not isinstance(a_float, float):
+            raise hammock.exceptions.BadRequest('a_float is not a float')
+        if not isinstance(a_bool, bool):
+            raise hammock.exceptions.BadRequest('a_bool is not a bool')
+        if not isinstance(a_string, str):
+            raise hammock.exceptions.BadRequest('a_string is not a string')
+        return True
 
     @hammock.get('with-default')
     def conversions_in_get_with_default(  # pylint: disable=unused-argument
@@ -37,13 +41,17 @@ class ArgumentTypes(hammock.Resource):
         :param list a_list: a list argument
         :return bool: True if all arguments have the correct type
         """
-        return all([
-            isinstance(a_list, list),
-            isinstance(an_int, int),
-            isinstance(a_float, float),
-            isinstance(a_bool, bool),
-            isinstance(a_string, str),
-        ])
+        if not isinstance(a_list, list):
+            raise hammock.exceptions.BadRequest('a_list is not a list')
+        if not isinstance(an_int, int):
+            raise hammock.exceptions.BadRequest('an_int is not an int')
+        if not isinstance(a_float, float):
+            raise hammock.exceptions.BadRequest('a_float is not a float')
+        if not isinstance(a_bool, bool):
+            raise hammock.exceptions.BadRequest('a_bool is not a bool')
+        if not isinstance(a_string, str):
+            raise hammock.exceptions.BadRequest('a_string is not a string')
+        return True
 
     @hammock.get('to-list')
     def get_to_list(self, a_list):

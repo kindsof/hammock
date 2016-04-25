@@ -8,8 +8,8 @@ except ImportError:
 import warnings
 import hammock.common as common
 import hammock.exceptions as exceptions
-from . import url as url_module
-from . import headers as headers_module
+from . import url as _module
+from . import headers as _headers
 from . import file as file_module
 
 LOG = logging.getLogger(__name__)
@@ -19,8 +19,8 @@ class Request(object):
     def __init__(self, method, url, headers, stream, url_params):
         self.method = method.upper()
         self._collected_data = None
-        self._url = url_module.Url(url)
-        self.headers = headers_module.Headers(headers)
+        self._url = _module.Url(url)
+        self.headers = _headers.Headers(headers)
         self.stream = stream
         self.url_params = url_params
         self.uid = common.uid()
