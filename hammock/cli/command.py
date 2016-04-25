@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import six
 import logging
 import requests
 import argparse
@@ -56,12 +57,8 @@ class Command(command.Command):
     def get_parser(self, prog_name):
         parser = super(Command, self).get_parser(prog_name)
         parser.formatter_class = argparse.RawTextHelpFormatter
-
-        # add all method arguments to parser
-        for name in self.spec.kwargs.keys() + self.spec.args:
-            self.spec.args_info(name).add_to_parser(parser)
-        if self.spec.keywords:
-            self.spec.args_info(self.spec.keywords).add_to_parser(parser)
+        for arg in six.itervalues(self.spec.args_info):
+            arg.add_to_parser(parser)
         return parser
 
     def _action(self, parsed_args):

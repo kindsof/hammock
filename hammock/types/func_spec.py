@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import collections
 import inspect
 import six
 import re
@@ -18,11 +19,13 @@ class FuncSpec(object):
         self.kwargs = {}
         self.keywords = None
         self._inspect(func)
-        self.doc, self._args_info, self.returns = self._get_doc_parts(func.__doc__)
+        self.doc, args_info, self.returns = self._get_doc_parts(func.__doc__)
 
-    def args_info(self, arg):
-        info = self._args_info.get(arg)
-        return info if info else self._get_arg(arg)
+        self.args_info = collections.OrderedDict()
+        for arg in self.args + self.kwargs.keys():
+            self.args_info[arg] = args_info.get(arg, self._get_arg(arg))
+        if self.keywords:
+            self.args_info[self.keywords] = self._get_arg(self.keywords)
 
     def _inspect(self, func):
         if six.PY2:

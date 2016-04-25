@@ -148,12 +148,21 @@ class Route(wrapper.Wrapper):
         :param data: keyword arguments supposed to be passed to self.func
         """
         for name, value in six.iteritems(data):
-            arg = self.spec.args_info(name)
+            try:
+                arg = self.spec.args_info[name]
+            except KeyError:
+                # If method accepts **kwargs, we don't panic here
+                if self.spec.keywords:
+                    continue
+                raise self._error(
+                    exceptions.BadRequest,
+                    "Route does not expect argument '{}'".format(name))
             try:
                 data[name] = arg.convert(value)
             except ValueError as exc:
-                raise exceptions.BadRequest(
-                    "Argument {} should be of type {}, got bad value: '{}'. ({})".format(
+                raise self._error(
+                    exceptions.BadRequest,
+                    "Argument '{}' should be of type {}, got bad value: '{}'. ({})".format(
                         name, arg.type_name, value, exc))
 
     @staticmethod
