@@ -53,5 +53,6 @@ class TestBase(testing.TestBase):
 
     def assert_status(self, status, *args, **kwargs):
         response = self._simulate(*args, **kwargs)
-        self.assertIn(str(status), self.srmock.status)
+        if str(status) not in self.srmock.status:
+            raise AssertionError("Got bad status {} (expected {}) reason: {}".format(self.srmock.status, status, response))
         return response
