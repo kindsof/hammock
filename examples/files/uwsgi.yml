@@ -1,0 +1,11 @@
+uwsgi:
+  http: :8000
+  module: files.api
+  max-requests: 10
+  queue: 10
+  need-app: true
+  procname: files
+  master: true
+  honour-stdin: true
+  py-autoreload: 1
+
