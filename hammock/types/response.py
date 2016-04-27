@@ -81,7 +81,11 @@ class Response(object):
     @property
     def json(self):
         if not self._json:
-            self._json = json.load(self.content) if self.is_stream else json.loads(self.content)
+            body = self.content if not self.is_stream else self.content.read()
+            try:
+                self._json = json.loads(body)
+            except (ValueError, UnicodeDecodeError) as exc:
+                raise ValueError("Failed parsing json response '{}': {}".format(body, exc))
         return self._json
 
     @json.setter
