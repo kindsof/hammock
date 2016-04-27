@@ -11,6 +11,11 @@ import warnings
 LOG = logging.getLogger(__name__)
 
 
+# A const to define an optional argument that was not set
+# and will be removed from the request.
+NOT_SET = object()
+
+
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
@@ -52,6 +57,7 @@ class {{ class_name }}(object):
         url = url_join(self._url, url).format(**url_kw)
         if json and not isinstance(json, list):
             json.update(kwargs or {})
+            json = {key: value for key, value in six.iteritems(json) if value != NOT_SET}
         _kwargs = {
             "timeout": self._timeout,
             "stream": True,
