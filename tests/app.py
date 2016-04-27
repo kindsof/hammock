@@ -6,11 +6,13 @@ import hammock
 import sys
 import subprocess
 import tests.resources1 as resources1
+import tests.base as tests_base
 
 application = falcon.API()  # pylint: disable=invalid-name
 hammock.Hammock(
     application, resources1,
-    policy_file=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'policy.json')
+    policy_file=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'policy.json'),
+    credentials_class=tests_base.TestCredentials
 )
 
 

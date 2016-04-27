@@ -22,11 +22,12 @@ class TestBase(testing.TestBase):
     RESOURCES = 'tests.resources'
     RESOURCE_PARAMS = {}
     POLICY = None
+    CREDENTIAL_CLASS = None
 
     def before(self):
         self.api.add_sink(default_404)
         resources = importlib.import_module(self.RESOURCES)
-        hammock.Hammock(self.api, resources, policy_file=self.POLICY, **self.RESOURCE_PARAMS)
+        hammock.Hammock(self.api, resources, policy_file=self.POLICY, credentials_class=self.CREDENTIAL_CLASS, **self.RESOURCE_PARAMS)
 
     def _simulate(self, method, url, query_string=None, body=None, headers=None, binary_response=False):
         kwargs = {}

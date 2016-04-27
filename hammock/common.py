@@ -25,16 +25,6 @@ ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.
 ENCODING = 'utf-8'
 
 
-HEADER_USER_ID = 'x-auth-user-id'
-HEADER_USER_NAME = 'x-auth-user-name'
-HEADER_USER_DOMAIN_ID = 'x-auth-user-domain-id'
-HEADER_USER_DOMAIN_NAME = 'x-auth-user-domain-name'
-HEADER_PROJECT_ID = 'x-auth-project-id'
-HEADER_PROJECT_NAME = 'x-auth-project-name'
-HEADER_PROJECT_DOMAIN_ID = 'x-auth-project-domain-id'
-HEADER_PROJECT_DOMAIN_NAME = 'x-auth-project-domain-name'
-HEADER_ROLES = 'x-auth-roles'
-
 # REST method names
 PUT = 'PUT'
 GET = 'GET'

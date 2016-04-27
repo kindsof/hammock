@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import requests
-import hammock.common as common
 import tests.uwsgi_base as uwsgi_base
+import tests.base as tests_base
 
 
 class TestUwsgiPolicy(uwsgi_base.UwsgiBase):
@@ -12,15 +12,15 @@ class TestUwsgiPolicy(uwsgi_base.UwsgiBase):
 
     def test_admin(self):
         admin = self.get_client(headers={
-            common.HEADER_ROLES: 'admin'
+            tests_base.HEADER_ROLES: 'admin'
         })
         self.assertEqual(admin.policy.project_admin(), True)
         self.assertEqual(admin.policy.admin(), True)
 
     def test_project_admin(self):
         project_admin = self.get_client(headers={
-            common.HEADER_ROLES: 'project_admin',
-            common.HEADER_PROJECT_ID: 'project-id-1'
+            tests_base.HEADER_ROLES: 'project_admin',
+            tests_base.HEADER_PROJECT_ID: 'project-id-1'
         })
         self.assertEqual(project_admin.policy.project_admin(project_id='project-id-1'), True)
         self.assert_not_authorized(project_admin.policy.project_admin, project_id='project-id-2')
@@ -28,7 +28,7 @@ class TestUwsgiPolicy(uwsgi_base.UwsgiBase):
 
     def test_credentials_arg(self):
         username = 'mickmick'
-        user = self.get_client(headers={common.HEADER_USER_NAME: username})
+        user = self.get_client(headers={tests_base.HEADER_USER_NAME: username})
         self.assertTrue(user.policy.test_credentials_arg(username))
         self.assertFalse(user.policy.test_credentials_arg('not-me'))
         self.assertTrue(user.policy.test_enforcer_arg(username))
