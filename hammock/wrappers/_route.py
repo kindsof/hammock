@@ -155,6 +155,10 @@ class Route(wrapper.Wrapper):
             if arg.convert is list:
                 if not isinstance(value, list):
                     data[name] = [value] if value is not None else []
+
+            elif arg.type_name == 'dict' and isinstance(value, dict):
+                continue
+
             elif arg.convert is not None and value is not None:
                 try:
                     data[name] = arg.convert(value)
