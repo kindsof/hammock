@@ -1,9 +1,5 @@
 from __future__ import absolute_import
 
-try:
-    import ujson as json
-except ImportError:
-    import json
 import unittest
 
 import hammock.types.func_spec as func_spec
@@ -59,11 +55,11 @@ class TestFuncSpec(unittest.TestCase):
         self.assertEqual(spec.args_info['a_default_bool'].type_name, 'bool')
         self.assertEqual(spec.args_info['a_default_bool_true'].type_name, 'bool[True]')
         self.assertEqual(spec.args_info['a_default_bool_false'].type_name, 'bool[False]')
-        self.assertEqual(spec.args_info['dict_arg'].convert, json.loads)
-        self.assertEqual(spec.args_info['kwargs_parameter'].convert, json.loads)
+        self.assertEqual(spec.args_info['dict_arg'].convert, converters.to_dict)
+        self.assertEqual(spec.args_info['kwargs_parameter'].convert, converters.to_dict)
 
         self.assertEqual(spec.args_info['an_int'].doc, 'integer value.')
         self.assertEqual(spec.args_info['a_string'].doc, 'string value.\nsecond line doc')
 
-        self.assertEqual(spec.returns.convert, dict)
+        self.assertEqual(spec.returns.convert, converters.to_dict)
         self.assertEqual(spec.returns.doc, 'return value')

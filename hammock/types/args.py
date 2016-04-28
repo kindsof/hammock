@@ -1,10 +1,5 @@
 from __future__ import absolute_import
 
-try:
-    import ujson as json
-except ImportError:
-    import json
-
 import hammock.names as names
 import hammock.converters as converters
 
@@ -13,7 +8,6 @@ class PositionalArg(object):
     """Represent a function argument"""
 
     PARSER_TYPE_MAP = {dict: str, list: str}
-    PARSER_NARGS_MAP = {dict: '*', list: '*'}
     ALLOWED_ARG_TYPES = {
         'bool': converters.to_bool,
         'bool[True]': converters.to_bool,
@@ -22,18 +16,18 @@ class PositionalArg(object):
         'float': converters.to_float,
         'str': converters.to_str,
         'list': converters.to_list,
-        'dict': json.loads,
-        'None': lambda x: None,
+        'dict': converters.to_dict,
+        'None': converters.to_none,
         None: lambda x: x,
     }
     ALLOWED_RETURN_TYPES = {
-        'bool': bool,
-        'int': int,
-        'float': float,
-        'str': str,
-        'list': list,
-        'dict': dict,
-        'None': lambda x: None,
+        'bool': converters.to_bool,
+        'int': converters.to_int,
+        'float': converters.to_float,
+        'str': converters.to_str,
+        'list': converters.to_list,
+        'dict': converters.to_dict,
+        'None': converters.to_none,
         'file': 'file',
         None: lambda x: x,
     }
