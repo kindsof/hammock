@@ -65,20 +65,26 @@ class Route(wrapper.Wrapper):
         """
         if self.dest is None:
             kwargs = self._extract_kwargs(req, req.collected_data)
-            if self.full_policy_rule_name:
-                enforcer, credentials = self._resource.api.policy.check(self.full_policy_rule_name, target=kwargs, headers=req.headers)
-                if common.KW_CREDENTIALS in self.spec.args:
-                    kwargs[common.KW_CREDENTIALS] = credentials
-                if common.KW_ENFORCER in self.spec.args:
-                    kwargs[common.KW_ENFORCER] = enforcer
+            enforcer = None
+            credentials = None
+            if self._resource.api.credentials_class:
+                credentials = self._resource.api.credentials_class(req.headers)
+                if self.full_policy_rule_name:
+                    enforcer = self._resource.api.policy.check(
+                        self.full_policy_rule_name, target=kwargs, credentials=credentials)
 
             # Convert arguments according to expected type
             self._convert_argument_types(kwargs)
-            # Add headers:
+
+            # Add special keyword arguments:
             if common.KW_HEADERS in self.spec.args:
                 kwargs[common.KW_HEADERS] = req.headers
             if common.KW_HOST in self.spec.args:
                 kwargs[common.KW_HOST] = '{}://{}'.format(req.parsed_url.scheme, req.parsed_url.netloc)
+            if common.KW_CREDENTIALS in self.spec.args:
+                kwargs[common.KW_CREDENTIALS] = credentials
+            if common.KW_ENFORCER in self.spec.args:
+                kwargs[common.KW_ENFORCER] = enforcer
 
             # Invoke the routing method:
             result = self(**kwargs)

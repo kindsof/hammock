@@ -6,7 +6,6 @@ from oslo_policy import opts
 import oslo_config.cfg as cfg
 
 import hammock.exceptions as exceptions
-import hammock.types.credentials as _credentials
 
 LOG = logging.getLogger(__name__)
 
@@ -34,26 +33,23 @@ class Policy(object):
     - The expression might have and/or parentheses.
     """
 
-    def __init__(self, policy_file=None, credentials_class=None):
+    def __init__(self, policy_file=None):
         """
         :param policy_file: path to a policy json file
-        :param credentials_class: a custom credentials class
         """
         self._policy_file = policy_file
-        self._credentials_class = credentials_class or _credentials.Credentials
         conf = self._get_conf()
         self._enforcer = policy.Enforcer(conf, use_conf=policy_file is not None)
         LOG.info('Policy is loaded with rules: %s', self._enforcer.rules)
 
-    def check(self, rule, target, headers):
+    def check(self, rule, target, credentials):
         # Default behavior, when no policy file was loaded or no rules were set,
         # is to approve all checks.
         if self.is_disabled:
             return
 
         # If any policy was set, the default behavior for undefined rule, is to reject.
-        credentials = self._credentials_class(headers)
-        LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, headers)
+        LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, credentials)
 
         def enforce_func(target):
             # Set None in project_id in case the target don't have one,
@@ -66,7 +62,7 @@ class Policy(object):
             )
 
         enforce_func(target)
-        return enforce_func, credentials
+        return enforce_func
 
     def set(self, rules_dict):
         LOG.info('Adding rules to policy: %s', rules_dict)

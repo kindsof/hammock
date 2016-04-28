@@ -14,7 +14,8 @@ class Hammock(resource_node.ResourceNode):
 
         self._api = api
         self.resource_package = resource_package
-        self.policy = policy.Policy(policy_file=policy_file, credentials_class=credentials_class)
+        self.credentials_class = credentials_class
+        self.policy = policy.Policy(policy_file=policy_file)
         self._backend = backends.get(api)
         self._backend.add_resources(self, resource_package, **resource_params)
         self._backend.add_resources(self, common_resources)
