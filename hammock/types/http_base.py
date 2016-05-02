@@ -23,7 +23,6 @@ class HttpBase(object):
     def __init__(self, headers, content):
         self._json = None
         self._content = None
-        self._saved_content = None
         self.uid = common.uid()
         self.headers = _headers.Headers(headers)
         if isinstance(content, (list, dict)):
@@ -33,17 +32,17 @@ class HttpBase(object):
 
     @property
     def content(self):
-        return self._saved_content or self._content
+        return self._content or ''
 
     @content.setter
     def content(self, content):
-        self._saved_content = self._content = content
+        self._content = content
         self.update_content_length()
 
     def read(self):
-        if self._saved_content is None:
-            self._saved_content = self.content if not self.is_stream else self.content.read()
-        return self._saved_content
+        if self.is_stream:
+            self._content = self._content.read()
+        return self.content
 
     @property
     def json(self):
