@@ -57,6 +57,7 @@ class Command(command.Command):
     def get_parser(self, prog_name):
         parser = super(Command, self).get_parser(prog_name)
         parser.formatter_class = argparse.RawTextHelpFormatter
+        parser.usage = self.__doc__
         for arg in six.itervalues(self.spec.args_info):
             arg.add_to_parser(parser)
         return parser
