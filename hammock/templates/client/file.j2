@@ -49,7 +49,7 @@ class HammockList(list):
 
 class {{ class_name }}(object):
 
-    ROUTE_CLI_COMMAND_MAP = {'login': False, 'logout': False, 'refresh': False}
+    ROUTE_CLI_COMMAND_MAP = {}
 
     def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %}, token=None, timeout=None, headers=None, retries=None, session=None):
         """
@@ -147,46 +147,6 @@ class {{ class_name }}(object):
     @property
     def token(self):
         return self._client.headers.get("{{ token_entry }}")
-
-    def login(self, username, password, tenant):
-        """
-        Login into the system
-        :param username: name to login with
-        :param password: your secret password
-        :param tenant: The tenant you belong to
-        :return dict: Login information.
-        """
-        self._check_auth()
-        token = self.auth.login(username, password, tenant)
-        self._set_token(token.token)
-        return token
-
-    def logout(self, token=None):
-        """
-        Logout from session
-        :param token: A token to revoke, default is the HEADERS token.
-        """
-        self._check_auth()
-        result = self.auth.logout(token)
-        if not token:
-            self._set_token(None)
-        return result
-
-    def refresh(self, token=None):
-        """
-        Refresh a login session
-        :param token: A token to refresh, default is the HEADERS token.
-        :return dict: A new login session information
-        """
-        self._check_auth()
-        new_token = self.auth.refresh(token)
-        if not token:
-            self._set_token(new_token.token)
-        return new_token
-
-    def _check_auth(self):
-        if not hasattr(self, 'auth'):
-            raise AttributeError('No auth resource available...')
 
     def _set_token(self, token):
         if token:
