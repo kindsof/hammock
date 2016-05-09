@@ -27,6 +27,18 @@ class FuncSpec(object):
         if self.keywords:
             self.args_info[self.keywords] = self._get_arg(self.keywords)
 
+    def check_match(self, **kwargs):
+        """
+        Checks if self._func signature matches invocation with kwargs.
+        """
+        keys = set(kwargs)
+        missing = set(self.args) - keys
+        not_expected = keys - set(self.args) - set(self.kwargs)
+        if missing:
+            raise TypeError('Missing arguments {}'.format(missing))
+        if not self.keywords and not_expected:
+            raise TypeError('Got unexpected arguments {}'.format(not_expected))
+
     def _inspect(self, func):
         if six.PY2:
             spec = inspect.getargspec(func)  # pylint: disable=deprecated-method

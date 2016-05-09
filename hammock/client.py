@@ -5,12 +5,15 @@ import inspect
 import jinja2
 import re
 import six
+
+import hammock
 import hammock.common as common
 import hammock.names as names
 import hammock.packages as packages
-import hammock
+import hammock.types.func_spec as func_spec
 import hammock.types.file as file_module
 import hammock.wrappers as wrappers
+
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader('hammock.templates', 'client'))
 FILE_TEMPLATE = ENV.get_template('file.j2')
@@ -59,7 +62,7 @@ class ClientGenerator(object):
 def _resource_class_code(_resource, paths=None):
     paths = paths or []
     methods = []
-    for kwargs in client_methods_propeties(_resource, paths):
+    for kwargs in client_methods_properties(_resource, paths):
         methods.append(_method_code(**kwargs))
 
     return RESOURCE_CLASS_TEMPLATE.render(  # pylint: disable=no-member
@@ -148,27 +151,41 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
     )
 
 
-def client_methods_propeties(resource_object, paths):
-    kwargs = []
+def client_methods_properties(resource_object, paths):
+    methods = []
     for method in resource_object.iter_route_methods(wrappers.Route):
         derivative_methods = method.client_methods or {method.__name__: None}
         for method_name, method_defaults in six.iteritems(derivative_methods):
             method_defaults = method_defaults or {}
             url = '/'.join(paths + [resource_object.path(), method.path])
-            kwargs.append(dict(
+
+            args = [arg for arg in method.spec.args if arg not in method_defaults]
+            kwargs = method.spec.kwargs
+            keywords = method.spec.keywords
+            doc_string = inspect.getdoc(method)
+
+            if method_defaults and hasattr(resource_object, method_name):
+                sub_method = getattr(resource_object, method_name)
+                doc_string = inspect.getdoc(sub_method)
+                sub_spec = func_spec.FuncSpec(sub_method)
+                args = sub_spec.args
+                kwargs = sub_spec.kwargs
+                keywords = sub_spec.keywords
+
+            methods.append(dict(
                 method_name=method_name,
                 method=method.method,
                 url=method.path,
-                args=[arg for arg in method.spec.args if arg not in method_defaults],
-                kwargs=method.spec.kwargs,
+                args=args,
+                kwargs=kwargs,
                 url_kw=[arg for arg in method.spec.args if "{{{}}}".format(arg) in url],
                 defaults=method_defaults,
                 success_code=method.success_code,
-                keywords=method.spec.keywords,
-                doc_string=inspect.getdoc(method),
+                keywords=keywords,
+                doc_string=doc_string,
                 keyword_map=method.keyword_map,
             ))
-    return kwargs
+    return methods
 
 
 def main(class_name, package_name, default_url=''):

@@ -96,6 +96,16 @@ class TestCli(base.Base):
         self.assertEquals(result['arg'], 'k')
         self.assertEquals(result['default'], 'f')
 
+    def test_client_methods(self):
+        self.assertEqual('3\n', self.run_command('client-methods jump 3'))
+        # Test missing argument
+        self.assertRaises(SystemExit, self.run_command, 'client-methods run')
+        # Test invalid argument type in client
+        self.assertRaises(SystemExit, self.run_command, 'client-methods run string')
+        self.assertEqual('3.0\n', self.run_command('client-methods run 3'))
+        self.assertEqual('30.0\n', self.run_command('client-methods run 3 --distance 10'))
+        self.assertRaises(hammock.cli.CLIException, self.run_command, 'client-methods no-such-action')
+
     def assert_list_of_dicts_equal(self, list1, list2):
         assert len(list1) == len(list2)
         for elem1, elem2 in zip(sorted(list1), sorted(list2)):

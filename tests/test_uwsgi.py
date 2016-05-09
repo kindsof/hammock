@@ -44,40 +44,33 @@ class TestUwsgi(uwsgi_base.UwsgiBase):
         self.assertEqual(data, response_data)
 
     def test_exceptions(self):
-        try:
+        with self.assertRaises(requests.HTTPError) as exc:
             self._client.exceptions.internal()
-        except requests.HTTPError as exc:
-            self.assertFalse(exc.response.ok)
-            self.assertEqual(500, exc.response.status_code)
-            self.assertDictEqual(
-                {
-                    'status': 500,
-                    'title': 'Internal Server Error',
-                    'description': repr(Exception(exceptions_resouce.DESCRIPTION)),
-                },
-                exc.response.json()
-            )
-        else:
-            raise AssertionError('An exception should have been raised.')
+        self.assertFalse(exc.exception.response.ok)
+        self.assertEqual(500, exc.exception.response.status_code)
+        self.assertDictEqual(
+            {
+                'status': 500,
+                'title': 'Internal Server Error',
+                'description': repr(Exception(exceptions_resouce.DESCRIPTION)),
+            },
+            exc.exception.response.json()
+        )
 
-        try:
+        with self.assertRaises(requests.HTTPError) as exc:
             self._client.exceptions.not_found()
-        except requests.HTTPError as exc:
-            self.assertFalse(exc.response.ok)
-            self.assertEqual(404, exc.response.status_code)
-            self.assertDictEqual(
-                {
-                    'status': 404,
-                    'title': 'Not Found',
-                    'description': exceptions_resouce.DESCRIPTION,
-                },
-                exc.response.json()
-            )
-        else:
-            raise AssertionError('An exception should have been raised.')
+        self.assertFalse(exc.exception.response.ok)
+        self.assertEqual(404, exc.exception.response.status_code)
+        self.assertDictEqual(
+            {
+                'status': 404,
+                'title': 'Not Found',
+                'description': exceptions_resouce.DESCRIPTION,
+            },
+            exc.exception.response.json()
+        )
 
     def test_keyword_mapping(self):
-
         self.assertEqual(self._client.keyword_map.post(valid1='1', valid2='1'), {'valid1': '1', 'valid2': '1'})
         self.assertEqual(self._client.keyword_map.post(valid1=None), {'valid1': None, 'valid2': None})
 
@@ -91,3 +84,8 @@ class TestUwsgi(uwsgi_base.UwsgiBase):
         self.assertEqual('modified-in-modified', self._client.different_path.different_sub.get())
         self.assertEqual('moshe', self._client.variable_in_url_1.get('moshe'))
         self.assertEqual('moshe', self._client.variable_in_url_2.get('moshe'))
+
+    def test_client_methods(self):
+        self.assertEquals(self._client.client_methods.run(3), 3)
+        self.assertEquals(self._client.client_methods.run(3, distance=10), 30)
+        self.assertEquals(self._client.client_methods.jump(3), 3)

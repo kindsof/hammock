@@ -96,6 +96,15 @@ class SomeResource(hammock.Resource):
   PATH = "some-other-name"
 ```
 
+## Client Methods:
+
+In case you want that one route method will be expand to different 
+methods in the generated client. you can use the route `client_methods`
+argument, and map a method name to kwargs that will be enforced as part
+of the client's request.
+
+You can see this [example](./tests/client_methods.py).
+
 ## Policy
 
 Define routing policies using a policy JSON file.
