@@ -163,7 +163,7 @@ class {{ class_name }}(object):
             return
         try:
             if type(result) == dict:
-                result = HammockDict(result, headers=response.headers)
+                result = HammockDict(munch.munchify(result), headers=response.headers)
             elif type(result) == list:
                 result = HammockList([item if type(item) != dict else munch.Munch(item) for item in result],
                                      headers=response.headers)
