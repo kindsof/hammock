@@ -9,6 +9,8 @@ import hammock.exceptions as exceptions
 import hammock.common as common
 import hammock.names as names
 import hammock.wrappers as wrappers
+import hammock.types.func_spec as func_spec
+import hammock
 
 
 LOG = logging.getLogger(__name__)
@@ -32,6 +34,7 @@ class Resource(object):
 
     def __init__(self, **resource_params):
         self.params = resource_params
+        self._specs = {}
         self._default_exception_handler = getattr(self, "DEFAULT_EXCEPTION_HANDLER", None)
 
     @classmethod
@@ -151,3 +154,11 @@ class Resource(object):
             else:
                 mapping[method_name] = command_name or names.to_command(route_method.__name__)
         return mapping
+
+    def check_spec_match(self, method_name, kwargs):
+        if method_name not in self._specs:
+            self._specs[method_name] = func_spec.FuncSpec(getattr(self, method_name))
+        try:
+            self._specs[method_name].match_and_convert(kwargs)
+        except TypeError as exc:
+            raise hammock.exceptions.BadRequest('Bad arguments: {}'.format(exc))

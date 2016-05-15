@@ -54,11 +54,11 @@ class Route(wrapper.Wrapper):
 
         self._validate_keyword_map()
 
-        if self.method in common.URL_PARAMS_METHODS and common.KW_LIST in (set(self.spec.args) | set(self.spec.kwargs)):
+        if self.method in common.URL_PARAMS_METHODS and common.KW_LIST in self.spec.all_args:
             raise exceptions.BadResourceDefinition(
                 "Can't declare a url params method with _list argument, it it useful only when you get request body.")
 
-        self.required_args = set(self.spec.args[:]) - self.METHOD_SPECIAL_ARGS
+        self.required_args = set(self.spec.args) - self.METHOD_SPECIAL_ARGS
         self.required_args_mapped = {self._get_mapped_keyword(arg) for arg in self.required_args}
 
     def _wrapper(self, req):
@@ -68,7 +68,8 @@ class Route(wrapper.Wrapper):
         :return: response as hammock.types.response.Response object.
         """
         if self.dest is None:
-            kwargs = self._extract_kwargs(req, req.collected_data)
+            kwargs = req.collected_data
+            self._convert_by_keyword_map(kwargs)
             enforcer = None
             credentials = None
             if self.credentials_class:
@@ -76,9 +77,6 @@ class Route(wrapper.Wrapper):
                 if self.full_policy_rule_name:
                     enforcer = self.policy.check(
                         self.full_policy_rule_name, target=kwargs, credentials=credentials)
-
-            # Convert arguments according to expected type
-            self._convert_argument_types(kwargs)
 
             # Add special keyword arguments:
             if common.KW_HEADERS in self.spec.args:
@@ -90,7 +88,16 @@ class Route(wrapper.Wrapper):
             if common.KW_ENFORCER in self.spec.args:
                 kwargs[common.KW_ENFORCER] = enforcer
 
+            try:
+                self.spec.match_and_convert(kwargs)
+            except exceptions.HttpError as exc:
+                raise self._error(exceptions.BadRequest, str(exc))
+            except Exception as exc:  # pylint: disable=broad-except
+                logging.exception('[Error parsing request kwargs %s] kwargs: %s, %r', req.uid, kwargs, exc)
+                raise self._error(exceptions.BadRequest, 'Error parsing request parameters, {}'.format(exc))
+
             # Invoke the routing method:
+            logging.debug('[kwargs %s] %s', req.uid, kwargs)
             result = self(**kwargs)
 
             resp = response.Response.from_result(result, self.success_code, self.response_content_type)
@@ -111,19 +118,14 @@ class Route(wrapper.Wrapper):
                     'Method {} in class {} has argument {}, thus should be in policy file'.format(
                         self.__name__, self._resource.__class__.__name__, common.KW_ENFORCER))
 
-    def _extract_kwargs(self, req, collected_data):
-        try:
-            self._check_for_missing_required_arguments(collected_data)
-            self._convert_to_kwargs(collected_data)
-            logging.debug('[kwargs %s] %s', req.uid, collected_data)
-            return collected_data
-        except exceptions.HttpError:
-            raise
-        except Exception as exc:  # pylint: disable=broad-except
-            logging.exception('[Error parsing request kwargs %s] %r', req.uid, exc)
-            raise exceptions.BadRequest('Error parsing request parameters, {:r}'.format(exc))
-
-    def _convert_to_kwargs(self, collected_data):
+    def _convert_by_keyword_map(self, collected_data):
+        """
+        Convert from request data to method arguments, according to mapping
+        """
+        # Check for missing according to mapped arguments
+        missing = self.required_args_mapped - set(collected_data)
+        if missing:
+            raise self._error(exceptions.BadRequest, 'Missing arguments: {}. Required: {}'.format(missing, self.required_args))
         # Handle args keyword conversion
         collected_data.update({
             keyword: collected_data.pop(self._get_mapped_keyword(keyword))
@@ -134,36 +136,6 @@ class Route(wrapper.Wrapper):
             keyword: collected_data.pop(self._get_mapped_keyword(keyword), default)
             for keyword, default in six.iteritems(self.spec.kwargs)
         })
-
-    def _check_for_missing_required_arguments(self, kwargs):
-        missing = self.required_args_mapped - set(kwargs)
-        if missing:
-            raise exceptions.BadRequest(
-                'Missing parameters: {}. Request arguments {}. Expected {}.'.format(
-                    ', '.join(missing), ', '.join(kwargs), ', '.join(self.required_args_mapped)))
-
-    def _convert_argument_types(self, data):
-        """
-        Inplace conversion of the data types according to self.spec
-        :param data: keyword arguments supposed to be passed to self.func
-        """
-        for name, value in six.iteritems(data):
-            try:
-                arg = self.spec.args_info[name]
-            except KeyError:
-                # If method accepts **kwargs, we don't panic here
-                if self.spec.keywords:
-                    continue
-                raise self._error(
-                    exceptions.BadRequest,
-                    "Route does not expect argument '{}'".format(name))
-            try:
-                data[name] = arg.convert(value)
-            except ValueError as exc:
-                raise self._error(
-                    exceptions.BadRequest,
-                    "Argument '{}' should be of type {}, got bad value: '{}'. ({})".format(
-                        name, arg.type_name, value, exc))
 
     @staticmethod
     def get_status_code(status):

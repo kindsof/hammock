@@ -4,6 +4,7 @@ import inspect
 import six
 import re
 import hammock.types.args as args
+import hammock
 
 
 PARAM_IS_SPECIAL = re.compile(r'^[ ]*:(param|return)')
@@ -20,24 +21,42 @@ class FuncSpec(object):
         self.keywords = None
         self._inspect(func)
         self.doc, args_info, self.returns = self._get_doc_parts(func.__doc__)
+        self.all_args = set(self.args) | set(self.kwargs)
 
         self.args_info = collections.OrderedDict()
-        for arg in self.args + self.kwargs.keys():
+        for arg in self.all_args:
             self.args_info[arg] = args_info.get(arg, self._get_arg(arg))
         if self.keywords:
             self.args_info[self.keywords] = self._get_arg(self.keywords)
 
-    def check_match(self, **kwargs):
+    def match_and_convert(self, kwargs):
         """
         Checks if self._func signature matches invocation with kwargs.
         """
         keys = set(kwargs)
         missing = set(self.args) - keys
-        not_expected = keys - set(self.args) - set(self.kwargs)
+        not_expected = keys - self.all_args
         if missing:
-            raise TypeError('Missing arguments {}'.format(missing))
+            raise TypeError('Missing arguments: {}. Expected at least: {}. Got: {}'.format(missing, self.args, kwargs))
         if not self.keywords and not_expected:
-            raise TypeError('Got unexpected arguments {}'.format(not_expected))
+            raise TypeError('Got unexpected arguments: {}. Expect: {}. Got: {}.'.format(not_expected, self.all_args, kwargs))
+        self._convert_args(kwargs)
+
+    def _convert_args(self, kwargs):
+        """
+        Inplace conversion of the data types according to self.spec
+        :param kwargs: keyword arguments supposed to be passed to self.func
+        """
+        for name, value in six.iteritems(kwargs):
+            if name not in self.all_args:
+                continue
+            arg = self.args_info[name]
+            try:
+                kwargs[name] = arg.convert(value)
+            except ValueError as exc:
+                raise hammock.exceptions.BadRequest(
+                    "Argument '{}' should be of type {}, got bad value: '{}'. ({})".format(
+                        name, arg.type_name, value, exc))
 
     def _inspect(self, func):
         if six.PY2:
