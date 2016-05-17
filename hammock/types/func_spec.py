@@ -20,14 +20,9 @@ class FuncSpec(object):
         self.kwargs = {}
         self.keywords = None
         self._inspect(func)
-        self.doc, args_info, self.returns = self._get_doc_parts(func.__doc__)
+        self.doc, doc_args_info, self.returns = self._get_doc_parts(func.__doc__)
         self.all_args = set(self.args) | set(self.kwargs)
-
-        self.args_info = collections.OrderedDict()
-        for arg in self.all_args:
-            self.args_info[arg] = args_info.get(arg, self._get_arg(arg))
-        if self.keywords:
-            self.args_info[self.keywords] = self._get_arg(self.keywords)
+        self.args_info = self._collect_args_info(doc_args_info)
 
     def match_and_convert(self, kwargs):
         """
@@ -41,6 +36,15 @@ class FuncSpec(object):
         if not self.keywords and not_expected:
             raise TypeError('Got unexpected arguments: {}. Expect: {}. Got: {}.'.format(not_expected, self.all_args, kwargs))
         self._convert_args(kwargs)
+
+    def _collect_args_info(self, doc_args_info):
+        # Must be ordered, because of positional arguments.
+        args_info = collections.OrderedDict()
+        for arg in (self.args + self.kwargs.keys()):
+            args_info[arg] = doc_args_info.get(arg, self._get_arg(arg))
+        if self.keywords:
+            args_info[self.keywords] = self._get_arg(self.keywords)
+        return args_info
 
     def _convert_args(self, kwargs):
         """

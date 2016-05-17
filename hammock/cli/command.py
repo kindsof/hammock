@@ -63,10 +63,7 @@ class Command(command.Command):
         return parser
 
     def _action(self, parsed_args):
-        kwargs = {
-            arg: getattr(parsed_args, arg)
-            for arg in (set(self.spec.args) | set(self.spec.kwargs))
-        }
+        kwargs = {arg: getattr(parsed_args, arg) for arg in self.spec.all_args}
         if self.spec.keywords:
             kwargs.update(getattr(parsed_args, self.spec.keywords, ''))
         try:
