@@ -16,13 +16,17 @@ api = hammock.Hammock(
 application = api.api  # pylint: disable=invalid-name
 
 
-def command(listen_port):
+THIS_FILE = os.path.abspath(__file__.replace('.pyc', '.py'))
+
+
+def command(listen_port, app_file=None, procname='hammock-test'):
+    app_file = app_file or THIS_FILE
     return [
         'uwsgi',
         '--http', ':{:d}'.format(listen_port),
-        '--wsgi-file', __file__.replace('.pyc', '.py'),
+        '--wsgi-file', app_file,
         '--need-app',
-        '--procname', 'hammock-test',
+        '--procname', procname,
     ]
 
 

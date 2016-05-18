@@ -1,22 +1,20 @@
 from __future__ import absolute_import
 import StringIO
-import functools
 import importlib
 import json
 import logging
 import os
-import socket
 import subprocess
 import sys
-import unittest
-import waiting
 import falcon
 
 import hammock
 import hammock.cli
 import hammock.client as client
 
-PORT = '6543'
+import tests.uwsgi_base as uwsgi_base
+
+PORT = 6543
 LOG = logging.getLogger(__name__)
 BUILD_PATH = 'build/cli-tests'
 
@@ -60,8 +58,8 @@ def get_unified_resources_package(build_path):
 
 
 UnifiedClient = get_unified_client(BUILD_PATH)
-API = falcon.API()
-hammock.Hammock(API, get_unified_resources_package('build/cli-tests'), policy_file=os.path.abspath('tests/policy.json'))
+application = falcon.API()
+hammock.Hammock(application, get_unified_resources_package('build/cli-tests'), policy_file=os.path.abspath('tests/policy.json'))
 
 
 def cli(argv=sys.argv[1:], remove_ignored_commands=True, stdout=sys.stdout):
@@ -69,39 +67,10 @@ def cli(argv=sys.argv[1:], remove_ignored_commands=True, stdout=sys.stdout):
     return app_class(UnifiedClient, stdout=stdout).run(['--url', 'http://localhost:{}'.format(PORT)] + argv)
 
 
-def server():
-    server_proc = subprocess.Popen(
-        ['uwsgi', '--http', ':{}'.format(PORT), '--yaml', 'tests/cli/uwsgi.yml'],
-    )
-    try:
-        LOG.info('Waiting for server...')
-        waiting.wait(
-            functools.partial(socket.create_connection, ('localhost', PORT)),
-            timeout_seconds=10, sleep_seconds=1,
-            expected_exceptions=(socket.error, ),
-        )
-        LOG.info('server is up!')
-    except:
-        kill_server(server_proc)
-    return server_proc
+class Base(uwsgi_base.UwsgiBase):
 
-
-def kill_server(proc):
-    proc.send_signal(9)
-    proc.wait()
-
-
-class Base(unittest.TestCase):
-
-    server = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.server = server()
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_server(cls.server)
+    PORT = PORT
+    app_module = __file__.replace('.pyc', '.py')
 
     def run_command(self, command, remove_ignored_commands=True):
         out = StringIO.StringIO()

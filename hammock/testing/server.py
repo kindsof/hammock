@@ -51,6 +51,12 @@ class _Server(six.moves.socketserver.TCPServer):
 class Handler(six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler):
     name = None
 
+    def log_message(self, formatting, *args):
+        # Quite output of SimpleHttpServer
+        logging.debug(
+            "%s - - [%s] %s",
+            self.client_address[0], self.log_date_time_string(), formatting % args)
+
     def __init__(self, *args, **kwargs):
         self.path = None
         six.moves.SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)

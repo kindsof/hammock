@@ -11,7 +11,7 @@ class TestRedirect(base.TestBase):
 
     @classmethod
     def setUpClass(cls):
-        cls._server = testing.Server(port=redirect.PORT)
+        cls._server = testing.Server(port=redirect.PORT, name='test-redirect')
 
     @classmethod
     def tearDownClass(cls):

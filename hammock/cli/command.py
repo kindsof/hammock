@@ -97,7 +97,7 @@ class Command(command.Command):
 
     @staticmethod
     def _format_exception(exc):
-        if 'application/json' in exc.response.headers.get('content-type'):
+        if 'application/json' in exc.response.headers.get('content-type', ''):
             try:
                 error_content = exc.response.json()
                 title = error_content.get('title')

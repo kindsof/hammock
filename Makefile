@@ -36,7 +36,6 @@ build: rpm rename
 
 rpm:  setup.py hammock/*
 	python setup.py bdist --formats=rpm
-	python setup.py bdist_egg
 	rm dist/*.src.rpm dist/*.tar.gz
 
 rename: dist/hammock-rest-0.0.1-1.noarch.rpm
