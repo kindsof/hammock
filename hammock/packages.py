@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import six
 import importlib
 import pkgutil
 import inspect
@@ -16,27 +17,26 @@ def iter_resource_classes(package):
     :param package: package to iterate over
     :return: a list of tuples: (
         resource_class: a resource class
-        parents: list of packages names the the module exists in.
+        parents: list of packages names the module exists in.
     )
     """
+    if isinstance(package, six.string_types):
+        package = importlib.import_module(package)
     for module, parents in iter_modules(package):
         for resource_class in _iter_resource_classes(module):
             yield resource_class, parents
 
 
-def iter_modules(package):
+def iter_modules(package, parents=None):
     """
     Iterates recursively the package's modules
     :param package: a package to iterate over
+    :param parents: patents of package
     :return: a list of tuples: (
         module: module object,
         parents: list of packages names the the module exists in.
     )
     """
-    return _rec_iter_modules(package)
-
-
-def _rec_iter_modules(package, parents=None):
     modules = []
     parents = parents or []
     for _, name, is_package in pkgutil.iter_modules(package.__path__):
@@ -49,7 +49,7 @@ def _rec_iter_modules(package, parents=None):
             path_name = getattr(son_package, "PATH", names.to_path(path))
             cli_command_name = getattr(son_package, "CLI_COMMAND_NAME", names.to_command(path))
             package_parents.append(Package(name=name, path=path_name, class_name=class_name, cli_command_name=cli_command_name))
-            modules.extend(_rec_iter_modules(son_package, package_parents))
+            modules.extend(iter_modules(son_package, package_parents))
         else:
             # name is module name
             module = importlib.import_module(".".join([package.__name__, name]), package.__name__)

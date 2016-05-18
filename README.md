@@ -11,6 +11,7 @@ Your REST server might have resources.
 2. Add your resources to that package (see below).
 3. Add the resources to the falcon API (see below).
 4. Use the auto-generated client.
+4. Use the auto-generated service API.
 
 ## Creating a resource
 A resource defined by its URL prefix.
@@ -190,6 +191,15 @@ For resources package, add `CLI_COMMAND_NAME` variable in the `__init__.py` file
 
 
 - The documentation string for the command is taken from the route method doc string.
+
+# API generation
+
+In order to dump a hammock service API into a file:
+`python -m hammock.doc path.to.resource_package [--json|--yaml] > my-resource-api.yml`
+
+The API json can also be obtained from a running hammock service:
+`curl http://your-server/_api`
+
 
 ## Examples:
 

@@ -32,10 +32,10 @@ class ClientGenerator(object):
             for _resource in self._resources.get("", [])
         ]
         resources_names = [_resource_tuple(r) for r in self._resources.get("", [])]
-        for package, resource_hirarchy in six.iteritems(self._resources):
+        for package, resource_hierarchy in six.iteritems(self._resources):
             if package == "":
                 continue
-            resource_classes.append(_tabify(_recursion_code(package, resource_hirarchy)))
+            resource_classes.append(_tabify(_recursion_code(package, resource_hierarchy)))
             resources_names.append(_package_tuple(package))
 
         code = FILE_TEMPLATE.render(  # pylint: disable=no-member
