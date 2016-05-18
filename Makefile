@@ -1,4 +1,4 @@
-all: tox build rename
+all: build rename tox
 
 TESTS ?= discover -b tests -p "test_*.py"
 
@@ -14,11 +14,11 @@ tox: .tox
 	$(ENV) tox --notest --recreate
 
 clean:
-	find -name *.pyc -delete
-	rm -rf dist *.egg-info htmlcov
+	find -name *.py[co] -delete
+	rm -rf build dist *.egg-info
 
 flake8:
-	flake8 --max-line-length=145 hammock tests
+	flake8 hammock tests
 
 pylint:
 	pylint -r n --py3k hammock tests
@@ -26,7 +26,7 @@ pylint:
 
 coverage:
 	coverage erase
-	coverage run --omit="*__init__*" --omit="*.j2" --include="hammock/*" -m unittest $(TESTS)
+	coverage run -m unittest $(TESTS)
 	coverage html
 
 unittest:
@@ -37,18 +37,21 @@ build: rpm rename
 rpm:  setup.py hammock/*
 	python setup.py bdist --formats=rpm
 	python setup.py bdist_egg
-	rm -rf build
 	rm dist/*.src.rpm dist/*.tar.gz
 
 rename: dist/hammock-rest-0.0.1-1.noarch.rpm
 	- rm -f $(basename $<)-*.rpm
 	mv $< $(basename $<)-$(shell git rev-parse --short=7 HEAD).rpm
 
+upload:
+	python setup.py sdist upload
+
 submit:
 	solvent submitproduct rpm dist
 
 approve:
 	solvent approve --product rpm
+	$(MAKE) upload
 
 prepareForCleanBuild:
 	sudo pip install tox
@@ -63,7 +66,7 @@ test-gunicorn:
 	gunicorn tests.app:application
 
 test-uwsgi:
-	python -m tests.app
+	.tox/py27/bin/python -m tests.app
 
 test-cli:
-	python -m tests.cli
+	.tox/py27/bin/python -m tests.cli

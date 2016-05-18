@@ -1,1 +1,2 @@
 recursive-include hammock/templates *.j2
+include README.md
