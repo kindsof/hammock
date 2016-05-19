@@ -1,6 +1,7 @@
-all: build rename tox
+all: build tox
 
-TESTS ?= discover -b tests -p "test_*.py"
+# Default nose2 arguments, if test module was not specified
+TEST ?= --config setup.cfg
 
 # TODO: remove this paragraph, python3.5 is not yet installed on the build machines...
 TOXENV ?= py27
@@ -24,15 +25,12 @@ pylint:
 	pylint -r n --py3k hammock tests
 	pylint -r n hammock tests
 
-coverage:
-	coverage erase
-	coverage run -m unittest $(TESTS)
-	coverage html
-	coverage report
-
 unittest:
-	python -m unittest $(TESTS)
+	coverage erase
+	nose2 $(TEST)
+	coverage html
 
+.PHONY: build
 build: rpm rename
 
 rpm:  setup.py hammock/*

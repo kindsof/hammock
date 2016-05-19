@@ -7,11 +7,13 @@ import hammock.client as client
 import tests.resources1 as resources1
 
 
+if not os.path.exists('build'):
+    os.mkdir('build')
+with open('build/hammock_client.py', 'w') as client_file:
+    client_file.write(client.ClientGenerator("HammockClient", resources1).code + '\n')
+
+
 def get_client(*args, **kwargs):
-    if not os.path.exists('build'):
-        os.mkdir('build')
-    with open('build/hammock_client.py', 'w') as client_file:
-        client_file.write(client.ClientGenerator("HammockClient", resources1).code + '\n')
     sys.path.append('build')
     client_class = importlib.import_module("hammock_client").HammockClient
     return client_class(*args, **kwargs)
