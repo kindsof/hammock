@@ -28,6 +28,7 @@ coverage:
 	coverage erase
 	coverage run -m unittest $(TESTS)
 	coverage html
+	coverage report
 
 unittest:
 	python -m unittest $(TESTS)
