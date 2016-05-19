@@ -13,32 +13,62 @@ Your REST server might have resources.
 4. Use the auto-generated client.
 4. Use the auto-generated service API.
 
-## Creating a resource
+## Creating a Resource
+
 A resource defined by its URL prefix.
 A resource is a class with name of its module, capitalized, and inherits from the `hammock.Resource`. Resource class:
 Lets create an helloworld resource, in resources/helloworld.py:
+
 ```python
 import hammock
 
 class Helloworld(hammock.Resource):
   @hammock.get()
   def say(self):
-    return "hello world"
+    return 'hello world'
 ```
 
 This class definition will add a resource in the URL `/helloworld`. The `hammock.get` decorator
 defines the say method as a rest method for `GET /helloworld`.
 
-## Adding resources package to falcon API
+## Adding Resources Package to Falcon API
+
 Simply use this code:
+
 ```python
 import hammock
 from somewhere.in.your.project import resources
 
 hammock.Hammock('falcon', resources)
 ```
+## Resources Package Hierarchy
 
-## REST methods
+The resources package hierarcy defines the REST server paths. 
+For example, a package resources of the form:
+
+```
+resources/
+  __init__.py
+  books.py
+    class Books(hammock.Resource)
+  users/
+    __init__.py
+    authors.py
+      class Authors(hammock.Resource)
+    book_lenders.py
+      class BookLenders(hammock.Resource)
+```
+
+Will have the `Books` resource class on URL `/books`. The `Authors` resource
+class on url `/users/authors` and `BookLenders` resource class on URL 
+`/users/book-lenders`.
+- All the translation between names and URLs is automatic, but can be overrided.
+- The route methods in a resource class will extend the class URL. 
+  For example, within the `BookLenders` class, a method decorated with 
+  `hammock.get('{lender_id}/last-book')` will add a GET method on an absoulute path `/users/book-lenders/{lender_id}/last-book`.
+
+## REST Methods
+
 As explained above, adding a rest method is done by adding a method to the resource class with an
 appropriate decorator.
 You can use one decorators: `hammock.get`, `hammock.post`, `hammock.put`, `hammock.patch` or `hammock.delete`.
@@ -47,7 +77,8 @@ something, usually an object that can be converted to JSON format in the respons
 will be parsed automatically from the request URL query or JSON body (depending on the method used), and the return
 value will be written to the response message.
 
-### The decorators may get some arguments:
+### The ecorators may get some arguments:
+
 - path (default: ""): representing a path in the resource. This path may include variables,
 surrounded by curly braces, same as you would have done in falcon.
 - success_code (default: 200): the code that will be returned with the HTTP response,
@@ -55,7 +86,7 @@ in case that no error was raised.
 - result_content_type (default "application/json"): the content type that will be in the header of the response.
 - rule_name: see [Policy](#policy), below.
 
-## Route argument types
+## Route Argument Types
 
 You may add types for the route method's arguments.
 The types are given in the docstring of the method and also influence the CLI.
@@ -74,6 +105,7 @@ will be raised. Special cases:
   will be passed to the method.
 
 ### Special arguments
+
 Naming the method's argument in a special way, might result in a different behaviour:
 - `_headers`: the argument that will be passed to the method is the headers of the request.
 - `_file`: This method expects "application/octet-stream" as content-type of the request, and the stream
@@ -82,19 +114,21 @@ Other arguments will be passed through the URL query parameters.
 - `_list`: when JSON body is a list (and not a dict) the body will go to this variable.
 
 ## URLs
+
 The URL of your resource is created using the python packages and class name.
 For example, if your Echo class is in `your.project.resources.tools.echo.Echo`,
 and you add the package `your.project.resources` to the rest.Rest class, the resource URL will be:
 `/tools/echo`, since its class name is Echo and it is in subpackage tools.
 
 ### Overriding URLs
+
 - For packages: if you want the URL component of a package to differ from its name,
-you can add to the package `__init__.py` file: `PATH = "some-other-name"`. This will replace the package
+you can add to the package `__init__.py` file: `PATH = 'some-other-name'`. This will replace the package
 name with `some-other-name` in the URL.
 - For classes: adding PATH class member
 ```python
 class SomeResource(hammock.Resource):
-  PATH = "some-other-name"
+  PATH = 'some-other-name'
 ```
 
 ## Client Methods:
@@ -154,7 +188,7 @@ class MySecuredResource(hammock.Resource):
     @hammock.get()
     def get(self, _credentials, resource_id):
         resource = manager.get(resource_id)
-        if resource['project_id'] != _credentials['project_id']:
+        if resource['project_id'] != _credentials.project_id:
             raise exceptions.Unauthorized('Get secured resource {}'.format(resource_id))
         return vm
 ```
@@ -192,7 +226,15 @@ For resources package, add `CLI_COMMAND_NAME` variable in the `__init__.py` file
 
 - The documentation string for the command is taken from the route method doc string.
 
-# API generation
+# Client Generation
+
+In order to dump a hammock service python binding (a python client) into a file:
+`python -m hammock.client ClientClassName path.to.resource_package [http://default-url] > my-client.py`
+
+The client code json can also be obtained from a running hammock service:
+`curl http://your-server/_client`
+
+# API Generation
 
 In order to dump a hammock service API into a file:
 `python -m hammock.doc path.to.resource_package [--json|--yaml] > my-resource-api.yml`
