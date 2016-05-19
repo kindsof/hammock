@@ -19,10 +19,18 @@ def test_connection(address):
         return True
 
 
+def get_available_port():
+    sock = socket.socket()
+    sock.bind(("", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
+
+
 class Server(object):
     def __init__(self, host="localhost", port=None, name=None):
         self.host = host
-        self.port = port or self._get_available_port()
+        self.port = port or get_available_port()
         logging.info("Starting server on %s:%d...", self.host, self.port)
         self.name = name
         self._httpd = _Server((self.host, self.port), type("Handler", (Handler, object), {"name": self.name}))
@@ -35,13 +43,6 @@ class Server(object):
         self._httpd.shutdown()
         self._httpd.server_close()
         logging.info("Server closed")
-
-    def _get_available_port(self):
-        sock = socket.socket()
-        sock.bind(("", 0))
-        port = sock.getsockname()[1]
-        sock.close()
-        return port
 
 
 class _Server(six.moves.socketserver.TCPServer):

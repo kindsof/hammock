@@ -11,10 +11,11 @@ import falcon
 import hammock
 import hammock.cli
 import hammock.client as client
+import hammock.testing as testing
 
 import tests.uwsgi_base as uwsgi_base
 
-PORT = 6543
+PORT = testing.get_available_port()
 LOG = logging.getLogger(__name__)
 BUILD_PATH = 'build/cli-tests'
 

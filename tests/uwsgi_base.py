@@ -19,10 +19,6 @@ def start_server(port, app_module=None, log_file_name=None, procname='hammock-te
         args += ['--logger', 'file:{}'.format(log_file_name)]
         kwargs = {'stderr': log_file, 'stdout': log_file}
 
-    # TODO: Fix this
-    # Cleanup leftover of servers from previous unittests
-    subprocess.call(['pkill', '-9', 'uwsgi'])
-
     server = subprocess.Popen(args, **kwargs)
     waiting.wait(
         functools.partial(testing.test_connection, ("localhost", port)),
@@ -33,7 +29,7 @@ def start_server(port, app_module=None, log_file_name=None, procname='hammock-te
 
 
 class UwsgiBase(unittest.TestCase):
-    PORT = 7001
+    PORT = testing.get_available_port()
     TOKEN = "token"
     _server = None
     _client = None
