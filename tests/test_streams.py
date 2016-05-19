@@ -6,13 +6,15 @@ import logging
 import hammock.common as common
 
 
+MB_TO_TEST = 50
+
+
 class TestStreams(base.TestBase):
 
     def test_streams(self):
         path = "/files"
-        mb_to_test = 100
-        logging.info("Testing post and get of %d mb", mb_to_test)
-        body = bytearray(mb_to_test << 20)
+        logging.info("Testing post and get of %d mb", MB_TO_TEST)
+        body = bytearray(MB_TO_TEST << 20)
         response = self._simulate(
             "POST",
             path,
@@ -26,19 +28,19 @@ class TestStreams(base.TestBase):
             body = body.decode()
         self.assertEqual(response, body)
 
-        logging.info("Testing get of %d mb", mb_to_test)
+        logging.info("Testing get of %d mb", MB_TO_TEST)
         response = self._simulate(
             "GET",
             path,
-            query_string="size_mb={:d}".format(mb_to_test)
+            query_string="size_mb={:d}".format(MB_TO_TEST)
         )
         size_bytes = len(response) if not isinstance(response, six.binary_type) else response.__sizeof__()
-        self.assertEqual(mb_to_test, size_bytes >> 20)
-        logging.info("Testing reading in server of %d mb", mb_to_test)
+        self.assertEqual(MB_TO_TEST, size_bytes >> 20)
+        logging.info("Testing reading in server of %d mb", MB_TO_TEST)
         response = self._simulate(
             "POST",
             os.path.join(path, "check_size"),
-            query_string="size_mb={:d}".format(mb_to_test),
+            query_string="size_mb={:d}".format(MB_TO_TEST),
             body=body,
             headers={common.CONTENT_TYPE: common.TYPE_OCTET_STREAM},
         )
