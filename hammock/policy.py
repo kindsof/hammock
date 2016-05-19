@@ -40,6 +40,7 @@ class Policy(object):
         self._policy_file = policy_file
         conf = self._get_conf()
         self._enforcer = policy.Enforcer(conf, use_conf=policy_file is not None)
+        self._enforcer.load_rules()
         LOG.info('Policy is loaded with rules: %s', self._enforcer.rules)
 
     def check(self, rule, target, credentials):
