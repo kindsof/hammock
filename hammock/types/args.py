@@ -32,6 +32,8 @@ class PositionalArg(object):
         None: lambda x: x,
     }
 
+    __slots__ = ('name', 'type_name', 'convert', 'doc', 'default')
+
     def __init__(self, name, type, doc, default=None):  # pylint: disable=redefined-builtin
         self.name = name
         self.type_name = type
