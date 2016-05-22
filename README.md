@@ -77,7 +77,7 @@ something, usually an object that can be converted to JSON format in the respons
 will be parsed automatically from the request URL query or JSON body (depending on the method used), and the return
 value will be written to the response message.
 
-### The ecorators may get some arguments:
+### The decorators may get some arguments:
 
 - path (default: ""): representing a path in the resource. This path may include variables,
 surrounded by curly braces, same as you would have done in falcon.
