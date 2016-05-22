@@ -9,6 +9,7 @@ import sys
 import hammock.packages as packages
 import hammock.common as common
 import hammock.types.args as _args
+import hammock.names as names
 
 
 def generate(package):
@@ -34,6 +35,7 @@ def generate(package):
                 'path': common.url_join(resource_path, route.path),
                 'success_status': route.success_code,
                 'doc': route.spec.doc,
+                'cli_command': _build_cli_command(parents, resource_class, route)
             })
     return doc
 
@@ -52,6 +54,20 @@ def main():
         yaml.dump(doc, stream=sys.stdout, default_flow_style=False)
     else:
         print(doc)
+
+
+def _build_cli_command(parents, resource_class, route_method):
+    if (
+        route_method is False or
+        resource_class.cli_command_name() is False or
+        any((parent.cli_command_name is False for parent in parents))
+    ):
+        return None
+    command = [parent.cli_command_name for parent in parents] + [
+        resource_class.cli_command_name(),
+        route_method.cli_command_name or names.to_command(route_method.__name__),
+    ]
+    return ' '.join(command)
 
 
 if __name__ == '__main__':

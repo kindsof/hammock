@@ -68,3 +68,6 @@ test-uwsgi:
 
 test-cli:
 	.tox/py27/bin/python -m tests.cli
+
+test-doc:
+	.tox/py27/bin/python -m hammock.doc tests.resources1 --yaml
