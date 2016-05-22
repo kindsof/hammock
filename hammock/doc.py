@@ -19,7 +19,7 @@ def generate(package):
             arguments = []
             for name, arg in six.iteritems(route.spec.args_info):
                 argument = {
-                    'name': name,
+                    'name': route.keyword_map.get(name, name),
                     'type': arg.type_name,
                     'doc': arg.doc,
                 }
