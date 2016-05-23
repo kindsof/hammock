@@ -24,8 +24,8 @@ def generate(package):
                     'type': arg.type_name,
                     'doc': arg.doc,
                 }
-                if not isinstance(arg, _args.PositionalArg):
-                    argument['default'] = arg.default,
+                if isinstance(arg, (_args.KeywordArg, _args.OptionalArg)):
+                    argument['default'] = arg.default
                 arguments.append(argument)
 
             doc.append({
