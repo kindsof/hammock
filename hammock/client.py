@@ -1,8 +1,5 @@
 from __future__ import absolute_import
 from __future__ import print_function
-import __builtin__
-import mock
-import importlib
 import inspect
 import jinja2
 import re
@@ -15,6 +12,7 @@ import hammock.packages as packages
 import hammock.types.func_spec as func_spec
 import hammock.types.file as file_module
 import hammock.wrappers as wrappers
+import hammock.mock_import as mock_import
 
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader('hammock.templates', 'client'))
@@ -24,35 +22,11 @@ RESOURCE_CLASS_TEMPLATE = ENV.get_template('resource_class.j2')
 IGNORE_KW = {common.KW_HEADERS, common.KW_FILE, common.KW_LIST, common.KW_CREDENTIALS, common.KW_ENFORCER}
 
 
-IMPORT = __builtin__.__import__
-
-
-def try_import_generator(resource_package_name):
-    def try_import(*args, **kwargs):
-        try:
-            return IMPORT(*args, **kwargs)
-        except:
-            if args[0].startswith(resource_package_name):
-                # This is a module we need to import, so we don't mock it
-                # and raising the exception
-                raise
-            # Mock external module so we can peacefully create our client
-            sys.modules[args[0]] = mock.MagicMock()
-            return sys.modules[args[0]]
-    return try_import
-
-
 class ClientGenerator(object):
     def __init__(self, class_name, resources_package, default_url=''):
         self._resources = {}
 
-        if isinstance(resources_package, str):
-            resources_package = importlib.import_module(resources_package)
-
-        # Mock __import__, so when resources try to import a module that
-        # exists only in the server, There won't be any ImportError
-        with mock.patch('__builtin__.__import__', try_import_generator(resources_package.__name__)):
-            self._add_resources(resources_package)
+        self._add_resources(resources_package)
 
         resource_classes = [
             _tabify(_resource_class_code(_resource))
@@ -79,11 +53,12 @@ class ClientGenerator(object):
         self.code = re.sub("[ ]+\n", "\n", code).rstrip("\n")
 
     def _add_resources(self, package):
-        for resource_class, parents in packages.iter_resource_classes(package):
-            cur = self._resources
-            for parent in parents:
-                cur = cur.setdefault(parent, {})
-            cur.setdefault("", []).append(resource_class)
+        with mock_import.mock_import([package]):
+            for resource_class, parents in packages.iter_resource_classes(package):
+                cur = self._resources
+                for parent in parents:
+                    cur = cur.setdefault(parent, {})
+                cur.setdefault("", []).append(resource_class)
 
 
 def _resource_class_code(_resource, paths=None):

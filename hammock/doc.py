@@ -10,33 +10,36 @@ import hammock.packages as packages
 import hammock.common as common
 import hammock.types.args as _args
 import hammock.names as names
+import hammock.mock_import as mock_import
 
 
 def generate(package):
     doc = []
-    for resource_class, parents in packages.iter_resource_classes(package):
-        resource_path = common.url_join(*([parent.path for parent in parents] + [resource_class.path()]))
-        for route in resource_class.iter_route_methods():
-            arguments = []
-            for name, arg in six.iteritems(route.spec.args_info):
-                argument = {
-                    'name': route.keyword_map.get(name, name),
-                    'type': arg.type_name,
-                    'doc': arg.doc,
-                }
-                if isinstance(arg, (_args.KeywordArg, _args.OptionalArg)):
-                    argument['default'] = arg.default
-                arguments.append(argument)
+    with mock_import.mock_import([package]):
+        for resource_class, parents in packages.iter_resource_classes(package):
+            resource_path = common.url_join(
+                *([parent.path for parent in parents] + [resource_class.path()]))
+            for route in resource_class.iter_route_methods():
+                arguments = []
+                for name, arg in six.iteritems(route.spec.args_info):
+                    argument = {
+                        'name': route.keyword_map.get(name, name),
+                        'type': arg.type_name,
+                        'doc': arg.doc,
+                    }
+                    if isinstance(arg, (_args.KeywordArg, _args.OptionalArg)):
+                        argument['default'] = arg.default
+                    arguments.append(argument)
 
-            doc.append({
-                'name': route.__name__,
-                'arguments': arguments,
-                'method': route.method,
-                'path': common.url_join(resource_path, route.path),
-                'success_status': route.success_code,
-                'doc': route.spec.doc,
-                'cli_command': _build_cli_command(parents, resource_class, route)
-            })
+                doc.append({
+                    'name': route.__name__,
+                    'arguments': arguments,
+                    'method': route.method,
+                    'path': common.url_join(resource_path, route.path),
+                    'success_status': route.success_code,
+                    'doc': route.spec.doc,
+                    'cli_command': _build_cli_command(parents, resource_class, route)
+                })
     return doc
 
 
