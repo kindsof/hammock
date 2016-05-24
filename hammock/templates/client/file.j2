@@ -20,16 +20,16 @@ NOT_SET = object()
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
-class HammockString(str):
+class ResponseString(str):
     def __new__(cls, data='', headers=None):
         new = str.__new__(cls, data)
         new.headers = headers
         return new
 
-class HammockDict(munch.Munch):
+class ResponseDict(munch.Munch):
 
     def __init__(self, seq=None, headers=None, **kwargs):
-        super(HammockDict, self).__init__(seq, **kwargs)
+        super(ResponseDict, self).__init__(seq, **kwargs)
         self.headers = headers
 
     def __setattr__(self, key, value):
@@ -37,13 +37,13 @@ class HammockDict(munch.Munch):
         If setting the special attr 'headers', set it as a attr, otherwise, set as a key
         """
         if key != "headers":
-            super(HammockDict, self).__setattr__(key, value)
+            super(ResponseDict, self).__setattr__(key, value)
         else:
             object.__setattr__(self, key, value)
 
-class HammockList(list):
+class ResponseList(list):
     def __init__(self, seq=(), headers=None):
-        super(HammockList, self).__init__(seq)
+        super(ResponseList, self).__init__(seq)
         self.headers = headers
 
 {{file_class}}
@@ -164,12 +164,12 @@ class {{ class_name }}(object):
             return
         try:
             if isinstance(result, dict):
-                result = HammockDict(munch.munchify(result), headers=response.headers)
+                result = ResponseDict(munch.munchify(result), headers=response.headers)
             elif isinstance(result, list):
-                result = HammockList([item if not isinstance(item, dict) else munch.munchify(item) for item in result],
-                                     headers=response.headers)
+                result = ResponseList([item if not isinstance(item, dict) else munch.munchify(item) for item in result],
+                                      headers=response.headers)
             elif isinstance(result, six.string_types):
-                result = HammockString(result, headers=response.headers)
+                result = ResponseString(result, headers=response.headers)
         except:
             raise Exception(traceback.format_exc())
         return result
