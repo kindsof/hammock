@@ -91,7 +91,7 @@ class Command(command.Command):
 
     def _colorize(self, column, value):
         try:
-            return self.column_colors[column][value.lower()](value)
+            return self.column_colors[column][str(value).lower()](value)
         except KeyError:
             return value
 
