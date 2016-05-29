@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 import munch
 
+import hammock.types.headers
+
 
 class Credentials(munch.Munch):
     """
@@ -11,6 +13,6 @@ class Credentials(munch.Munch):
     """
     def __init__(self, headers):
         super(Credentials, self).__init__(
-            headers=headers,
+            headers=hammock.types.headers.Headers(headers),
             user_name=headers.get("username")
         )
