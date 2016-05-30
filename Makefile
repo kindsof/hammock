@@ -29,6 +29,7 @@ unittest:
 	coverage erase
 	nose2 $(TEST)
 	coverage html
+	coverage xml
 
 .PHONY: build
 build: rpm rename
