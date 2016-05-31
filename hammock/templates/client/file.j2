@@ -20,11 +20,13 @@ NOT_SET = object()
 def url_join(*args):
     return '/'.join(arg.strip('/') for arg in args)
 
+
 class ResponseString(str):
     def __new__(cls, data='', headers=None):
         new = str.__new__(cls, data)
         new.headers = headers
         return new
+
 
 class ResponseDict(munch.Munch):
 
@@ -41,10 +43,12 @@ class ResponseDict(munch.Munch):
         else:
             object.__setattr__(self, key, value)
 
+
 class ResponseList(list):
     def __init__(self, seq=(), headers=None):
         super(ResponseList, self).__init__(seq)
         self.headers = headers
+
 
 {{file_class}}
 

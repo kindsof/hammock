@@ -10,6 +10,7 @@ import cliff.show as show
 import cliff.lister as lister
 import hammock.types.func_spec as func_spec
 import hammock.cli
+from . import flatten as flatten
 
 
 LOG = logging.getLogger(__name__)
@@ -117,6 +118,7 @@ class CommandItem(Command, show.ShowOne):
 
     def take_action(self, parsed_args):  # pylint: disable=unused-argument
         result = self._action(parsed_args)
+        result = flatten.flatten(result)
         names = self._sorted_columns(result.keys())
         return names, (self._colorize(name, result[name]) for name in names)
 
@@ -129,10 +131,9 @@ class CommandList(Command, lister.Lister):
 
     def take_action(self, parsed_args):  # pylint: disable=unused-argument
         objects = self._action(parsed_args)
+        objects = [flatten.flatten(obj) for obj in objects]
         # We expect the method to return a list of dicts, or a list of values.
         names = self._get_names(objects)
-        if not names:
-            return ('value', ), [(value, ) for value in objects]
         return names, [
             [self._colorize(name, obj.get(name)) for name in names]
             for obj in objects
