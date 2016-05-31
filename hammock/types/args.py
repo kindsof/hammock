@@ -60,8 +60,12 @@ class PositionalArg(object):
         return self.name
 
     def _parser_update_kwargs(self, kwargs):
-        if self.convert is list:
-            kwargs['nargs'] = '*'
+        if self.type_name == 'list':
+            kwargs['action'] = 'append'
+            kwargs.pop('type', None)
+            # Always list is an optional CLI argument.
+            if not self._parser_name.startswith('--')
+                self.name = '--' + self.name
 
 
 class OptionalArg(PositionalArg):
