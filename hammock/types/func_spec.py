@@ -17,7 +17,7 @@ class FuncSpec(object):
     def __init__(self, func):
         self._func = func
         self.args = []
-        self.kwargs = {}
+        self.kwargs = collections.OrderedDict()
         self.keywords = None
         self._inspect(func)
         self.doc, doc_args_info, self.returns = self._get_doc_parts(func.__doc__)
@@ -71,7 +71,8 @@ class FuncSpec(object):
                 spec_args = spec_args[1:]
             self.args = spec_args[:len(spec_args) - len(defaults)]
             keywords = spec_args[len(spec_args) - len(defaults):]
-            self.kwargs = dict(six.moves.zip(keywords, defaults))
+            for key, value in six.moves.zip(keywords, defaults):
+                self.kwargs[key] = value
             self.keywords = spec.keywords
         elif six.PY3:
             # pylint: disable=no-member

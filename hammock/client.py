@@ -135,12 +135,16 @@ def _method_code(method_name, method, url, args, kwargs, url_kw, defaults, succe
         # Fix doc string indentation.
         doc_string = '\n    '.join(doc_string.split('\n'))
 
+    for key, value in kwargs.iteritems():
+        if isinstance(value, six.string_types):
+            kwargs[key] = '"{}"'.format(value)
+
     return METHOD_TEMPLATE.render(  # pylint: disable=no-member
         method_name=names.to_variable_name(method_name),
         method=method,
         url=url,
         args=args,
-        kwargs={k: (v if not isinstance(v, six.string_types) else '"{}"'.format(v)) for k, v in six.iteritems(kwargs)},
+        kwargs=kwargs,
         url_kw=url_kw,
         params_kw=params_kw,
         defaults=defaults,
