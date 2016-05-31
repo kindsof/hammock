@@ -28,6 +28,7 @@ pylint:
 unittest:
 	coverage erase
 	nose2 $(TEST)
+	coverage xml
 	coverage html
 
 .PHONY: build
