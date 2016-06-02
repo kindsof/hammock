@@ -31,7 +31,7 @@ class ResponseString(str):
 class ResponseDict(munch.Munch):
 
     def __init__(self, seq=None, headers=None, **kwargs):
-        super(ResponseDict, self).__init__(seq, **kwargs)
+        super(ResponseDict, self).__init__(seq or {}, **kwargs)
         self.headers = headers
 
     def __setattr__(self, key, value):
@@ -45,8 +45,8 @@ class ResponseDict(munch.Munch):
 
 
 class ResponseList(list):
-    def __init__(self, seq=(), headers=None):
-        super(ResponseList, self).__init__(seq)
+    def __init__(self, seq=None, headers=None):
+        super(ResponseList, self).__init__(seq or [])
         self.headers = headers
 
 
