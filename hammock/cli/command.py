@@ -5,6 +5,7 @@ import requests
 import argparse
 import sys
 import shutil
+import munch
 import cliff.command as command
 import cliff.show as show
 import cliff.lister as lister
@@ -67,7 +68,7 @@ class Command(command.Command):
         if self.spec.keywords:
             kwargs.update(getattr(parsed_args, self.spec.keywords, ''))
         try:
-            return self.func(**kwargs)
+            return munch.unmunchify(self.func(**kwargs))
         except requests.HTTPError as exc:
             raise hammock.cli.CLIException(self._format_exception(exc))
 
