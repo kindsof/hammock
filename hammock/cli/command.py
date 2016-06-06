@@ -5,6 +5,7 @@ import requests
 import argparse
 import sys
 import shutil
+import munch
 import cliff.command as command
 import cliff.show as show
 import cliff.lister as lister
@@ -116,7 +117,7 @@ class CommandItem(Command, show.ShowOne):
     """
 
     def take_action(self, parsed_args):  # pylint: disable=unused-argument
-        result = self._action(parsed_args)
+        result = munch.unmunchify(self._action(parsed_args))
         names = self._sorted_columns(result.keys())
         return names, (self._colorize(name, result[name]) for name in names)
 
