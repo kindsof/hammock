@@ -85,8 +85,10 @@ class {{ class_name }}(object):
         eventually_close_file_object = None
         url_kw = url_kw or {}
         url = url_join(self._url, url).format(**url_kw)
+        json = json or {}
+        if isinstance(json, dict) and kwargs:
+            json.update(kwargs)
         if json and not isinstance(json, list):
-            json.update(kwargs or {})
             json = {key: value for key, value in six.iteritems(json) if value != NOT_SET}
         _kwargs = {
             "timeout": self._timeout,
