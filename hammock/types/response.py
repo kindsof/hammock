@@ -52,7 +52,7 @@ class Response(http_base.HttpBase):
                 content = result
         else:
             response_headers[common.CONTENT_TYPE] = content_type
-            content = result[common.KW_CONTENT]
+            content = result.get(common.KW_CONTENT, None)
 
         return cls(content, response_headers, response_status)
 
