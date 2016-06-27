@@ -17,7 +17,7 @@ def to_bool(value):
     """
     if isinstance(value, six.string_types):
         value = value in {'true', 'True'}
-    return bool(value)
+    return bool(value) if value is not None else None
 
 
 def to_list(value):
