@@ -90,7 +90,10 @@ class Command(command.Command):
         except ValueError:
             return len(self.column_order) + 1
 
-    def _colorize(self, column, value):
+    def _colorize(self, column, value, args):
+        if getattr(args, 'formatter', None) != 'table':
+            # Only colorize when table format is requested
+            return value
         try:
             return self.column_colors[column][str(value).lower()](value)
         except KeyError:
@@ -116,10 +119,10 @@ class CommandItem(Command, show.ShowOne):
     in the form of a dict.
     """
 
-    def take_action(self, parsed_args):  # pylint: disable=unused-argument
+    def take_action(self, parsed_args):
         result = munch.unmunchify(self._action(parsed_args))
         names = self._sorted_columns(result.keys())
-        return names, (self._colorize(name, result[name]) for name in names)
+        return names, (self._colorize(name, result[name], parsed_args) for name in names)
 
 
 class CommandList(Command, lister.Lister):
@@ -128,14 +131,14 @@ class CommandList(Command, lister.Lister):
     each one is a dict.
     """
 
-    def take_action(self, parsed_args):  # pylint: disable=unused-argument
+    def take_action(self, parsed_args):
         objects = self._action(parsed_args)
         # We expect the method to return a list of dicts, or a list of values.
         names = self._get_names(objects)
         if not names:
             return ('value', ), [(value, ) for value in objects]
         return names, [
-            [self._colorize(name, obj.get(name)) for name in names]
+            [self._colorize(name, obj.get(name), parsed_args) for name in names]
             for obj in objects
         ]
 
