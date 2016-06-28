@@ -132,7 +132,7 @@ class CommandList(Command, lister.Lister):
     """
 
     def take_action(self, parsed_args):
-        objects = self._action(parsed_args)
+        objects = [munch.unmunchify(obj) for obj in self._action(parsed_args)]
         # We expect the method to return a list of dicts, or a list of values.
         names = self._get_names(objects)
         if not names:
