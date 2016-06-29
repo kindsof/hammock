@@ -60,6 +60,15 @@ class CLINames(hammock.Resource):
         """
         return 'something'
 
+    @hammock.get('argument-with-underscores')
+    def argument_with_underscores(self, _arg_, _second_arg_=None):
+        """
+        :param int _arg_: argument with underscores
+        :param int _second_arg_: second argument with underscores
+        :return dict:
+        """
+        return {'arg': _arg_, 'second': _second_arg_}
+
 
 def _get_func(func_name):
     @hammock.get(func_name)

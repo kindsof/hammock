@@ -84,6 +84,12 @@ class TestCli(base.Base):
     def test_result_type(self):
         self.assertEqual('', self.run_command('cli-names returns-nothing-type'))
 
+    def test_argument_with_underscores(self):
+        self.assertDictEqual(
+            self.run_json_command(['cli-names', 'argument-with-underscores', '1', '--second-arg', '2']),
+            {'arg': 1, 'second': 2}
+        )
+
     def test_empty_resources(self):
         self.assertEqual('additional\n', self.run_command('sub-resource nested additional'))
         self.assertEqual('additional-2\n', self.run_command('sub-resource nested additional-2'))

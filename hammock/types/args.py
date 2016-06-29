@@ -55,11 +55,13 @@ class PositionalArg(object):
 
     @property
     def _parser_name(self):
-        # Can't convert name with names.to_command, no option to add a 'dest' keyword
-        # when using a positional argument.
         return self.name
 
     def _parser_update_kwargs(self, kwargs):
+        self._update_list_kwargs(kwargs)
+        kwargs['metavar'] = self.name.strip('_')
+
+    def _update_list_kwargs(self, kwargs):
         if self.type_name == 'list':
             kwargs['nargs'] = '+'
             kwargs.pop('type', None)
@@ -73,11 +75,10 @@ class OptionalArg(PositionalArg):
 
     @property
     def _parser_name(self):
-        return '--{}'.format(names.to_command(self.name))
+        return '--{}'.format(names.to_command(self.name).strip('_'))
 
     def _parser_update_kwargs(self, kwargs):
-        super(OptionalArg, self)._parser_update_kwargs(kwargs)
-        # dest keyword can be added only if the argument is optional,
+        self._update_list_kwargs(kwargs)
         kwargs['dest'] = self.name
         if self.type_name == 'bool[True]':
             kwargs['action'] = 'store_false'
@@ -85,6 +86,9 @@ class OptionalArg(PositionalArg):
         elif self.type_name == 'bool[False]':
             kwargs['action'] = 'store_true'
             kwargs.pop('type', None)
+        else:
+            kwargs['metavar'] = self.name.strip('_').upper()
+
         # If a list, change nargs from '+' to '*'
         if kwargs.get('nargs') == '+':
             kwargs['nargs'] = '*'
@@ -101,7 +105,10 @@ class KeywordArg(PositionalArg):
 
     @property
     def _parser_name(self):
-        return '--{}'.format(self.name)
+        return '--{}'.format(self.name.strip('_'))
+
+    def _parser_update_kwargs(self, kwargs):
+        kwargs['dest'] = self.name
 
 
 class ReturnArg(PositionalArg):
