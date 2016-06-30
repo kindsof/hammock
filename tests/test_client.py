@@ -3,19 +3,24 @@ import unittest
 import importlib
 import os
 import sys
+import fcntl
 import hammock.client as client
 import tests.resources1 as resources1
 
 
-if not os.path.exists('build'):
-    os.mkdir('build')
-with open('build/hammock_client.py', 'w') as client_file:
-    client_file.write(client.ClientGenerator("HammockClient", resources1).code + '\n')
-
-
 def get_client(*args, **kwargs):
-    sys.path.append('build')
-    client_class = importlib.import_module("hammock_client").HammockClient
+    if not os.path.exists('build'):
+        os.mkdir('build')
+    client_file = open('build/hammock_client.py', 'w')
+    try:
+        fcntl.flock(client_file.fileno(), fcntl.LOCK_EX)
+        client_file.write(client.ClientGenerator("HammockClient", resources1).code + '\n')
+        client_file.flush()
+        sys.path.append('build')
+        client_class = importlib.import_module("hammock_client").HammockClient
+    finally:
+        fcntl.flock(client_file.fileno(), fcntl.LOCK_UN)
+        client_file.close()
     return client_class(*args, **kwargs)
 
 

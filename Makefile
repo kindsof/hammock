@@ -27,6 +27,7 @@ pylint:
 
 unittest:
 	coverage erase
+	mkdir -p build
 	nose2 $(TEST)
 	coverage xml
 	coverage html
