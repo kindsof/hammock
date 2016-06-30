@@ -5,6 +5,9 @@ import tests.cli.base as base
 import tests.resources1.cli_names as cli_names
 
 
+SUCCESS = 'Success'
+
+
 class TestCli(base.Base):
 
     def test_dict(self):
@@ -44,45 +47,45 @@ class TestCli(base.Base):
         self.assertRaises(SystemExit, self.run_command, 'list remove')
 
     def test_nested_resources(self):
-        self.assertEqual('sub-in-sub1\n', self.run_command('sub-resource sub get'))
-        self.assertEqual('sub2-in-sub1\n', self.run_command('sub-resource sub2 get'))
-        self.assertEqual('sub-in-nested-in-sub\n', self.run_command('sub-resource nested sub get'))
-        self.assertEqual('sub-in-sub2\n', self.run_command('sub-resource2-modified sub get'))
+        self.assertEqual('sub-in-sub1', self.run_command('sub-resource sub get'))
+        self.assertEqual('sub2-in-sub1', self.run_command('sub-resource sub2 get'))
+        self.assertEqual('sub-in-nested-in-sub', self.run_command('sub-resource nested sub get'))
+        self.assertEqual('sub-in-sub2', self.run_command('sub-resource2-modified sub get'))
 
     def test_method_name(self):
         for method_name, translated_name in six.iteritems(cli_names.NAMES):
-            self.assertEqual(method_name + '\n', self.run_command('cli-names {}'.format(translated_name)))
-        self.assertEqual('moshe\n', self.run_command('cli-names optional-variable-with-underscores --optional-variable moshe'))
-        self.assertEqual('\n', self.run_command('cli-names optional-variable-with-underscores'))
-        self.assertEqual('True\n', self.run_command('cli-names set-false'))
-        self.assertEqual('False\n', self.run_command('cli-names set-false --set-false'))
-        self.assertEqual('False\n', self.run_command('cli-names set-true'))
-        self.assertEqual('True\n', self.run_command('cli-names set-true --set-true'))
-        self.assertEqual('True\n', self.run_command('cli-names bool-type --value True'))
-        self.assertEqual('True\n', self.run_command('cli-names bool-type --value true'))
-        self.assertEqual('False\n', self.run_command('cli-names bool-type --value False'))
-        self.assertEqual('False\n', self.run_command('cli-names bool-type --value some-string'))
+            self.assertEqual(method_name, self.run_command('cli-names {}'.format(translated_name)))
+        self.assertEqual('moshe', self.run_command('cli-names optional-variable-with-underscores --optional-variable moshe'))
+        self.assertEqual(SUCCESS, self.run_command('cli-names optional-variable-with-underscores'))
+        self.assertEqual(True, self.run_command('cli-names set-false'))
+        self.assertEqual(False, self.run_command('cli-names set-false --set-false'))
+        self.assertEqual(False, self.run_command('cli-names set-true'))
+        self.assertEqual(True, self.run_command('cli-names set-true --set-true'))
+        self.assertEqual(True, self.run_command('cli-names bool-type --value True'))
+        self.assertEqual(True, self.run_command('cli-names bool-type --value true'))
+        self.assertEqual(False, self.run_command('cli-names bool-type --value False'))
+        self.assertEqual(False, self.run_command('cli-names bool-type --value some-string'))
 
-        self.assertEqual('modified-in-modified\n', self.run_command('different-path different-sub get'))
-        self.assertEqual('modified-in-modified-in-modified\n', self.run_command('different-path different-sub post-modified'))
-        self.assertEqual('moshe\n', self.run_command('variable-in-url-1 get moshe'))
-        self.assertEqual('moshe\n', self.run_command('variable-in-url-2 get moshe'))
+        self.assertEqual('modified-in-modified', self.run_command('different-path different-sub get'))
+        self.assertEqual('modified-in-modified-in-modified', self.run_command('different-path different-sub post-modified'))
+        self.assertEqual('moshe', self.run_command('variable-in-url-1 get moshe'))
+        self.assertEqual('moshe', self.run_command('variable-in-url-2 get moshe'))
 
     def test_headers(self):
-        self.assertEqual('True\n', self.run_command('--headers a:b headers request-headers a b'))
-        self.assertEqual('False\n', self.run_command('--headers a:b headers request-headers a c'))
+        self.assertEqual(True, self.run_command('--headers a:b headers request-headers a b'))
+        self.assertEqual(False, self.run_command('--headers a:b headers request-headers a c'))
 
     def test_ignores(self):
         self.assertRaises(hammock.cli.CLIException, self.run_command, 'cli-ignored-package sub get')
         self.assertRaises(hammock.cli.CLIException, self.run_command, 'cli-ignored-resource sub get')
         self.assertRaises(hammock.cli.CLIException, self.run_command, 'cli-names ignored-method')
 
-        self.assertEqual('sub-in-ignored\n', self.run_command('cli-ignored-package sub get', remove_ignored_commands=False))
-        self.assertEqual('cli-ignored-resource\n', self.run_command('cli-ignored-resource get', remove_ignored_commands=False))
-        self.assertEqual('ignored-method\n', self.run_command('cli-names ignored-method', remove_ignored_commands=False))
+        self.assertEqual('sub-in-ignored', self.run_command('cli-ignored-package sub get', remove_ignored_commands=False))
+        self.assertEqual('cli-ignored-resource', self.run_command('cli-ignored-resource get', remove_ignored_commands=False))
+        self.assertEqual('ignored-method', self.run_command('cli-names ignored-method', remove_ignored_commands=False))
 
     def test_result_type(self):
-        self.assertEqual('', self.run_command('cli-names returns-nothing-type'))
+        self.assertEqual(SUCCESS, self.run_command('cli-names returns-nothing-type'))
 
     def test_argument_with_underscores(self):
         self.assertDictEqual(
@@ -91,8 +94,8 @@ class TestCli(base.Base):
         )
 
     def test_empty_resources(self):
-        self.assertEqual('additional\n', self.run_command('sub-resource nested additional'))
-        self.assertEqual('additional-2\n', self.run_command('sub-resource nested additional-2'))
+        self.assertEqual('additional', self.run_command('sub-resource nested additional'))
+        self.assertEqual('additional-2', self.run_command('sub-resource nested additional-2'))
 
     def test_keywords(self):
         command = ['keywords', 'get', '--kwargs', '{"a": "b", "c": "d"}', '--default', 'f', 'k']
@@ -103,13 +106,13 @@ class TestCli(base.Base):
         self.assertEquals(result['default'], 'f')
 
     def test_client_methods(self):
-        self.assertEqual('3\n', self.run_command('client-methods jump 3'))
+        self.assertEqual(3, self.run_command('client-methods jump 3'))
         # Test missing argument
         self.assertRaises(SystemExit, self.run_command, 'client-methods run')
         # Test invalid argument type in client
         self.assertRaises(SystemExit, self.run_command, 'client-methods run string')
-        self.assertEqual('3.0\n', self.run_command('client-methods run 3'))
-        self.assertEqual('30.0\n', self.run_command('client-methods run 3 --distance 10'))
+        self.assertEqual(3.0, self.run_command('client-methods run 3'))
+        self.assertEqual(30.0, self.run_command('client-methods run 3 --distance 10'))
         self.assertRaises(hammock.cli.CLIException, self.run_command, 'client-methods no-such-action')
 
     def assert_list_of_dicts_equal(self, list1, list2):

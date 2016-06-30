@@ -74,17 +74,15 @@ class Base(uwsgi_base.UwsgiBase):
     app_module = __file__.replace('.pyc', '.py')
 
     def run_command(self, command, remove_ignored_commands=True):
-        out = StringIO.StringIO()
+        return self.run_json_command(command, remove_ignored_commands)['value']
+
+    @staticmethod
+    def run_json_command(command, remove_ignored_commands=True):
         if not isinstance(command, list):
-            command = command.split(' ')
+            command = command.split()
+        command += ['-f', 'json']
+        out = StringIO.StringIO()
         return_code = cli(command, remove_ignored_commands=remove_ignored_commands, stdout=out)
         if return_code != 0:
             raise hammock.cli.CLIException('Error code {} from running command {}'.format(return_code, command))
-        return out.getvalue()
-
-    def run_json_command(self, command, remove_ignored_commands=True):
-        if isinstance(command, list):
-            command += ['-f', 'json']
-        else:
-            command += ' -f json'
-        return json.loads(self.run_command(command, remove_ignored_commands=remove_ignored_commands))
+        return json.loads(out.getvalue())

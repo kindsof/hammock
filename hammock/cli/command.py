@@ -27,13 +27,11 @@ def factory(func, column_order=None, column_colors=None):
     }
 
     if spec.returns:
-        if spec.returns.type_name == 'dict':
-            return type(func.__name__, (CommandItem, ), overrides)
-        elif spec.returns.type_name == 'list':
+        if spec.returns.type_name == 'list':
             return type(func.__name__, (CommandList, ), overrides)
         elif spec.returns.type_name == 'file':
             return type(func.__name__, (CommandFile, ), overrides)
-    return type(func.__name__, (Command, ), overrides)
+    return type(func.__name__, (CommandItem, ), overrides)
 
 
 class Command(command.Command):
@@ -121,6 +119,12 @@ class CommandItem(Command, show.ShowOne):
 
     def take_action(self, parsed_args):
         result = munch.unmunchify(self._action(parsed_args))
+        if result is not None and (self.spec.returns is not None):
+            result = self.spec.returns.convert(result)
+        if result is None or result == '':
+            result = 'Success'
+        if not isinstance(result, dict):
+            result = {'value': result}
         names = self._sorted_columns(result.keys())
         return names, (self._colorize(name, result[name], parsed_args) for name in names)
 

@@ -45,5 +45,5 @@ def to_str(value):
     return str(value) if value is not None else None
 
 
-def to_none(value):  # pylint: disable=unused-argument
+def to_none(_):
     return None
