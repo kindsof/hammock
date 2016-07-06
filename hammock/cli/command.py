@@ -64,7 +64,7 @@ class Command(command.Command):
     def _action(self, parsed_args):
         kwargs = {arg: getattr(parsed_args, arg) for arg in self.spec.all_args}
         if self.spec.keywords:
-            kwargs.update(getattr(parsed_args, self.spec.keywords, ''))
+            kwargs.update(getattr(parsed_args, self.spec.keywords, None) or {})
         try:
             return self.func(**kwargs)
         except requests.HTTPError as exc:
