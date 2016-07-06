@@ -2,7 +2,21 @@
 
 
 import os
+import subprocess
 import setuptools
+
+
+PKG_INFO = 'PKG-INFO'
+
+
+def version():
+    if os.path.exists(PKG_INFO):
+        with open(PKG_INFO) as package_info:
+            for key, value in (line.split(':', 1) for line in package_info):
+                if key.startswith('Version'):
+                    return value.strip()
+    else:
+        return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()
 
 
 def read(fname):
@@ -12,7 +26,7 @@ def read(fname):
 
 setuptools.setup(
     name='hammock-rest',
-    version='0.0.1',
+    version=version(),
     author='Eyal Posener',
     author_email='eyal@stratoscale.com',
     description='A good place to REST',
