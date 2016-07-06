@@ -1,4 +1,4 @@
-all: build tox
+all: dist tox
 
 # Default nose2 arguments, if test module was not specified
 TEST ?= --config setup.cfg
@@ -32,24 +32,22 @@ unittest:
 	coverage xml
 	coverage html
 
-.PHONY: build
-build: rpm rename
-
-rpm:  setup.py hammock/*
+dist: setup.py hammock/*
 	python setup.py bdist --formats=rpm
 	rm dist/*.src.rpm dist/*.tar.gz
 
-rename: dist/hammock-rest-0.0.1-1.noarch.rpm
-	- rm -f $(basename $<)-*.rpm
-	mv $< $(basename $<)-$(shell git rev-parse --short=7 HEAD).rpm
-
 upload:
-	python setup.py sdist upload
+	python setup.py sdist upload -r http://rackattack-nas.dc1:5001
 
 submit:
 	solvent submitproduct rpm dist
 
 approve:
+	@if ! (git diff --exit-code --quiet && git diff --exit-code --cached --quiet); \
+	then \
+		echo "Please commit any local changes prior to approving"; \
+		false; \
+	fi
 	solvent approve --product rpm
 	$(MAKE) upload
 
