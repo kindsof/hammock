@@ -33,6 +33,7 @@ PUT = 'PUT'
 GET = 'GET'
 POST = 'POST'
 DELETE = 'DELETE'
+PATCH = 'PATCH'
 
 
 def url_join(*parts):
