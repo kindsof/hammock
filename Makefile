@@ -37,7 +37,7 @@ dist: setup.py hammock/*
 	rm dist/*.src.rpm dist/*.tar.gz
 
 upload:
-	python setup.py sdist upload -r http://rackattack-nas.dc1:5001
+	python setup.py sdist upload -r http://strato-pypi.dc1:5001
 
 submit:
 	solvent submitproduct rpm dist
