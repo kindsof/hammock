@@ -22,6 +22,7 @@ KW_HOST = '_host'
 CONTENT_TYPE = 'CONTENT-TYPE'
 CONTENT_LENGTH = 'CONTENT-LENGTH'
 TYPE_JSON = 'application/json'
+TYPE_XML = 'application/xml'
 TYPE_OCTET_STREAM = 'application/octet-stream'
 TOKEN_ENTRY = 'X-Auth-Token'
 ID_LETTERS = (string.lowercase if six.PY2 else string.ascii_lowercase) + string.digits
