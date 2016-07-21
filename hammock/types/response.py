@@ -3,6 +3,7 @@ try:
     import ujson as json
 except ImportError:
     import json
+from xml.etree.ElementTree import tostring
 import httplib
 import hammock.common as common
 from . import http_base as http_base
@@ -32,6 +33,7 @@ class Response(http_base.HttpBase):
         :param status: status code for response
         :return: a Response object
         """
+        content_convert_funcs = {common.TYPE_JSON: json.dumps, common.TYPE_XML: tostring}
         result = cls._convert_result_to_dict(result)
 
         response_headers = result.pop(common.KW_HEADERS, {})
@@ -42,12 +44,12 @@ class Response(http_base.HttpBase):
             content = common.to_bytes(content_stream)
             response_headers[common.CONTENT_TYPE] = common.TYPE_OCTET_STREAM
             response_headers.update(result)
-        elif content_type == common.TYPE_JSON:
+        elif content_type in content_convert_funcs.keys():
             if common.KW_CONTENT in result:
                 content = result.pop(common.KW_CONTENT)
                 response_headers.update(result)
                 if content is not None:
-                    content = json.dumps(content)
+                    content = content_convert_funcs[content_type](content)
             else:
                 content = result
         else:
