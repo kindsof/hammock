@@ -1,5 +1,9 @@
 from __future__ import absolute_import
-
+try:
+    import ujson as json
+except ImportError:
+    import json
+import xml.etree.ElementTree as ElementTree
 import codecs
 import inspect
 import logging
@@ -35,6 +39,8 @@ GET = 'GET'
 POST = 'POST'
 DELETE = 'DELETE'
 PATCH = 'PATCH'
+
+CONTENT_CONVERSION = {TYPE_JSON: json.dumps, TYPE_XML: ElementTree.tostring}
 
 
 def url_join(*parts):

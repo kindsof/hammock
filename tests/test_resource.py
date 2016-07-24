@@ -137,6 +137,8 @@ class TestResource(base.TestBase):
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes'))
         self.assertEqual('bytes', self._simulate('GET', '/responses/bytes-io'))
         self.assertListEqual([1, 2, 3], self._simulate('GET', '/responses/list'))
+        expected_string = '<topElem><SubElem1>text1</SubElem1><SubElem2>text2</SubElem2></topElem>'
+        self.assertEqual(expected_string, self._simulate('GET', '/responses/xml'))
 
     def test_patterns(self):
         url = "/patterns"

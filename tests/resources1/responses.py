@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import hammock
 import six
+import xml.etree.ElementTree as ElementTree
 
 
 class Responses(hammock.Resource):
@@ -30,3 +31,12 @@ class Responses(hammock.Resource):
     @hammock.get(path='list')
     def list(self):
         return [1, 2, 3]
+
+    @hammock.get(path='xml', response_content_type='application/xml')
+    def xml(self):
+        top = ElementTree.Element('topElem')
+        sub = ElementTree.SubElement(top, 'SubElem1')
+        sub.text = 'text1'
+        sub = ElementTree.SubElement(top, 'SubElem2')
+        sub.text = 'text2'
+        return {'_content': top}
