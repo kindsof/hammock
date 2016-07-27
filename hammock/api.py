@@ -11,7 +11,7 @@ class Hammock(object):
         policy_file=None, credentials_class=None,
         **resource_params
     ):
-        self._backend = backends.get(api)
+        self._backend = backends.get(api, **resource_params)
         self._policy = policy.Policy(policy_file=policy_file)
         self._resources = resource_node.ResourceNode()
         resource_params.update({
