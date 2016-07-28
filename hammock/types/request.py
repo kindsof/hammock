@@ -90,5 +90,5 @@ class Request(http_base.HttpBase):
                 return None
             else:
                 return {common.KW_CONTENT: body}
-        elif common.TYPE_OCTET_STREAM in content_type:
+        elif content_type in [common.TYPE_OCTET_STREAM, common.TYPE_TEXT_PLAIN]:
             return {common.KW_FILE: file_module.File(self.content, self.headers.get(common.CONTENT_LENGTH))}
