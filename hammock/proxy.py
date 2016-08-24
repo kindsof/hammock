@@ -27,7 +27,7 @@ def proxy(req, dest):
         prepared = session.prepare_request(inner_request)
         if req.headers.get(common.CONTENT_LENGTH):
             prepared.headers[common.CONTENT_LENGTH] = req.headers.get(common.CONTENT_LENGTH)
-        if req.headers.get('TRANSFER-ENCODING'):
+        if prepared.headers.get('TRANSFER-ENCODING'):
             del prepared.headers['TRANSFER-ENCODING']
         inner_response = session.send(prepared, stream=True)
         return response.Response(inner_response.raw, inner_response.headers, inner_response.status_code)
