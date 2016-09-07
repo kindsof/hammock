@@ -88,7 +88,9 @@ class Command(command.Command):
         except ValueError:
             return len(self.column_order) + 1
 
-    def _colorize(self, column, value, args):
+    def _preprocess_value(self, column, value, args):
+        if isinstance(value, list):
+            value = ' '.join([('"%s"' % token if ' ' in str(token) else token) for token in value])
         if getattr(args, 'formatter', None) != 'table':
             # Only colorize when table format is requested
             return value
@@ -126,7 +128,7 @@ class CommandItem(Command, show.ShowOne):
         if not isinstance(result, dict):
             result = {'value': result}
         names = self._sorted_columns(result.keys())
-        return names, (self._colorize(name, result[name], parsed_args) for name in names)
+        return names, (self._preprocess_value(name, result[name], parsed_args) for name in names)
 
 
 class CommandList(Command, lister.Lister):
@@ -142,7 +144,7 @@ class CommandList(Command, lister.Lister):
         if not names:
             return ('value', ), [(value, ) for value in objects]
         return names, [
-            [self._colorize(name, obj.get(name), parsed_args) for name in names]
+            [self._preprocess_value(name, obj.get(name), parsed_args) for name in names]
             for obj in objects
         ]
 
