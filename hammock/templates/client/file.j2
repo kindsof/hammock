@@ -56,7 +56,7 @@ class {{ class_name }}(object):
 
     ROUTE_CLI_COMMAND_MAP = {}
 
-    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %}, token=None, timeout=None, headers=None, retries=None, session=None):
+    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %}, token=None, timeout=60, headers=None, retries=0, session=None):
         """
         :param url: url to connect to
         :param token: a token to be used for requests
