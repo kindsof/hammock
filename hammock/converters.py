@@ -16,7 +16,7 @@ def to_bool(value):
     :return bool: Boolean value of value.
     """
     if isinstance(value, six.string_types):
-        value = value in {'true', 'True'}
+        value = value.lower() == 'true'
     return bool(value) if value is not None else None
 
 
