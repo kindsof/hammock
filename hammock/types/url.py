@@ -51,10 +51,11 @@ class Url(object):
     @property
     def params(self):
         if not self._params:
+            query = urllib.parse.parse_qs(self.parsed.query, keep_blank_values=True)
             self._params = {
                 key: self._param_value(value)
-                for key, value in six.iteritems(urllib.parse.parse_qs(self.parsed.query))
-                }
+                for key, value in six.iteritems(query)
+            }
         return self._params
 
     @staticmethod
