@@ -33,6 +33,7 @@ class Response(http_base.HttpBase):
         response_headers = result.pop(common.KW_HEADERS, {})
         content_stream = result.pop(common.KW_FILE, None)
         response_status = result.pop(common.KW_STATUS, status)
+        content_type = response_headers.get(common.CONTENT_TYPE, content_type)
 
         if content_stream:
             content = common.to_bytes(content_stream)
