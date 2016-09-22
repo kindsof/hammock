@@ -92,5 +92,6 @@ class Request(http_base.HttpBase):
                 return {common.KW_CONTENT: body}
         else:
             content_length = self.headers.get(common.CONTENT_LENGTH, '0')
-            if int(content_length) != 0:
+            if content_length.isdigit() and int(content_length) != 0:
                 return {common.KW_FILE: file_module.File(self.content, content_length)}
+            return None
