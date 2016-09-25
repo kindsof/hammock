@@ -52,7 +52,8 @@ class UwsgiBase(unittest.TestCase):
             cls._server_log.close()
 
     def setUp(self):
-        self._client = test_client.get_client(url="http://localhost:{}".format(self.PORT), token=self.TOKEN)
+        self._client = test_client.get_client(
+           url="http://localhost:{}".format(self.PORT), token=self.TOKEN, retries=10)
 
     def get_client(self, **kwargs):
         return test_client.get_client(url="http://localhost:{}".format(self.PORT), **kwargs)
