@@ -9,7 +9,6 @@ class Sink(wrapper.Wrapper):
 
     def _wrapper(self, req):
         kwargs = {}
-        credentials = None
         if self.credentials_class and common.KW_CREDENTIALS in self.spec.args:
             credentials = self.credentials_class(req.headers)
             req.url_params[common.KW_CREDENTIALS] = credentials
@@ -18,4 +17,3 @@ class Sink(wrapper.Wrapper):
             return self(req, **req.url_params)  # pylint: disable=not-callable
         else:
             return proxy.proxy(req, self.dest)
-
