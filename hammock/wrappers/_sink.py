@@ -8,7 +8,6 @@ from . import wrapper
 class Sink(wrapper.Wrapper):
 
     def _wrapper(self, req):
-        kwargs = {}
         if self.credentials_class and common.KW_CREDENTIALS in self.spec.args:
             credentials = self.credentials_class(req.headers)
             req.url_params[common.KW_CREDENTIALS] = credentials
