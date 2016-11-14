@@ -7,6 +7,7 @@ import logging
 import munch
 import warnings
 import traceback
+from requests.packages.urllib3.util import retry
 
 
 LOG = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class {{ class_name }}(object):
         :param token: a token to be used for requests
         :param timeout: timeout for a request
         :param headers: custom headers to send with each request
-        :param retries: max-retries as an int, or a urllib3.Retry object, 
+        :param retries: max-retries as an int, or a requests.packages.urllib3.util.retry.Retry object,
         :param requests.Session session: an external request session to use
         """
         self._url = url
@@ -70,6 +71,13 @@ class {{ class_name }}(object):
             warnings.warn('using arguments hostname and port in client.__init__ is deprecated, use url instead', UserWarning)
             self._url = "http://%s:%d" % (hostname, port)
         self._client = requests.Session() if not session else session
+
+        if isinstance(retries, int):
+            # Configure the retry class with backoff_factor of 0.1, will result
+            # in waiting of about 50s after 10 retries.
+            # the wait function is {backoff factor} * (2 ^ ({retry index} - 1)
+            retries = retry.Retry(total=retries, backoff_factor=0.1)
+
         self._client.mount(self._url, requests.adapters.HTTPAdapter(max_retries=retries))
         self._timeout = timeout
         self._set_token(token)
