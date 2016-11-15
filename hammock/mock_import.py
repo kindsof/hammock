@@ -7,6 +7,8 @@ import six
 
 BUILTIN_IMPORT = __builtin__.__import__
 
+import ipdb;
+ipdb.set_trace()
 
 def mock_import(packages_to_raise=None):
     """
@@ -22,7 +24,9 @@ def mock_import(packages_to_raise=None):
 
     def try_import(module_name, *args, **kwargs):
         try:
+            ipdb.set_trace()
             return BUILTIN_IMPORT(module_name, *args, **kwargs)
+
         except:
             if any((module_name.startswith(prefix) for prefix in packages_to_raise)):
                 # This is a module we need to import, so we don't mock it
