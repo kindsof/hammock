@@ -28,9 +28,14 @@ def to_list(value):
 
 
 def to_dict(value):
+    if value is None:
+        return {}
+    dict_value = value
     if isinstance(value, six.string_types):
-        value = json.loads(value)
-    return value
+        dict_value = json.loads(value)
+    if not isinstance(dict_value, dict):
+        raise ValueError('Conversion to dict failed')
+    return dict_value
 
 
 def to_int(value):
