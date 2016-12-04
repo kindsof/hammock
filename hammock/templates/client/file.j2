@@ -11,6 +11,7 @@ from requests.packages.urllib3.util import retry
 
 
 LOG = logging.getLogger(__name__)
+METHOD_WHITELIST = {'HEAD', 'TRACE', 'GET', 'OPTIONS'}
 
 
 # A const to define an optional argument that was not set
@@ -76,7 +77,7 @@ class {{ class_name }}(object):
             # Configure the retry class with backoff_factor of 0.1, will result
             # in waiting of about 50s after 10 retries.
             # the wait function is {backoff factor} * (2 ^ ({retry index} - 1)
-            retries = retry.Retry(total=retries, backoff_factor=0.1, read=0)
+            retries = retry.Retry(total=retries, read=0, backoff_factor=0.05, method_whitelist=METHOD_WHITELIST)
 
         self._client.mount(self._url, requests.adapters.HTTPAdapter(max_retries=retries))
         self._timeout = timeout
