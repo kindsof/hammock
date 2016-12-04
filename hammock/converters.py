@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import six
+import hammock.exceptions as exceptions
 try:
     import ujson as json
 except ImportError:
@@ -29,8 +30,12 @@ def to_list(value):
 
 def to_dict(value):
     if isinstance(value, six.string_types):
-        value = json.loads(value)
-    return value
+        dict_value = json.loads(value)
+    if not isinstance(value, dict):
+        raise exceptions.BadRequest(
+            'Got {}(type {}) instead of type dict'.format(
+                value, type(value))
+    return dict_value
 
 
 def to_int(value):
