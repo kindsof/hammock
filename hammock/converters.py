@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import six
+import uuid
 try:
     import ujson as json
 except ImportError:
@@ -48,6 +49,10 @@ def to_float(value):
 
 def to_str(value):
     return str(value) if value is not None else None
+
+
+def to_uuid(value):
+    return str(uuid.UUID(value)) if value is not None else None
 
 
 def to_none(_):

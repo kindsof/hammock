@@ -13,14 +13,14 @@ class TestArgumentTypes(base.TestBase):
             httplib.OK,
             common.GET,
             "/argument-types",
-            query_string="a_list=1&an_int=1&a_float=0.1&a_bool=True&a_string=123&not_in_doc=123"
+            query_string="a_list=1&an_int=1&a_float=0.1&a_bool=True&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
         )
         self.assertEqual(response, True)
         response = self.assert_status(
             httplib.OK,
             common.GET,
             "/argument-types",
-            query_string="a_list=1&a_list=moshe&an_int=1&a_float=0.1&a_bool=True&a_string=123&not_in_doc=123"
+            query_string="a_list=1&a_list=moshe&an_int=1&a_float=0.1&a_bool=True&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
         )
         self.assertEqual(response, True)
 
@@ -35,28 +35,35 @@ class TestArgumentTypes(base.TestBase):
             httplib.BAD_REQUEST,
             common.GET,
             "/argument-types",
-            query_string="an_int=1&a_float=0.1&a_bool=True&a_string=123&not_in_doc=123"
+            query_string="an_int=1&a_float=0.1&a_bool=True&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
         )
         # Test bad Int
         self.assert_status(
             httplib.BAD_REQUEST,
             common.GET,
             "/argument-types",
-            query_string="a_list=1&an_int=yo&a_float=0.1&a_bool=True&a_string=123&not_in_doc=123"
+            query_string="a_list=1&an_int=yo&a_float=0.1&a_bool=True&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
         )
         # Test bad float
         self.assert_status(
             httplib.BAD_REQUEST,
             common.GET,
             "/argument-types",
-            query_string="a_list=1&an_int=1&a_float=yo&a_bool=True&a_string=123&not_in_doc=123"
+            query_string="a_list=1&an_int=1&a_float=yo&a_bool=True&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
+        )
+        # Test bad uuid
+        self.assert_status(
+            httplib.BAD_REQUEST,
+            common.GET,
+            "/argument-types",
+            query_string="a_list=1&an_int=1&a_float=yo&a_bool=True&a_string=123&a_uuid=abc&not_in_doc=123"
         )
         # Everything can be a bool
         self.assert_status(
             httplib.OK,
             common.GET,
             "/argument-types",
-            query_string="a_list=1&an_int=1&a_float=1.1&a_bool=yo&a_string=123&not_in_doc=123"
+            query_string="a_list=1&an_int=1&a_float=1.1&a_bool=yo&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
         )
 
     def test_list_conversion(self):
