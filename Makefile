@@ -16,7 +16,7 @@ tox: .tox
 
 clean:
 	find -name *.py[co] -delete
-	rm -rf build dist *.egg-info
+	rm -rf build dist *.egg-info .cache .tox
 
 flake8:
 	flake8 hammock tests
