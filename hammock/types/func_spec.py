@@ -17,12 +17,19 @@ class FuncSpec(object):
     def __init__(self, func):
         self._func = func
         self.args = []
-        self.kwargs = collections.OrderedDict()
+        self._kwargs = collections.OrderedDict()
         self.keywords = None
         self._inspect(func)
         self.doc, doc_args_info, self.returns = self._get_doc_parts(func.__doc__)
-        self.all_args = set(self.args) | set(self.kwargs)
+        self.all_args = set(self.args) | set(self._kwargs)
         self.args_info = self._collect_args_info(doc_args_info)
+
+    @property
+    def kwargs(self):
+        kwargs = collections.OrderedDict()
+        for k, v in self._kwargs.iteritems():
+            kwargs[k] = v
+        return kwargs
 
     def match_and_convert(self, kwargs):
         """
@@ -40,7 +47,7 @@ class FuncSpec(object):
     def _collect_args_info(self, doc_args_info):
         # Must be ordered, because of positional arguments.
         args_info = collections.OrderedDict()
-        for arg in (self.args + self.kwargs.keys()):
+        for arg in (self.args + self._kwargs.keys()):
             args_info[arg] = doc_args_info.get(arg, self._get_arg(arg))
         if self.keywords:
             args_info[self.keywords] = self._get_arg(self.keywords)
@@ -72,7 +79,7 @@ class FuncSpec(object):
             self.args = spec_args[:len(spec_args) - len(defaults)]
             keywords = spec_args[len(spec_args) - len(defaults):]
             for key, value in six.moves.zip(keywords, defaults):
-                self.kwargs[key] = value
+                self._kwargs[key] = value
             self.keywords = spec.keywords
         elif six.PY3:
             # pylint: disable=no-member
@@ -85,7 +92,7 @@ class FuncSpec(object):
                 elif param.default == inspect.Signature.empty:
                     self.args.append(param.name)
                 else:
-                    self.kwargs[param.name] = param.default
+                    self._kwargs[param.name] = param.default
 
     def _get_doc_parts(self, doc):
         intro = []
@@ -143,8 +150,8 @@ class FuncSpec(object):
     def _get_arg(self, name, arg_type=None, doc=None):
         if name in self.args:
             return args.PositionalArg(name, arg_type, doc)
-        elif name in self.kwargs:
-            return args.OptionalArg(name, arg_type, doc, default=self.kwargs[name])
+        elif name in self._kwargs:
+            return args.OptionalArg(name, arg_type, doc, default=self._kwargs[name])
         elif name == self.keywords:
             return args.KeywordArg(name, doc)
         else:
