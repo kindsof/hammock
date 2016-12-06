@@ -215,7 +215,8 @@ For resources package, add `CLI_COMMAND_NAME` variable in the `__init__.py` file
 - The arguments for a command are taken from the route method it represents.
 - `args` are converted to positional arguments. `kwargs` are converted to optional arguments.
 - Type and documentation strings are taken from the method doc string: if the doc string contains a line(s): `:param [<optional-param-type>] <param-name>: <param-help(multi-line)>`.
-  * The type can be `str`, `bool`, `int` of `float` to specify type.
+  * The type can be `str`, `uuid`, `bool`, `int` of `float` to specify type.
+  * `uuid` is a string in UUID formati (according to [RFC 4122](https://tools.ietf.org/html/rfc4122.html)). 
   * `list` will define a CLI argparser `nargs='*'`.
   * `bool[False]` or `bool[True]` will use the `action='store_true'` or `action='store_false'` respectively, and type bool.
 - Return value of a method can be defined using the doc string line(s): `:return <return-type>: <return-help(multi-line)>`, The return value affects the command as follows:
