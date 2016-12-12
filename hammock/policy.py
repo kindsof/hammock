@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import logging
+import copy
 import os
 from oslo_policy import policy
 from oslo_policy import opts
@@ -49,9 +50,13 @@ class Policy(object):
         if self.is_disabled:
             return
 
-        # If any policy was set, the default behavior for undefined rule, is to reject.
-        LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, credentials)
+        # In case a log message is required, omit the token fields to reduce the log size
+        if LOG.getEffectiveLevel() == logging.DEBUG:
+            credentials_copy = copy.deepcopy(credentials)
+            credentials_copy["token"] = credentials_copy["headers"]['X-AUTH-TOKEN'] = 'omitted'
+            LOG.debug('Checking rule %s on target %s with credentials %s', rule, target, credentials_copy)
 
+        # If any policy was set, the default behavior for undefined rule, is to reject.
         def enforce_func(target):
             # Set None in project_id in case the target don't have one,
             # For all the rules that check for project_id.
