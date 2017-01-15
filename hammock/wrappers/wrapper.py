@@ -3,6 +3,11 @@ import logging
 import abc
 from hammock.types import func_spec
 import hammock.common as common
+from py_zipkin import zipkin
+from py_zipkin.zipkin import zipkin_span
+import requests
+import string
+import random
 
 
 LOG = logging.getLogger(__name__)
@@ -73,7 +78,45 @@ class Wrapper(object):
 
             req.update_content_length()
 
-            resp = self._wrapper(req)
+            def http_transport(encoded_span):
+                # The collector expects a thrift-encoded list of spans. Instead of
+                # decoding and re-encoding the already thrift-encoded message, we can just
+                # add header bytes that specify that what follows is a list of length 1.
+                body = '\x0c\x00\x00\x00\x01' + encoded_span
+                requests.post(
+                    'http://localhost:9411/api/v1/spans',
+                    data=body,
+                    headers={'Content-Type': 'application/x-thrift'},
+                )
+
+            def _gen_random_id():
+                return ''.join(random.choice(string.digits) for i in range(16))
+
+            # import pytest; pytest.set_trace()
+            headers = req.headers
+            trace_id = headers.get('X-B3-TraceId') or _gen_random_id()
+            parent_span_id = headers.get('X-B3-ParentSpanId')
+            is_sampled = str(headers.get('X-B3-Sampled') or '1') == '1'  # changed from flask_zipkin
+            flags = headers.get('X-B3-Flags')
+
+            zipkin_attrs = zipkin.ZipkinAttrs(
+                trace_id=trace_id,
+                span_id=_gen_random_id(),
+                parent_span_id=parent_span_id,
+                flags=flags,
+                is_sampled=is_sampled,
+            )
+            resource_package = self._resource.params["_resource_package"].__name__
+            top_resource_package = resource_package.split('.')[0]
+            with zipkin_span(
+                    service_name=top_resource_package,
+                    span_name=resource_package + ':' + self.func.__name__,
+                    transport_handler=http_transport,
+                    port=42,
+                    sample_rate=100.0,  # Value between 0.0 and 100.0
+                    zipkin_attrs=zipkin_attrs):
+                resp = self._wrapper(req)
+            # import pytest; pytest.set_trace()
 
             resp.update_content_length()
 
