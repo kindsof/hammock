@@ -3,9 +3,9 @@ import logging
 import abc
 from hammock.types import func_spec
 import hammock.common as common
+from hammock import strato_zipkin
 from py_zipkin import zipkin
 from py_zipkin.zipkin import zipkin_span
-import requests
 import string
 import random
 
@@ -78,17 +78,6 @@ class Wrapper(object):
 
             req.update_content_length()
 
-            def http_transport(encoded_span):
-                # The collector expects a thrift-encoded list of spans. Instead of
-                # decoding and re-encoding the already thrift-encoded message, we can just
-                # add header bytes that specify that what follows is a list of length 1.
-                body = '\x0c\x00\x00\x00\x01' + encoded_span
-                requests.post(
-                    'http://localhost:9411/api/v1/spans',
-                    data=body,
-                    headers={'Content-Type': 'application/x-thrift'},
-                )
-
             def _gen_random_id():
                 return ''.join(random.choice(string.digits) for i in range(16))
 
@@ -111,7 +100,7 @@ class Wrapper(object):
             with zipkin_span(
                     service_name=top_resource_package,
                     span_name=resource_package + ':' + self.func.__name__,
-                    transport_handler=http_transport,
+                    transport_handler=strato_zipkin.http_transport,
                     port=42,
                     sample_rate=100.0,  # Value between 0.0 and 100.0
                     zipkin_attrs=zipkin_attrs):

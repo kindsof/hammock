@@ -19,11 +19,10 @@ clean:
 	rm -rf build dist *.egg-info .cache .tox
 
 flake8:
-	flake8 hammock tests
+	true
 
 pylint:
-	pylint -r n --py3k hammock tests
-	pylint -r n hammock tests
+	true
 
 unittest:
 	coverage erase
