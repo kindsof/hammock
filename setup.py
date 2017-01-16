@@ -45,6 +45,7 @@ setuptools.setup(
         'decorator==4.0.6',
         'oslo.policy==0.11.0',
         'jinja2==2.8',
+        'py_zipkin',
 
         # TODO: The following should be moved to extras_requires['client']
         'cliff==1.15.0',

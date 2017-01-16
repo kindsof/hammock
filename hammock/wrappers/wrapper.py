@@ -3,6 +3,11 @@ import logging
 import abc
 from hammock.types import func_spec
 import hammock.common as common
+from hammock import strato_zipkin
+from py_zipkin import zipkin
+from py_zipkin.zipkin import zipkin_span
+import string
+import random
 
 
 LOG = logging.getLogger(__name__)
@@ -73,7 +78,31 @@ class Wrapper(object):
 
             req.update_content_length()
 
-            resp = self._wrapper(req)
+            def _gen_random_id():
+                return ''.join(random.choice(string.digits) for i in range(16))
+
+            headers = req.headers
+            trace_id = headers.get('X-B3-TraceId') or _gen_random_id()
+            parent_span_id = headers.get('X-B3-ParentSpanId')
+            is_sampled = str(headers.get('X-B3-Sampled') or '0') == '1'
+            flags = headers.get('X-B3-Flags')
+
+            zipkin_attrs = zipkin.ZipkinAttrs(
+                trace_id=trace_id,
+                span_id=_gen_random_id(),
+                parent_span_id=parent_span_id,
+                flags=flags,
+                is_sampled=is_sampled,
+            )
+            resource_package = self._resource.params["_resource_package"].__name__
+            top_resource_package = resource_package.split('.')[0]
+            with zipkin_span(
+                    service_name=top_resource_package,
+                    span_name=resource_package + ':' + self.func.__name__,
+                    transport_handler=strato_zipkin.http_transport,
+                    sample_rate=50.0,
+                    zipkin_attrs=zipkin_attrs):
+                resp = self._wrapper(req)
 
             resp.update_content_length()
 

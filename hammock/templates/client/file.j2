@@ -8,6 +8,7 @@ import munch
 import warnings
 import traceback
 from requests.packages.urllib3.util import retry
+from py_zipkin import zipkin
 
 
 LOG = logging.getLogger(__name__)
@@ -140,6 +141,8 @@ class {{ class_name }}(object):
             _kwargs.setdefault('headers', {}).update(headers)
         LOG.debug("Sending %s request: %s %s", method, url, json)
         try:
+            zipkin_headers = zipkin.create_http_headers_for_new_span()
+            _kwargs.setdefault('headers', {}).update(zipkin_headers)
             response = getattr(self._client, method.lower())(url, **_kwargs)
             result = None
             if '{{ type_json }}' in response.headers.get('content-type', ''):
