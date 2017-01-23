@@ -4,7 +4,11 @@ def {{ method_name }}(self
         {%- endif -%}
         {%- if kwargs -%}
             {%- for k, v in kwargs.items() -%}
+            {%- if k != kw_file -%}
                 , {{ k }}=NOT_SET
+            {%- else %}
+                , {{ k }}=None
+            {% endif -%}
             {%- endfor -%}
         {%- endif -%}
         {%- if keywords %}, **{{ keywords }}{% endif -%}
