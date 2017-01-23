@@ -4,7 +4,11 @@ def {{ method_name }}(self
         {%- endif -%}
         {%- if kwargs -%}
             {%- for k, v in kwargs.items() -%}
+            {%- if k != kw_file -%}
                 , {{ k }}=NOT_SET
+            {%- else %}
+                , {{ k }}=None
+            {% endif -%}
             {%- endfor -%}
         {%- endif -%}
         {%- if keywords %}, **{{ keywords }}{% endif -%}
@@ -17,7 +21,7 @@ def {{ method_name }}(self
     json = {
         {%- for p in params_kw %}'{{ p }}': {{ p }}, {% endfor -%}
         {%- for k, v in defaults.items() %}'{{ k }}': {{ v }}, {% endfor -%}
-        {%- for k in kwargs %}'{{ k }}': {{ k }}, {% endfor -%}
+        {%- for k in kwargs %}{%- if k != kw_file -%}'{{ k }}': {{ k }}, {%- endif -%}{% endfor -%}
         }
     {% if keyword_map -%}
     keyword_map = {{ keyword_map }}
@@ -49,7 +53,7 @@ def {{ method_name }}(self
         {%- if keywords %}
         kwargs={{ keywords }},
         {% endif -%}
-        {%- if kw_file in args  %}
+        {%- if kw_file in args or kw_file in kwargs %}
         file_stream={{ kw_file }},
         {%- endif %}
         success_code={{ success_code }},
