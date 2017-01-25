@@ -40,7 +40,7 @@ setuptools.setup(
         'falcon==0.3.0',
         'requests==2.7.0',
         'ujson==1.33',
-        'six==1.9.0',
+        'six==1.10.0',
         'munch==2.0.3',
         'decorator==4.0.6',
         'oslo.policy==0.11.0',
