@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 def proxy(req, dest):
     redirection_url = common.url_join(dest, req.relative_uri)
-    LOG.info('[Proxy %s] to %s', req.uid, redirection_url)
+    LOG.debug('[Proxy %s] to %s', req.uid, redirection_url)
     inner_request = requests.Request(
         req.method,
         url=redirection_url,
