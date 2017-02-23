@@ -125,7 +125,7 @@ class Route(wrapper.Wrapper):
         # Check for missing according to mapped arguments
         missing = self.required_args_mapped - set(collected_data)
         if missing:
-            raise self._error(exceptions.BadRequest, 'Missing arguments: {}. Required: {}'.format(missing, self.required_args))
+            raise self._error(exceptions.BadRequest, 'Missing arguments: {}. Required: {}'.format(missing, self.required_args_mapped))
         # Handle args keyword conversion
         collected_data.update({
             keyword: collected_data.pop(self._get_mapped_keyword(keyword))
