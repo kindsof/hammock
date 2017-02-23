@@ -16,7 +16,7 @@ def version():
                 if key.startswith('Version'):
                     return value.strip()
     else:
-        return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()
+        return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
 
 
 def read(fname):

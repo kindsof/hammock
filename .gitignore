@@ -6,7 +6,6 @@ build
 dist
 sdist
 *.egg-info
-.tox
 .coverage
 *.log
 *.sw[ponlm]
