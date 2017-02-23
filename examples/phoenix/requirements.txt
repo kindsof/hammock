@@ -1,9 +1,0 @@
-munch==2.0.4
-falcon==0.3.0
-requests==2.8.1
-simplejson==3.8.1
-setuptools==18.7.1
-configargparse==0.10.0
-
-# TODO (Shay): Update URLs to concrete hash once Poz is done
-git+http://github.com/Stratoscale/hammock.git@multi-backend
