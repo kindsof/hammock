@@ -32,7 +32,7 @@ install:$ setup.py hammock/*
 	python setup.py install
 
 requirements: dev-requirements.txt
-	pip install --upgrade pip -r -r dev-requirements.txt
+	pip install --upgrade pip -r dev-requirements.txt
 
 test-gunicorn:
 	gunicorn tests.app:application

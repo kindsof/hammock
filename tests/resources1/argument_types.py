@@ -39,7 +39,8 @@ class ArgumentTypes(hammock.Resource):
 
     @hammock.get('with-default')
     def conversions_in_get_with_default(  # pylint: disable=unused-argument
-            self, a_list=None, an_int=1, a_float=0.1, a_bool=True, a_string='123', a_uuid='ceae3dd0-5a38-4189-b65c-bbb66a457812', not_in_doc=None):
+            self, a_list=None, an_int=1, a_float=0.1, a_bool=True, a_string='123', a_uuid='ceae3dd0-5a38-4189-b65c-bbb66a457812',
+            not_in_doc=None):
         """
         Check conversion of argument in URL methods.
         :param str a_string: a string argument

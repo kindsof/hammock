@@ -94,7 +94,8 @@ class Command(command.Command):
             return value
         try:
             # If the list only contains only scalars then make it human readable
-            if isinstance(value, list) and all(isinstance(item, (int, float, str, unicode)) for item in value):  # pylint: disable=unicode-builtin
+            if isinstance(value, list) and \
+               all(isinstance(item, (int, float, str, unicode)) for item in value):  # pylint: disable=unicode-builtin
                 value = ' '.join([('"%s"' % token if ' ' in str(token) else token) for token in value])
             return self.column_colors[column][str(value).lower()](value)
         except KeyError:

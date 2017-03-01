@@ -20,7 +20,8 @@ class TestArgumentTypes(base.TestBase):
             httplib.OK,
             common.GET,
             "/argument-types",
-            query_string="a_list=1&a_list=moshe&an_int=1&a_float=0.1&a_bool=True&a_string=123&a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123"
+            query_string='a_list=1&a_list=moshe&an_int=1&a_float=0.1&a_bool=True&a_string=123&'
+                         'a_uuid=ceae3dd0-5a38-4189-b65c-bbb66a457812&not_in_doc=123'
         )
         self.assertEqual(response, True)
 
