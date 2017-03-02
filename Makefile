@@ -25,7 +25,7 @@ dist: setup.py hammock/*
 	python setup.py sdist
 
 upload:
-	python setup.py sdist upload -r http://strato-pypi.dc1:5001
+	python setup.py sdist upload -r http://strato-pypi.dc1:5002
 
 
 install:$ setup.py hammock/*
