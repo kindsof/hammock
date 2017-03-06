@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import os
+import time
 import requests
 import requests.adapters
 import six
@@ -58,7 +59,8 @@ class {{ class_name }}(object):
 
     ROUTE_CLI_COMMAND_MAP = {}
 
-    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %}, token=None, timeout=60, headers=None, retries=0, session=None):
+    def __init__(self, hostname=None, port=None, url={% if default_url %}'{{ default_url }}'{% else %}''{% endif %},
+                 token=None, timeout=60, headers=None, retries=0, session=None, keepalive_timeout=3):
         """
         :param url: url to connect to
         :param token: a token to be used for requests
@@ -66,6 +68,8 @@ class {{ class_name }}(object):
         :param headers: custom headers to send with each request
         :param retries: max-retries as an int, or a requests.packages.urllib3.util.retry.Retry object,
         :param requests.Session session: an external request session to use
+        :param keepalive_timeout: a timeout for the HTTP persistent connection. After which, the TCP
+                                  connection will be re-established. See BK-4455
         """
         self._url = url
         if hostname and port:
@@ -81,6 +85,8 @@ class {{ class_name }}(object):
 
         self._client.mount(self._url, requests.adapters.HTTPAdapter(max_retries=retries))
         self._timeout = timeout
+        self._keepalive_timeout = keepalive_timeout
+        self._last_response_time = None
         self._set_token(token)
         self._client.headers.update(headers or {})
 {%- for resource_name, resource_class, resource_path in resources_names %}
@@ -140,7 +146,9 @@ class {{ class_name }}(object):
             _kwargs.setdefault('headers', {}).update(headers)
         LOG.debug("Sending %s request: %s %s", method, url, json)
         try:
+            self._renew_keepalive()
             response = getattr(self._client, method.lower())(url, **_kwargs)
+            self._last_response_time = time.time()
             result = None
             if '{{ type_json }}' in response.headers.get('content-type', ''):
                 result = self._jsonify(response)
@@ -163,6 +171,15 @@ class {{ class_name }}(object):
     @property
     def token(self):
         return self._client.headers.get("{{ token_entry }}")
+
+    def _renew_keepalive(self):
+        if self._last_response_time is None:
+            return
+        seconds_since_last_response = time.time() - self._last_response_time
+        if seconds_since_last_response > self._keepalive_timeout:
+            # Close the session, so it will be renewed
+            self.close()
+            self._last_response_time = None
 
     def _set_token(self, token):
         if token:
