@@ -140,7 +140,21 @@ class {{ class_name }}(object):
             _kwargs.setdefault('headers', {}).update(headers)
         LOG.debug("Sending %s request: %s %s", method, url, json)
         try:
-            response = getattr(self._client, method.lower())(url, **_kwargs)
+            retry = True
+            retry_count = 3
+            while retry and retry_count > 0:
+                retry = False
+                try:
+                    response = getattr(self._client, method.lower())(url, **_kwargs)
+                except requests.ConnectionError, err:
+                    # There's a race condition in http-keepalive mechanism, that can cause a "BadStatusLine" exception.
+                    # If the error is because of it, the server didn't even get our request, so we should retry
+                    # See BK-4455 for more details
+                    if "BadStatusLine" in str(err) and "Connection aborted" in str(err):
+                        retry = True
+                        retry_count -= 1
+                    else:
+                        raise
             result = None
             if '{{ type_json }}' in response.headers.get('content-type', ''):
                 result = self._jsonify(response)
