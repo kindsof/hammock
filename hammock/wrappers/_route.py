@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
-import types
+import inspect
+import logging
 
 import six
-import logging
-import hammock.proxy as proxy
+
 import hammock.common as common
 import hammock.exceptions as exceptions
+import hammock.proxy as proxy
 import hammock.types.response as response
 from . import wrapper
 
@@ -70,11 +71,10 @@ class Route(wrapper.Wrapper):
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.
         """
-        if self.dest is not None and not isinstance(self.func, types.GeneratorType):
+        if self.dest is not None and not inspect.isgeneratorfunction(self.func):
             # If it's a proxy function, and also not a generator,
             # we have no need in parsing the kwargs
-            resp = proxy.proxy(req, self.dest)
-            return resp
+            return proxy.proxy(req, self.dest)
 
         kwargs = req.collected_data
         self._convert_by_keyword_map(kwargs)
