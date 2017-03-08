@@ -1,9 +1,11 @@
 from __future__ import absolute_import
-import logging
-import abc
-from hammock.types import func_spec
-import hammock.common as common
 
+import abc
+import inspect
+import logging
+
+import hammock.common as common
+from hammock.types import func_spec
 
 LOG = logging.getLogger(__name__)
 
@@ -44,8 +46,11 @@ class Wrapper(object):
         self.__doc__ = func.__doc__
 
         # If it is a proxy, make sure function doesn't do anything.
-        if self.dest is not None:
-            common.func_is_pass(func)
+        # (unless it's a generator, which can be utilized for pre and post processing)
+        if self.dest is not None \
+                and not inspect.isgeneratorfunction(self.func)\
+                and not common.func_is_pass(func):
+            raise Exception("Passthrough function %s is not empty and not a generator", func.__name__)
 
     def __call__(self, *args, **kwargs):
         """
