@@ -61,8 +61,7 @@ def func_is_pass(func):
     while not lines.pop(0).startswith("def"):
         pass
     empty = "".join(lines).strip() == "pass"
-    if not empty:
-        raise Exception("Passthrough function %s is not empty", func.__name__)
+    return empty
 
 
 def uid(length=8):

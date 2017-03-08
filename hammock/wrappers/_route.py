@@ -1,4 +1,7 @@
 from __future__ import absolute_import
+
+import types
+
 import six
 import logging
 import hammock.proxy as proxy
@@ -67,42 +70,60 @@ class Route(wrapper.Wrapper):
         :param req: a hammock.types.request.Request object.
         :return: response as hammock.types.response.Response object.
         """
+        if self.dest is not None and not isinstance(self.func, types.GeneratorType):
+            # If it's a proxy function, and also not a generator,
+            # we have no need in parsing the kwargs
+            resp = proxy.proxy(req, self.dest)
+            return resp
+
+        kwargs = req.collected_data
+        self._convert_by_keyword_map(kwargs)
+        enforcer = None
+        credentials = None
+        if self.credentials_class:
+            credentials = self.credentials_class(req.headers)
+            if self.full_policy_rule_name:
+                enforcer = self.policy.check(
+                    self.full_policy_rule_name, target=kwargs, credentials=credentials)
+
+        # Add special keyword arguments:
+        if common.KW_HEADERS in self.spec.args:
+            kwargs[common.KW_HEADERS] = req.headers
+        if common.KW_HOST in self.spec.args:
+            kwargs[common.KW_HOST] = '{}://{}'.format(req.parsed_url.scheme, req.parsed_url.netloc)
+        if common.KW_CREDENTIALS in self.spec.args:
+            kwargs[common.KW_CREDENTIALS] = credentials
+        if common.KW_ENFORCER in self.spec.args:
+            kwargs[common.KW_ENFORCER] = enforcer
+
+        try:
+            self.spec.match_and_convert(kwargs)
+        except exceptions.HttpError as exc:
+            raise self._error(exceptions.BadRequest, str(exc))
+        except Exception as exc:  # pylint: disable=broad-except
+            logging.exception('[Error parsing request kwargs %s] kwargs: %s, %r', req.uid, kwargs, exc)
+            raise self._error(exceptions.BadRequest, 'Error parsing request parameters, {}'.format(exc))
+
         if self.dest is None:
-            kwargs = req.collected_data
-            self._convert_by_keyword_map(kwargs)
-            enforcer = None
-            credentials = None
-            if self.credentials_class:
-                credentials = self.credentials_class(req.headers)
-                if self.full_policy_rule_name:
-                    enforcer = self.policy.check(
-                        self.full_policy_rule_name, target=kwargs, credentials=credentials)
-
-            # Add special keyword arguments:
-            if common.KW_HEADERS in self.spec.args:
-                kwargs[common.KW_HEADERS] = req.headers
-            if common.KW_HOST in self.spec.args:
-                kwargs[common.KW_HOST] = '{}://{}'.format(req.parsed_url.scheme, req.parsed_url.netloc)
-            if common.KW_CREDENTIALS in self.spec.args:
-                kwargs[common.KW_CREDENTIALS] = credentials
-            if common.KW_ENFORCER in self.spec.args:
-                kwargs[common.KW_ENFORCER] = enforcer
-
-            try:
-                self.spec.match_and_convert(kwargs)
-            except exceptions.HttpError as exc:
-                raise self._error(exceptions.BadRequest, str(exc))
-            except Exception as exc:  # pylint: disable=broad-except
-                logging.exception('[Error parsing request kwargs %s] kwargs: %s, %r', req.uid, kwargs, exc)
-                raise self._error(exceptions.BadRequest, 'Error parsing request parameters, {}'.format(exc))
-
             # Invoke the routing method:
             logging.debug('[kwargs %s] %s', req.uid, kwargs)
             result = self(**kwargs)
 
             resp = response.Response.from_result(result, self.success_code, self.response_content_type)
         else:
+            generator = self(**kwargs)
+            # code before 'yield'
+            next(generator)
+            # request itself
             resp = proxy.proxy(req, self.dest)
+
+            try:
+                # code after yield
+                generator.send(resp)
+            except StopIteration:
+                # Here the generator ends, everything's good!
+                pass
+
         return resp
 
     def set_resource(self, resource):
