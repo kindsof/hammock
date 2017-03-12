@@ -21,7 +21,7 @@ def {{ method_name }}(self
     json = {
         {%- for p in params_kw %}'{{ p }}': {{ p }}, {% endfor -%}
         {%- for k, v in defaults.items() %}'{{ k }}': {{ v }}, {% endfor -%}
-        {%- for k in kwargs %}{%- if k != kw_file -%}'{{ k }}': {{ k }}, {%- endif -%}{% endfor -%}
+        {%- for k in kwargs %}{%- if k != kw_file -%}'{{ k }}': {{ k }}, {% endif -%}{% endfor -%}
         }
     {% if keyword_map -%}
     keyword_map = {{ keyword_map }}
