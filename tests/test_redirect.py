@@ -1,13 +1,23 @@
 from __future__ import absolute_import
+
+import os
+
+import six
+from mock import mock
+
+import hammock.common as common
 import hammock.testing as testing
 import tests.base as base
-import six
-import os
 import tests.resources1.redirect as redirect
-import hammock.common as common
+from hammock.types import Request
+from hammock.types import Response
 
 
 class TestRedirect(base.TestBase):
+    YIELD_BEFORE = mock.MagicMock()
+    YIELD_AFTER = mock.MagicMock()
+
+    RESOURCE_PARAMS = {'before': YIELD_BEFORE, 'after': YIELD_AFTER}
 
     @classmethod
     def setUpClass(cls):
@@ -112,3 +122,20 @@ class TestRedirect(base.TestBase):
         self._simulate('POST', '/redirect/post-passthrough', body={'some_data': 'a'})
         self._simulate('POST', '/redirect/post-passthrough-with-body', body={'some_data': 'a'})
         self._simulate('GET', '/redirect/manipulate-path')
+
+    def test_post_generator(self):
+        self.YIELD_BEFORE.reset_mock()
+        self.YIELD_AFTER.reset_mock()
+        self._simulate('POST', '/redirect/post-generator', body={'some_data': 'a'})
+        self.YIELD_BEFORE.assert_called_once_with('a')
+        self.assertEqual(self.YIELD_AFTER.call_count, 1)
+        self.assertIsInstance(self.YIELD_AFTER.call_args[0][0], Response)
+
+    def test_sink_generator(self):
+        self.YIELD_BEFORE.reset_mock()
+        self.YIELD_AFTER.reset_mock()
+        self._simulate('DELETE', '/redirect/sink-generator')
+        self.assertEqual(self.YIELD_BEFORE.call_count, 1)
+        self.assertIsInstance(self.YIELD_BEFORE.call_args[0][0], Request)
+        self.assertEqual(self.YIELD_AFTER.call_count, 1)
+        self.assertIsInstance(self.YIELD_AFTER.call_args[0][0], Response)

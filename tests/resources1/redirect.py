@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 import hammock
 from hammock import types
 
@@ -31,6 +32,11 @@ def post_manipulate_path(response, _):
 class Redirect(hammock.Resource):
 
     POLICY_GROUP_NAME = False
+
+    def __init__(self, **kwargs):
+        self.before = kwargs.get('before')
+        self.after = kwargs.get('after')
+        super(Redirect, self).__init__(**kwargs)
 
     @hammock.sink(dest=DEST, trim_prefix="redirect")
     def passthrough(self):
@@ -73,3 +79,23 @@ class Redirect(hammock.Resource):
     )
     def manipulate_path(self):
         pass
+
+    @hammock.post(
+        dest=DEST,
+        path='post-generator',
+        trim_prefix='redirect',
+    )
+    def post_generator(self, some_data):
+        self.before(some_data)
+        resp = yield
+        self.after(resp)
+
+    @hammock.sink(
+        dest=DEST,
+        path='sink-generator',
+        trim_prefix='redirect',
+    )
+    def sink_generator(self, req):
+        self.before(req)
+        resp = yield
+        self.after(resp)
