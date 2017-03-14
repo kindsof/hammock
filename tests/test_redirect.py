@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import httplib
 import os
 
 import six
@@ -139,3 +140,11 @@ class TestRedirect(base.TestBase):
         self.assertIsInstance(self.YIELD_BEFORE.call_args[0][0], Request)
         self.assertEqual(self.YIELD_AFTER.call_count, 1)
         self.assertIsInstance(self.YIELD_AFTER.call_args[0][0], Response)
+
+    def test_sink_receives_kwargs_properly_when_generator(self):
+        resp = self._simulate('GET', '/redirect/sink-generator-with-missing-url-params-kwargs/value1/value2')
+        self.assertEqual(resp['status'], httplib.INTERNAL_SERVER_ERROR)
+        self.YIELD_BEFORE.reset_mock()
+        resp = self._simulate('GET', '/redirect/sink-generator-with-full-url-params-kwargs/value1/value2')
+        self.assertNotEqual(resp.get('status'), httplib.INTERNAL_SERVER_ERROR)
+        self.YIELD_BEFORE.assert_called_once_with('value1', 'value2')

@@ -56,7 +56,14 @@ def log_exception(exc, request_uuid):
         logging.exception("[Internal server error %s]", request_uuid)
 
 
-def func_is_pass(func):
+def is_valid_proxy_func(func):
+    """
+    Checks if a given function is valid for proxy endpoints.
+    func should be either empty ('pass') or a generator
+    """
+    if inspect.isgeneratorfunction(func):
+        return True
+
     lines = [line.strip() for line in inspect.getsource(func).split("\n")]
     while not lines.pop(0).startswith("def"):
         pass
