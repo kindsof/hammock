@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import abc
-import inspect
 import logging
 
 import hammock.common as common
@@ -45,12 +44,10 @@ class Wrapper(object):
         self.__name__ = func.__name__
         self.__doc__ = func.__doc__
 
-        # If it is a proxy, make sure function doesn't do anything.
-        # (unless it's a generator, which can be utilized for pre and post processing)
+        # If it is a proxy, make sure function is valid.
         if self.dest is not None \
-                and not inspect.isgeneratorfunction(self.func)\
-                and not common.func_is_pass(func):
-            raise Exception("Passthrough function %s is not empty and not a generator", func.__name__)
+                and not common.is_valid_proxy_func(func):
+            raise Exception("Proxy function %s is not empty and not a generator", func.__name__)
 
     def __call__(self, *args, **kwargs):
         """

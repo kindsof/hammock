@@ -99,3 +99,20 @@ class Redirect(hammock.Resource):
         self.before(req)
         resp = yield
         self.after(resp)
+
+    @hammock.sink(
+        dest=DEST,
+        path='sink-generator-with-missing-url-params-kwargs/{param1}/{param2}',
+        trim_prefix='redirect',
+    )
+    def sink_generator_with_missing_url_params_kwargs(self, req, param1):  # pylint: disable=unused-argument
+        yield
+
+    @hammock.sink(
+        dest=DEST,
+        path='sink-generator-with-full-url-params-kwargs/{param1}/{param2}',
+        trim_prefix='redirect',
+    )
+    def sink_generator_with_full_url_params_kwargs(self, req, param1, param2):  # pylint: disable=unused-argument
+        self.before(param1, param2)
+        yield

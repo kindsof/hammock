@@ -112,13 +112,13 @@ class Route(wrapper.Wrapper):
             resp = response.Response.from_result(result, self.success_code, self.response_content_type)
         else:
             generator = self(**kwargs)
-            # code before 'yield'
+            # We now know that the function is a generator and should be treated like this:
+            # The code before the first 'yield' should be executed immediately
             next(generator)
-            # request itself
+            # Now we should perform the proxy logic
             resp = proxy.proxy(req, self.dest)
-
             try:
-                # code after yield
+                # And now, we should call the code after yield, giving it the response received by the server at 'dest'
                 generator.send(resp)
             except StopIteration:
                 # Here the generator ends, everything's good!
