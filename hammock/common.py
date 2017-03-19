@@ -41,6 +41,9 @@ POST = 'POST'
 DELETE = 'DELETE'
 PATCH = 'PATCH'
 
+# REST methods not to log
+REST_METHODS_LOGGING_BLACKLIST = [GET]
+
 CONTENT_CONVERSION = {TYPE_JSON: json.dumps, TYPE_XML: ElementTree.tostring}
 
 

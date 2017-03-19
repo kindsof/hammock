@@ -76,6 +76,14 @@ class Route(wrapper.Wrapper):
             # we have no need in parsing the kwargs
             return proxy.proxy(req, self.dest)
 
+        # uWSGI bonus - if this is not a GET request, log it
+        try:
+            import uwsgi
+            if req.method not in common.REST_METHODS_LOGGING_BLACKLIST:
+                uwsgi.log_this_request()
+        except:
+            pass
+
         kwargs = req.collected_data
         self._convert_by_keyword_map(kwargs)
         enforcer = None
