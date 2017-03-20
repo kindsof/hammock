@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import abc
 import logging
+import time
 
 import hammock.common as common
 from hammock.types import func_spec
@@ -67,6 +68,8 @@ class Wrapper(object):
         """
         context = {}
         try:
+            request_path = req.relative_uri
+            request_start = time.time()
             if self.trim_prefix:
                 req.trim_prefix(self.trim_prefix)
 
@@ -85,9 +88,10 @@ class Wrapper(object):
             resp.update_content_length()
 
         except Exception as exc:  # pylint: disable=broad-except
-            self._resource.handle_exception(exc, self.exception_handler, req.uid)
+            self._resource.handle_exception(exc, self.exception_handler, req.uid, req.method, request_path, request_start)
         else:
             LOG.debug('[response %s] status: %s, content: %s', req.uid, resp.status, resp.content)
+            common.log_request(req.method, request_path, resp.status, request_start)
             return resp
 
     @property
