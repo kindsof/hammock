@@ -39,6 +39,7 @@ ENCODING = 'utf-8'
 PUT = 'PUT'
 GET = 'GET'
 POST = 'POST'
+HEAD = 'HEAD'
 DELETE = 'DELETE'
 PATCH = 'PATCH'
 
