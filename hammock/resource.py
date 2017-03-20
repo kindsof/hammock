@@ -51,7 +51,7 @@ class Resource(object):
             return False
         return cls.POLICY_GROUP_NAME or names.to_command(cls.name().lower())
 
-    def handle_exception(self, exc, exception_handler, request_uuid):
+    def handle_exception(self, exc, exception_handler, request_uuid, request_method, request_uri, request_start):
         """
         Convert the exception to HTTP error
         """
@@ -68,6 +68,10 @@ class Resource(object):
             # If exception was not converted yet, we convert it to internal server error.
             if not isinstance(exc, exceptions.HttpError):
                 exc = exceptions.InternalServerError(repr(exc))
+
+            common.log_request(request_method, request_uri,
+                               getattr(exc, 'CODE', exceptions.INTERNAL_SERVER_ERROR),
+                               request_start)
 
             # Raise exc, with the original traceback
             six.reraise(exc, None, sys.exc_info()[2])

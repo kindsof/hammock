@@ -9,6 +9,7 @@ import inspect
 import logging
 import random
 import string
+import time
 
 import six
 
@@ -53,6 +54,16 @@ def log_exception(exc, request_uuid):
         logging.warning("[Http %s Exception %s] %s - %s", exc.status, request_uuid, exc.title, exc.description)
     else:
         logging.exception("[Internal server error %s]", request_uuid)
+
+
+def log_request(request_method, request_uri, resp_status, request_start):
+    duration_msec = (time.time() - request_start) * 1000
+    log_level = logging.INFO
+    if request_method.upper() == 'GET' and 200 <= int(resp_status) <= 299:
+        log_level = logging.DEBUG
+    logging.log(log_level, "%(method)s %(route)s => returned %(retval)s in %(duration).2f msecs",
+                dict(method=request_method, route=request_uri,
+                     retval=resp_status, duration=duration_msec))
 
 
 def is_valid_proxy_func(func):
