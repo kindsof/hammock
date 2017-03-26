@@ -12,10 +12,11 @@ LOG = logging.getLogger(__name__)
 def proxy(req, dest):
     redirection_url = common.url_join(dest, req.relative_uri)
     LOG.debug('[Proxy %s] to %s', req.uid, redirection_url)
+
     inner_request = requests.Request(
         req.method,
         url=redirection_url,
-        data=req.content if req.method not in common.URL_PARAMS_METHODS else None,
+        data=req.content,
         headers={
             k: v if k.lower() != "host" else six.moves.urllib.parse.urlparse(dest).netloc
             for k, v in six.iteritems(req.headers)
