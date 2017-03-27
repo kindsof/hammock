@@ -9,8 +9,8 @@ import hammock.types.response as response
 LOG = logging.getLogger(__name__)
 
 
-def proxy(req, dest):
-    redirection_url = common.url_join(dest, req.relative_uri)
+def proxy(req, dest, redirection_url=None):
+    redirection_url = common.url_join(dest, req.relative_uri) if redirection_url is None else redirection_url
     LOG.debug('[Proxy %s] to %s', req.uid, redirection_url)
     inner_request = requests.Request(
         req.method,
