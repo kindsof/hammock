@@ -10,6 +10,7 @@ import logging
 import random
 import string
 import time
+import copy
 
 import six
 
@@ -93,3 +94,16 @@ def to_bytes(source):
         # XXX: maybe more efficient way then reading StringIO data.
         return codecs.encode(source.getvalue(), ENCODING)
     return source
+
+
+def repr_request_kwargs_for_logging(kwargs):
+    """
+    Request kwargs representation for logging purposes
+    :param kwargs: dict
+    :return: str representing kwargs for logging
+    """
+    kw = copy.deepcopy(kwargs)
+    # token is too large to be printed
+    if KW_CREDENTIALS in kw:
+        kw[KW_CREDENTIALS].token = 'omitted'
+    return json.dumps(kw)
