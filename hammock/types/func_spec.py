@@ -5,7 +5,7 @@ import six
 import re
 import hammock.types.args as args
 import hammock
-
+from hammock.common import repr_kwargs
 
 PARAM_IS_SPECIAL = re.compile(r'^[ ]*:(param|return)')
 PARAM_RE = re.compile(r'^[ ]*:param([ ]+(?P<type>[\w\[\]]+))?[ ]+(?P<name>\w+):[ ]*(?P<doc>.*)$', re.MULTILINE)
@@ -39,9 +39,13 @@ class FuncSpec(object):
         missing = set(self.args) - keys
         not_expected = keys - self.all_args
         if missing:
-            raise TypeError('Missing arguments: {}. Expected at least: {}. Got: {}'.format(missing, self.args, kwargs))
+            raise TypeError(
+                'Missing arguments: {}. Expected at least: {}. Got: {}'.format(
+                    missing, self.args, repr_kwargs(kwargs)))
         if not self.keywords and not_expected:
-            raise TypeError('Got unexpected arguments: {}. Expect: {}. Got: {}.'.format(not_expected, self.all_args, kwargs))
+            raise TypeError(
+                'Got unexpected arguments: {}. Expect: {}. Got: {}.'.format(
+                    not_expected, self.all_args, repr_kwargs(kwargs)))
         self._convert_args(kwargs)
 
     def _collect_args_info(self, doc_args_info):

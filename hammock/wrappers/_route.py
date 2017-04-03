@@ -101,7 +101,7 @@ class Route(wrapper.Wrapper):
         except exceptions.HttpError as exc:
             raise self._error(exceptions.BadRequest, str(exc))
         except Exception as exc:  # pylint: disable=broad-except
-            logging.exception('[Error parsing request kwargs %s] kwargs: %s, %r', req.uid, kwargs, exc)
+            logging.debug('[Error parsing request kwargs %s] kwargs: %s, %r', req.uid, common.repr_kwargs(kwargs), exc)
             raise self._error(exceptions.BadRequest, 'Error parsing request parameters, {}'.format(exc))
 
         if self.dest is None:
