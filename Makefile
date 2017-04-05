@@ -45,3 +45,6 @@ test-cli:
 
 test-doc:
 	python -m hammock.doc tests.resources1 --yaml
+
+test-swagger:
+	python -m hammock.swaggerize tests.resources1
