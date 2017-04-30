@@ -77,5 +77,6 @@ def _get_func(func_name):
     func.__name__ = func_name
     return func
 
+
 for name in NAMES.keys():
     setattr(CLINames, name, _get_func(name))
