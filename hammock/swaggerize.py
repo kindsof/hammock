@@ -21,6 +21,16 @@ SWAGGER_TYPES = {
 }
 
 
+def _generate_param_dict(route, name, arg, where, required):
+    return {
+        'name': route.keyword_map.get(name, name),
+        'in': where,
+        'type': SWAGGER_TYPES.get(arg.type_name, "string"),
+        'description': arg.doc or "",
+        'required': required,
+    }
+
+
 def generate_swagger(package):
     doc = OrderedDict(
         swagger='2.0',
@@ -54,25 +64,12 @@ def generate_swagger(package):
                 parameters = []
                 # add all path params
                 for name, arg in six.iteritems(params['path']):
-                    param = {
-                        'name': route.keyword_map.get(name, name),
-                        'in': 'path',
-                        'type': SWAGGER_TYPES.get(arg.type_name, "string"),
-                        'description': arg.doc or "",
-                        'required': True
-                    }
-                    parameters.append(param)
+                    parameters.append(_generate_param_dict(route, name, arg, 'path', True))
 
                 # add all query params
                 for name, arg in six.iteritems(params['query']):
-                    param = {
-                        'name': route.keyword_map.get(name, name),
-                        'in': 'query',
-                        'type': SWAGGER_TYPES.get(arg.type_name, "string"),
-                        'description': arg.doc or "",
-                        'required': not isinstance(arg, (_args.KeywordArg, _args.OptionalArg))
-                    }
-                    parameters.append(param)
+                    required = not isinstance(arg, (_args.KeywordArg, _args.OptionalArg))
+                    parameters.append(_generate_param_dict(route, name, arg, 'query', required))
 
                 # add body param if needed
                 properties = {}
